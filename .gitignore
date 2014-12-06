@@ -1,0 +1,12 @@
+# Don't track emacs temporary files
+*~
+
+# Input parameter files
+*.in
+
+# Output files and executables
+*.out
+*.exe
+
+# Fortran module files
+*.mod
