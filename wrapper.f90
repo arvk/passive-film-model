@@ -34,6 +34,7 @@ program passive_film_model
 
   !! Import the thermodynamic module -- All processors
   call thermo()
+  call diffusivities()
 
   !! Allocate all matrices -- All processors
   call allocate_matrices()
