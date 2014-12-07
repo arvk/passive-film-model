@@ -31,7 +31,7 @@ module commondata
 
 
   integer :: nomc                         ! Number of kMC steps
-  integer :: noimg = 200                  ! Number of output files
+  integer :: noimg = 20                   ! Number of output files
   integer :: freq_scale = 1750000000      ! KMC information is transferred every freq_scale steps
   integer :: kg_scale = 5                 ! Number of KMC grid points per PF grid
   real*8 :: dpf = 5E-9
@@ -117,3 +117,14 @@ module field_evolution
   real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr, oldmu, newph
 
 end module field_evolution
+
+
+module diffusion_constants
+  implicit none
+  save
+
+  real*8 :: D_S_met, D_S_env, D_S_pht, D_S_pyr
+  real*8 :: D_Fe_met, D_Fe_env, D_Fe_pht, D_Fe_pyr
+
+end module diffusion_constants
+
