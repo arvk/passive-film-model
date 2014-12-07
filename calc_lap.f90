@@ -10,6 +10,7 @@ subroutine calc_lap
   del2pht = 0.0d0 
   del2env = 0.0d0 
   del2met = 0.0d0 
+  del2pyr = 0.0d0 
   del2mu = 0.0d0 
   del2ph = 0.0d0 
 
@@ -62,6 +63,20 @@ wrap(y+1,psy),z-1)+met(wrap(x+1,psx),wrap(y-1,psy),z-1)+met(wrap(x-1,psx),wrap(y
 &wrap(y+1,psy),z-1)+env(wrap(x+1,psx),wrap(y-1,psy),z-1)+env(wrap(x-1,psx),wrap(y-1,psy),z-1))
            del2env(x,y,z) = (del2env(x,y,z) - 128*env(x,y,z))/(30*dpf*dpf)
 
+           del2pyr(x,y,z) = 14*(pyr(wrap(x+1,psx),y,z)+pyr(wrap(x-1,psx),y,z)+pyr(x,wrap(y+1,psy),z)+&
+&pyr(x,wrap(y-1,psy),z)+pyr(x,y,z+1)+pyr(x,y,z-1))
+           del2pyr(x,y,z) = del2pyr(x,y,z) + 3*(pyr(wrap(x+1,psx),wrap(y+1,psy),z)+pyr(wrap(x-1,psx),wrap(y+1,psy),z)+&
+&pyr(wrap(x+1,psx),wrap(y-1,psy),z)+pyr(wrap(x-1,psx),wrap(y-1,psy),z))
+           del2pyr(x,y,z) = del2pyr(x,y,z) + 3*(pyr(x,wrap(y+1,psy),z+1)+pyr(x,wrap(y+1,psy),z-1)+&
+&pyr(x,wrap(y-1,psy),z+1)+pyr(x,wrap(y-1,psy),z-1))
+           del2pyr(x,y,z) = del2pyr(x,y,z) + 3*(pyr(wrap(x+1,psx),y,z+1)+pyr(wrap(x-1,psx),y,z+1)+&
+&pyr(wrap(x+1,psx),y,z-1)+pyr(wrap(x-1,psx),y,z-1))
+           del2pyr(x,y,z) = del2pyr(x,y,z) + 1*(pyr(wrap(x+1,psx),wrap(y+1,psy),z+1)+pyr(wrap(x-1,psx),&
+&wrap(y+1,psy),z+1)+pyr(wrap(x+1,psx),wrap(y-1,psy),z+1)+pyr(wrap(x-1,psx),wrap(y-1,psy),z+1))
+           del2pyr(x,y,z) = del2pyr(x,y,z) + 1*(pyr(wrap(x+1,psx),wrap(y+1,psy),z-1)+pyr(wrap(x-1,psx),&
+&wrap(y+1,psy),z-1)+pyr(wrap(x+1,psx),wrap(y-1,psy),z-1)+pyr(wrap(x-1,psx),wrap(y-1,psy),z-1))
+           del2pyr(x,y,z) = (del2pyr(x,y,z) - 128*pyr(x,y,z))/(30*dpf*dpf)
+
            del2mu(x,y,z) = 14*(mu(wrap(x+1,psx),y,z)+mu(wrap(x-1,psx),y,z)+mu(x,wrap(y+1,psy),z)+&
 &mu(x,wrap(y-1,psy),z)+mu(x,y,z+1)+mu(x,y,z-1))
            del2mu(x,y,z) = del2mu(x,y,z) + 3*(mu(wrap(x+1,psx),wrap(y+1,psy),z)+mu(wrap(x-1,psx),wrap(y+1,psy),z)+&
@@ -102,6 +117,7 @@ wrap(y+1,psy),z-1)+met(wrap(x+1,psx),wrap(y-1,psy),z-1)+met(wrap(x-1,psx),wrap(y
         del2pht(x,y,1) = 0.0d0 ; del2pht(x,y,psz+2) = 0.0d0
         del2env(x,y,1) = 0.0d0 ; del2env(x,y,psz+2) = 0.0d0
         del2met(x,y,1) = 0.0d0 ; del2met(x,y,psz+2) = 0.0d0
+        del2pyr(x,y,1) = 0.0d0 ; del2pyr(x,y,psz+2) = 0.0d0
         del2mu(x,y,1) = 0.0d0 ; del2mu(x,y,psz+2) = 0.0d0
         del2ph(x,y,1) = 0.0d0 ; del2ph(x,y,psz+2) = 0.0d0
      end do

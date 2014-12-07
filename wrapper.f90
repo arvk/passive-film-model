@@ -64,6 +64,13 @@ program passive_film_model
      !! Solve PF equations
      call pfsolve(iter)
 
+     ! if (iter.lt. (nomc/100)) then
+     !    call pre_equilibrate()
+     ! end if
+
+!        read(*,*)
+
+
      if (mod(iter,freq_scale).eq.0) then
 
         if (isparent) then
@@ -89,7 +96,6 @@ program passive_film_model
 
      ! !!         Write output files at fixed times
      if (mod(iter,(nomc/noimg)-1).eq.0) then
-
 
         call gather_pf()
 

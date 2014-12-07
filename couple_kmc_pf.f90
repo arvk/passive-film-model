@@ -16,7 +16,7 @@ subroutine couple_kmc_pf
   do x = 1,psx_g
      do y = 1,psy_g
         do z = psz_g-1,1,-1
-           if ((pht_g(x,y,z) .gt. 1.0E-3).and.(pht_g(x,y,z+1) .lt. 1.0E-3)) then
+           if ((pht_g(x,y,z) .gt. 5.0E-1).and.(pht_g(x,y,z+1) .lt. 5.0E-1)) then
               interface_loc(x,y) = z
               exit
            end if

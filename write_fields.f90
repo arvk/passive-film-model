@@ -6,7 +6,7 @@ subroutine write_fields(iter)
   integer :: x, y, z
   character*5 :: img_id
 
-  call system("rm -rf PHT.out ENV.out MET.out MUS.out Hplus.out ALL.out")
+  call system("rm -rf PHT.out ENV.out MET.out PYR.out MUS.out Hplus.out ALL.out")
 
   open (unit=101, file="PHT.out", status="new")
   write(101,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
@@ -52,37 +52,49 @@ subroutine write_fields(iter)
   end do
   close(105)  
 
-  open (unit=106, file="Hplus.out", status="new")
-  write(106,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
+!   open (unit=106, file="Hplus.out", status="new")
+!   write(106,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
+!   do x = 1,psx_g 
+!      do y = 1,psy_g
+!         do z = 1,psz_g
+!            write(106,*)  ph_g(x,y,z)
+!         end do
+!      end do
+!   end do
+!   close(106)  
+
+
+!   open (unit=107, file="ALL.out", status="new")
+!   write(107,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
+!   do x = 1,psx_g 
+!      do y = 1,psy_g
+!         do z = 1,psz_g
+!            write(107,*)  (met_g(x,y,z)*1.0d0)+(pht_g(x,y,z)*2.0d0)+(env_g(x,y,z)*4.0d0)
+!         end do
+!      end do
+!   end do
+!   close(107)  
+
+
+  open (unit=108, file="PYR.out", status="new")
+  write(108,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g 
      do y = 1,psy_g
         do z = 1,psz_g
-           write(106,*)  ph_g(x,y,z)
+           write(108,*)  pyr_g(x,y,z)
         end do
      end do
   end do
-  close(106)  
-
-
-  open (unit=107, file="ALL.out", status="new")
-  write(107,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
-     do y = 1,psy_g
-        do z = 1,psz_g
-           write(107,*)  (met_g(x,y,z)*1.0d0)+(pht_g(x,y,z)*2.0d0)+(env_g(x,y,z)*4.0d0)
-        end do
-     end do
-  end do
-  close(107)  
-
+  close(108)  
 
   write(img_id,'(I5.5)') iter/((nomc/noimg)-1)
   call system("cp PHT.out PHT_"//img_id//".out")
   call system("cp ENV.out ENV_"//img_id//".out")
   call system("cp MET.out MET_"//img_id//".out")
+  call system("cp PYR.out PYR_"//img_id//".out")
   call system("cp MUS.out MUS_"//img_id//".out")
-  call system("cp Hplus.out Hplus_"//img_id//".out")
-  call system("cp ALL.out ALL_"//img_id//".out")
+!  call system("cp Hplus.out Hplus_"//img_id//".out")
+!  call system("cp ALL.out ALL_"//img_id//".out")
 
 end subroutine write_fields
 

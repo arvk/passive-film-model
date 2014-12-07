@@ -14,12 +14,14 @@ module commondata
   real*8, dimension(:,:,:), allocatable :: pht ! PF grid for pyrrhotite
   real*8, dimension(:,:,:), allocatable :: env ! PF grid for environment (liquid or gas)
   real*8, dimension(:,:,:), allocatable :: met ! PF grid for metal
+  real*8, dimension(:,:,:), allocatable :: pyr ! PF grid for pyrite
   real*8, dimension(:,:,:), allocatable :: mu  ! mu_S grid
   real*8, dimension(:,:,:), allocatable :: ph  ! pH matrix in the simulation cell
 
   real*8, dimension(:,:,:), allocatable :: met_g 
   real*8, dimension(:,:,:), allocatable :: pht_g 
   real*8, dimension(:,:,:), allocatable :: env_g 
+  real*8, dimension(:,:,:), allocatable :: pyr_g 
   real*8, dimension(:,:,:), allocatable :: mu_g 
   real*8, dimension(:,:,:), allocatable :: ph_g 
 
@@ -29,8 +31,8 @@ module commondata
 
 
   integer :: nomc                         ! Number of kMC steps
-  integer :: noimg = 50                   ! Number of output files
-  integer :: freq_scale = 1750            ! KMC information is transferred every freq_scale steps
+  integer :: noimg = 200                  ! Number of output files
+  integer :: freq_scale = 1750000000      ! KMC information is transferred every freq_scale steps
   integer :: kg_scale = 5                 ! Number of KMC grid points per PF grid
   real*8 :: dpf = 5E-9
   real*8 :: R = 8.3144621   
@@ -58,6 +60,7 @@ module laplacians
   real*8, dimension(:,:,:), allocatable :: del2pht
   real*8, dimension(:,:,:), allocatable :: del2env
   real*8, dimension(:,:,:), allocatable :: del2met
+  real*8, dimension(:,:,:), allocatable :: del2pyr
   real*8, dimension(:,:,:), allocatable :: del2mu
   real*8, dimension(:,:,:), allocatable :: del2ph
 
@@ -110,7 +113,7 @@ module field_evolution
   implicit none
   save
 
-  real*8, dimension(:,:,:), allocatable :: dpht_dt, denv_dt, dmet_dt, dmu_dt, dph_dt
-  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, oldmu, newph
+  real*8, dimension(:,:,:), allocatable :: dpht_dt, denv_dt, dmet_dt, dpyr_dt, dmu_dt, dph_dt
+  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr, oldmu, newph
 
 end module field_evolution
