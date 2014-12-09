@@ -9,10 +9,9 @@ subroutine initialize_geometry()
   integer :: x,y,z
   integer :: pht_z_beg, pht_z_end
   integer :: rank_loop
-  real*8 :: dt = 5E-2
 
-  pht_z_beg = 543*(psz_g/576)
-  pht_z_end = 556*(psz_g/576)
+  pht_z_beg = 2*(psz_g/4)
+  pht_z_end = 3*(psz_g/4)
 
   avg_mu_met = mus_met_pht_eqb + (R*T*0.1d0) 
 !  avg_mu_env = (R*T*(0.0d0-0.99d0))

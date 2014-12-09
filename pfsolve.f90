@@ -43,7 +43,7 @@ subroutine pfsolve(iter)
   real*8 :: dF_dpyr_met, dF_dpyr_pht, dF_dpyr_env
 
   !! Timestep for evolution
-  real*8 :: dt = 1E-3
+  real*8 :: dt = 0.75E-3
 
   integer :: int_count
   integer :: muloop,muloop_max
