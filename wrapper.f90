@@ -17,19 +17,25 @@ program passive_film_model
   call mpi_comm_size(MPI_COMM_WORLD,procs,ierr)
   call mpi_comm_rank(MPI_COMM_WORLD,rank,ierr)
 
-  !! Define parent process (rank 0)
+  !! Define Root process (rank 0)
   if(rank .eq. 0)then
-     isparent = .TRUE.
-  else
-     isparent = .FALSE.
+     isroot = .TRUE.
+  else 
+     isroot = .FALSE.
   end if
 
-  !! Read in input parameters -- Parent Processor only
-  if (isparent) then
+
+  !=======================
+  ! SYSTEM INITIALIZATION
+  !=======================
+  
+
+  !! Read in input parameters -- Root only
+  if (isroot) then
      call read_parameters()
   end if
 
-  !! Distribute input parameters -- MPI Broadcast by root
+  !! Distribute input parameters -- MPI Broadcast by Root
   call distrib_params()
 
   !! Import the thermodynamic module -- All processors
@@ -40,7 +46,7 @@ program passive_film_model
   call allocate_matrices()
 
   !! Construct/read the system -- All processors
-  if (isparent) then
+  if (isroot) then
      if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then
         call read_geometry()
      else 
@@ -51,15 +57,18 @@ program passive_film_model
 
   call distrib_pf()
 
-  if(isparent) then
+  if(isroot) then
      call write_parameters()
   end if
 
-  !! Equilibration of chemical potentials
-  !#####! call pre_equilibrate()
-
+  !! Barrier before beginning time loop
   call mpi_barrier(MPI_COMM_WORLD,ierr)
 
+
+  ! =========
+  ! TIME LOOP
+  ! =========
+  
   do iter = 1,nomc
 
      !! Solve PF equations
@@ -74,7 +83,7 @@ program passive_film_model
 
      if (mod(iter,freq_scale).eq.0) then
 
-        if (isparent) then
+        if (isroot) then
            call initialize_kmc()
         end if
 
@@ -87,7 +96,7 @@ program passive_film_model
         call gather_pf()
         call gather_kmc()
 
-        if (isparent) then           
+        if (isroot) then           
            call couple_kmc_pf()
         end if
         call distrib_pf()
@@ -100,17 +109,11 @@ program passive_film_model
 
         call gather_pf()
 
-        if(isparent)then
+        if(isroot)then
            call write_fields(iter)
         end if
 
      end if
-
-
-     !! Draw progress bar
-     !     call draw_progress_bar(iter,nomc,dt)
-
-     !  write(6,*)   ! Write out empty line after the progress bar
 
   end do
 

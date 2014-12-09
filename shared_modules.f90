@@ -46,7 +46,7 @@ module commondata
 
   real*8 :: max_mu, min_mu
 
-  logical :: isparent
+  logical :: isroot
 
 end module commondata
 
