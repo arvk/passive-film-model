@@ -74,12 +74,6 @@ program passive_film_model
      !! Solve PF equations
      call pfsolve(iter)
 
-     ! if (iter.lt. (nomc/100)) then
-     !    call pre_equilibrate()
-     ! end if
-
-!        read(*,*)
-
 
      if (mod(iter,freq_scale).eq.0) then
 
