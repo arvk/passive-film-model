@@ -28,6 +28,76 @@ module fields
   real*8 :: dpf = 5E-9  ! Phase-field grid size
   real*8 :: dt          ! Timestep for PF evolution
 
+
+
+  real*8, dimension(:,:,:), allocatable :: dpht_dt, denv_dt, dmet_dt, dpyr_dt, dmu_dt
+  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr, oldmu
+
+
+
+
+  !! Thermodynamic parameters
+
+  real*8 :: sigma_pht_env= -1E-6
+  real*8 :: sigma_env_pht= -1E-6
+
+  real*8 :: sigma_pht_met= -1E-6
+  real*8 :: sigma_met_pht= -1E-6
+
+  real*8 :: sigma_pht_pyr= -2.5E-8
+  real*8 :: sigma_pyr_pht= -2.5E-8
+
+  real*8 :: sigma_met_env= -1E-5
+  real*8 :: sigma_env_met= -1E-5
+
+  real*8 :: sigma_met_pyr= -1E-6
+  real*8 :: sigma_pyr_met= -1E-6
+
+  real*8 :: sigma_env_pyr= -2.5E-8
+  real*8 :: sigma_pyr_env= -2.5E-8
+
+
+
+  real*8 :: M_pht_met = 1.7E-09
+  real*8 :: M_met_pht = 1.7E-09
+
+  real*8 :: M_met_pyr = 1.7E-09
+  real*8 :: M_pyr_met = 1.7E-09
+
+  real*8 :: M_pht_env = 1.7E-12
+  real*8 :: M_env_pht = 1.7E-12
+
+  real*8 :: M_env_pyr = 8.7E-09
+  real*8 :: M_pyr_env = 8.7E-09
+
+  real*8 :: M_met_env = 1.7E-26
+  real*8 :: M_env_met = 1.7E-26
+
+  real*8 :: M_pht_pyr = 8.7E-09
+  real*8 :: M_pyr_pht = 8.7E-09
+
+
+
+  real*8 :: hill_pht_met = 8E10
+  real*8 :: hill_met_pht = 8E10
+
+  real*8 :: hill_met_pyr = 8E10
+  real*8 :: hill_pyr_met = 8E10
+
+  real*8 :: hill_pht_env = 5E11
+  real*8 :: hill_env_pht = 5E11
+
+  real*8 :: hill_env_pyr = 5E7
+  real*8 :: hill_pyr_env = 5E7
+
+  real*8 :: hill_met_env = 2E14
+  real*8 :: hill_env_met = 2E14
+
+  real*8 :: hill_pht_pyr = 5E7
+  real*8 :: hill_pyr_pht = 5E7
+
+
+
 end module fields
 
 
@@ -133,9 +203,6 @@ end module kmc_data
 module field_evolution
   implicit none
   save
-
-  real*8, dimension(:,:,:), allocatable :: dpht_dt, denv_dt, dmet_dt, dpyr_dt, dmu_dt
-  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr, oldmu
 
 end module field_evolution
 

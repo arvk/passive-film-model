@@ -19,24 +19,6 @@ subroutine pfsolve(iter)
   real*8 :: f_pht, f_env, f_met, f_pyr
   real*8 :: w_pht, w_env, w_met, w_pyr
 
-  !! Thermodynamic parameters
-  real*8 :: hill_pht_env, hill_pht_met, hill_pht_pyr
-  real*8 :: hill_met_env, hill_met_pht, hill_met_pyr
-  real*8 :: hill_env_pht, hill_env_met, hill_env_pyr
-  real*8 :: hill_pyr_env, hill_pyr_met, hill_pyr_pht
-
-  !! Interfacial energy
-  real*8 :: sigma_pht_env, sigma_pht_met, sigma_pht_pyr
-  real*8 :: sigma_met_env, sigma_met_pht, sigma_met_pyr
-  real*8 :: sigma_env_pht, sigma_env_met, sigma_env_pyr
-  real*8 :: sigma_pyr_env, sigma_pyr_met, sigma_pyr_pht
-
-  !! Kinetic parameters (Interface mobility)
-  real*8 :: M_pht_met, M_met_pht, M_met_pyr
-  real*8 :: M_pht_env, M_env_pht, M_env_pyr
-  real*8 :: M_met_env, M_env_met, M_pht_pyr
-  real*8 :: M_pyr_env, M_pyr_met, M_pyr_pht
-
   !! Derivative of bulk free energy with phase field
   real*8 :: dF_dpht_met, dF_dpht_env, dF_dpht_pyr
   real*8 :: dF_dmet_pht, dF_dmet_env, dF_dmet_pyr
@@ -46,23 +28,6 @@ subroutine pfsolve(iter)
   integer :: int_count
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  !! Thermodynamic parameters
-  hill_pht_met = 8E10 ; hill_met_pht = 8E10 ; hill_met_pyr = 8E10
-  hill_pht_env = 5E11 ; hill_env_pht = 5E11 ; hill_env_pyr = 5E7
-  hill_met_env = 2E14 ; hill_env_met = 2E14 ; hill_pht_pyr = 5E7
-  hill_pyr_env = 5E7 ; hill_pyr_met = 8E10 ; hill_pyr_pht = 5E7
-
-  sigma_pht_env= -2E2*dpf ; sigma_pht_met= -2E2*dpf ; sigma_pht_pyr= -5E0*dpf
-  sigma_met_env= -2E3*dpf ; sigma_met_pht= -2E2*dpf ; sigma_met_pyr= -2E2*dpf
-  sigma_env_pht= -2E2*dpf ; sigma_env_met= -2E3*dpf ; sigma_env_pyr= -5E0*dpf
-  sigma_pyr_pht= -5E0*dpf ; sigma_pyr_met= -2E2*dpf ; sigma_pyr_env= -5E0*dpf
-
-  !! Kinetic parameters  
-  M_pht_met = 1.7E-09 ; M_met_pht = 1.7E-09 ; M_met_pyr = 1.7E-09
-  M_pht_env = 1.7E-12 ; M_env_pht = 1.7E-12 ; M_env_pyr = 8.7E-09
-  M_met_env = 1.7E-26 ; M_env_met = 1.7E-26 ; M_pht_pyr = 8.7E-09
-  M_pyr_met = 1.7E-09 ; M_pyr_env = 8.7E-09 ; M_pyr_pht = 8.7E-09
 
   !! Initialize field variables to 0
   dpht_dt = 0.0d0 ; denv_dt = 0.0d0 ; dmet_dt = 0.0d0 ; dpyr_dt = 0.0d0 ; dmu_dt = 0.0d0 

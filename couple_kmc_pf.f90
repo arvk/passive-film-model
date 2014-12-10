@@ -8,7 +8,8 @@ subroutine couple_kmc_pf
   integer :: x, y, z  ! Loop variables
   integer :: i, j     ! Loop variables
   real*8 :: sum_kg
-  real*8 :: oldpht, newpht, oldenv, newenv
+  real*8 :: pht_bc, env_bc ! Local phase fractions at (x,y,z) before coupling. This is read from pht(x,y,z) and env(x,y,z)
+  real*8 :: pht_ac, env_ac ! Local phase fractions at (x,y,z) after coupling. This is written to pht(x,y,z) and env(x,y,z)
   real*8 :: coupling_const
   integer, dimension(psx_g,psy_g) :: interface_loc
 
@@ -36,25 +37,25 @@ subroutine couple_kmc_pf
            end do
         end do
 
-        oldpht = pht_g(x,y,interface_loc(x,y))
-        oldenv = env_g(x,y,interface_loc(x,y))
+        pht_bc = pht_g(x,y,interface_loc(x,y))
+        env_bc = env_g(x,y,interface_loc(x,y))
 
-        newpht = pht_g(x,y,interface_loc(x,y))+(0.2d0*((sum_kg/(kg_scale*kg_scale))-pht_g(x,y,interface_loc(x,y))))
-        newpht = max(min(newpht,1.0d0),0.0d0)
+        pht_ac = pht_g(x,y,interface_loc(x,y))+(0.2d0*((sum_kg/(kg_scale*kg_scale))-pht_g(x,y,interface_loc(x,y))))
+        pht_ac = max(min(pht_ac,1.0d0),0.0d0)
 
-        env_g(x,y,interface_loc(x,y)) = env_g(x,y,interface_loc(x,y)) - (newpht-pht_g(x,y,interface_loc(x,y)))
-        pht_g(x,y,interface_loc(x,y)) = pht_g(x,y,interface_loc(x,y)) + (newpht-pht_g(x,y,interface_loc(x,y)))
+        env_g(x,y,interface_loc(x,y)) = env_g(x,y,interface_loc(x,y)) - (pht_ac-pht_g(x,y,interface_loc(x,y)))
+        pht_g(x,y,interface_loc(x,y)) = pht_g(x,y,interface_loc(x,y)) + (pht_ac-pht_g(x,y,interface_loc(x,y)))
 
-        newpht = (pht_g(x,y,interface_loc(x,y))/(pht_g(x,y,interface_loc(x,y))+env_g(x,y,interface_loc(x,y))))*(oldpht+oldenv)
-        newenv = (env_g(x,y,interface_loc(x,y))/(pht_g(x,y,interface_loc(x,y))+env_g(x,y,interface_loc(x,y))))*(oldpht+oldenv)
+        pht_ac = (pht_g(x,y,interface_loc(x,y))/(pht_g(x,y,interface_loc(x,y))+env_g(x,y,interface_loc(x,y))))*(pht_bc+env_bc)
+        env_ac = (env_g(x,y,interface_loc(x,y))/(pht_g(x,y,interface_loc(x,y))+env_g(x,y,interface_loc(x,y))))*(pht_bc+env_bc)
 
-        pht_g(x,y,interface_loc(x,y)) = newpht
-        env_g(x,y,interface_loc(x,y)) = newenv
+        pht_g(x,y,interface_loc(x,y)) = pht_ac
+        env_g(x,y,interface_loc(x,y)) = env_ac
 
-        if (newpht.gt.oldpht) then
-           mu_g(x,y,interface_loc(x,y)) = mu_g(x,y,interface_loc(x,y)) + ((newpht-oldpht)*(avg_mu_pht-mu_g(x,y,interface_loc(x,y))))
+        if (pht_ac.gt.pht_bc) then
+           mu_g(x,y,interface_loc(x,y)) = mu_g(x,y,interface_loc(x,y)) + ((pht_ac-pht_bc)*(avg_mu_pht-mu_g(x,y,interface_loc(x,y))))
         else
-           mu_g(x,y,interface_loc(x,y)) = mu_g(x,y,interface_loc(x,y)) - ((newpht-oldpht)*(avg_mu_env-mu_g(x,y,interface_loc(x,y))))
+           mu_g(x,y,interface_loc(x,y)) = mu_g(x,y,interface_loc(x,y)) - ((pht_ac-pht_bc)*(avg_mu_env-mu_g(x,y,interface_loc(x,y))))
         end if
 
      end do
