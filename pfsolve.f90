@@ -266,8 +266,6 @@ subroutine pfsolve(iter)
   end do
 
 
-  !!  sulfidation_rate = 0.01372E-9 for the linear rate
-
   sulfidation_rate = 0.0d0
   int_count = 1
 
@@ -283,8 +281,6 @@ subroutine pfsolve(iter)
   end do
 
   sulfidation_rate = max((sulfidation_rate/int_count) + 0.01372E-9,0.0d0)
-
-!  write(6,*) 'Sulf rate is ', sulfidation_rate
 
   call swap_mu()
   call calc_lap()
@@ -330,9 +326,6 @@ subroutine musolve(sulfidation_rate,iter)
   integer :: x, y, z   ! Loop variables
   real*8 :: asd ! Anti-Surface-Diffusion
 
-  !! Sulfur density in different phases
-  real*8 :: rho_pht, rho_env, rho_met, rho_pyr
-
   !! Diffusivities
   real*8 :: D_inter_met, D_inter_env, D_inter_pht, D_inter_pyr, D
   real*8 :: D_H_met, D_H_env, D_H_pht, D_H_pyr, D_H
@@ -352,53 +345,14 @@ subroutine musolve(sulfidation_rate,iter)
      do y = 1,psy
         do z = 2,psz+1
 
-           !! Calculate sulfur density in each phase
-           rho_pht = 52275
-           rho_met = 0.0015d0*140401
-
-           if (iter.lt.nomc/100) then
-              rho_env = rho_met
-           else      
-              rho_env = 0.0015d0*(13303/T)
-           end if
-
-           rho_pyr = 2.0d0*41667.0d0
-
-!              rho_env = 0.0015d0*(13303/T)
-        
-!           rho_met = exp(avg_mu_met/(R*T))*140401
-!           rho_env = exp(avg_mu_env/(R*T))*(13303/T)
-
            !! Calculate inter-diffusivities in each phase 
-!           D_Fe_pht = 10**((0-7056/T)-2.679)    ! Ref = William's data
 
-
-           ! if (abs(mu(x,y,z)/(2*250896)) .lt. 0.05) then
-           !    D_inter_pht = (D_S_pht*(1+(mu(x,y,z)/(2*250896)))) + (D_Fe_pht*(1-(mu(x,y,z)/(2*250896))))
-           ! else
-           !    D_inter_pht = D_Fe_pht
-           ! end if
-
-              D_inter_pht = D_Fe_pht
-
-!           D_Fe_met = 7.87E-7 * exp((96500*(0.0-0.60d0))/(R*T))   ! Ref = PHYSICAL REVIEW B 80, 144111-4 2009
+           D_inter_pht = D_Fe_pht
            D_inter_met = D_Fe_met
-
-!           D_S_env = 1.70E-9  ! Ref = J. Chem. Eng. Data 1994, 39, 330-332 and http://mail.sci.ccny.cuny.edu/~pzhang/EAS44600/EAS446lec16.pdf
            D_inter_env = D_S_env
-
-!           D_inter_pyr = D_Fe_pyr                               ! S diffusivity should be negligible
-
            D_inter_pyr = D_inter_pht/10
 
            D = ((pht(x,y,z)*D_inter_pht)+(env(x,y,z)*D_inter_env)+(met(x,y,z)*D_inter_met)+(pyr(x,y,z)*D_inter_pyr))
-
-           !! Hydrogen diffusivity
-
-!           D_H_env = 9.31E-9                      ! Ref = http://mail.sci.ccny.cuny.edu/~pzhang/EAS44600/EAS446lec16.pdf
-!           D_H_met = 1.5E-7 * exp(0-(8492/(R*T))) ! Ref = PHYSICAL REVIEW B 70 , 064102-7 (2004)
-!           D_H_pht = 1.75E-9 ! Ref = Int. J. Electrochem. Sci.,8, (2013) 2880-2891
-!           D_H_pyr = D_H_met ! Assumed. Cannot find reference
 
 !           D_H = (met(x,y,z)*D_H_met)+(pht(x,y,z)*D_H_pht)+(env(x,y,z)*D_H_env)
 
@@ -452,15 +406,7 @@ subroutine musolve(sulfidation_rate,iter)
      do y = 1,psy
         do z = 2,psz+1
            newmu(x,y,z) = mu(x,y,z) + (dt*dmu_dt(x,y,z))
-
-           ! if (iter.lt.nomc/100) then
-           !    newmu(x,y,z) = max(min(newmu(x,y,z),mus_pht_pyr_eqb),mus_met_pht_eqb)
-           ! else
-           !    newmu(x,y,z) = max(min(newmu(x,y,z),max_mu),min_mu)
-           ! end if
-
-              newmu(x,y,z) = max(min(newmu(x,y,z),max_mu),min_mu)
-       
+           newmu(x,y,z) = max(min(newmu(x,y,z),max_mu),min_mu)     
            newph(x,y,z) = ph(x,y,z)! + (dt*dph_dt(x,y,z))
            newph(x,y,z) = max(min(newph(x,y,z),14.0d0),0.0d0)
         end do

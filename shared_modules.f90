@@ -81,6 +81,7 @@ module thermo_constants
   save
   
   real*8 :: mus_met_pht_eqb, mus_pht_pyr_eqb
+  real*8 :: rho_pht, rho_env, rho_met, rho_pyr    !! Sulfur density in different phases
 
 end module thermo_constants
 

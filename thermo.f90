@@ -9,6 +9,9 @@ subroutine thermo
   real*8 :: my_pht, my_met, my_pyr  ! Free energy of each phase
   real*8 :: min_met_pht, min_pht_pyr
 
+
+  !! Estimate the phase-stability region
+
   min_met_pht = 50000.0d0; min_pht_pyr = 50000.0d0
 
   do i = -30000,30000
@@ -29,6 +32,16 @@ subroutine thermo
      end if
      
   end do
+
+
+
+  !! Sulfur density in each FeS_x phase
+
+  rho_pht = 52275.0d0
+  rho_met = 0.0015d0*140401
+  rho_pyr = 2.0d0*41667.0d0
+  rho_env = 0.0015d0*(13303/T)
+           
 
 end subroutine thermo
 
