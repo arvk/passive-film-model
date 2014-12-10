@@ -54,18 +54,6 @@ subroutine write_fields(iter)
   end do
   close(105)  
 
-!   open (unit=106, file="Hplus.out", status="new")
-!   write(106,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
-!   do x = 1,psx_g 
-!      do y = 1,psy_g
-!         do z = 1,psz_g
-!            write(106,*)  ph_g(x,y,z)
-!         end do
-!      end do
-!   end do
-!   close(106)  
-
-
 !   open (unit=107, file="ALL.out", status="new")
 !   write(107,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
 !   do x = 1,psx_g 
@@ -95,7 +83,6 @@ subroutine write_fields(iter)
   call system("cp MET.out MET_"//img_id//".out")
   call system("cp PYR.out PYR_"//img_id//".out")
   call system("cp MUS.out MUS_"//img_id//".out")
-!  call system("cp Hplus.out Hplus_"//img_id//".out")
 !  call system("cp ALL.out ALL_"//img_id//".out")
 
 end subroutine write_fields

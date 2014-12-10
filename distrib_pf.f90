@@ -13,7 +13,6 @@ subroutine distrib_pf()
   call mpi_bcast(env_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(pyr_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(mu_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-  call mpi_bcast(ph_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
   do x = 1,psx
      do y = 1,psy
@@ -23,7 +22,6 @@ subroutine distrib_pf()
            env(x,y,z) = env_g(x,y,z-1+(rank*psz_g/procs))
            pyr(x,y,z) = pyr_g(x,y,z-1+(rank*psz_g/procs))
            mu(x,y,z) = mu_g(x,y,z-1+(rank*psz_g/procs))
-           ph(x,y,z) = ph_g(x,y,z-1+(rank*psz_g/procs))
         end do
      end do
   end do

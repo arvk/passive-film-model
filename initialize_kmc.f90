@@ -129,7 +129,7 @@ subroutine initialize_kmc()
         my_ph = 0.0d0
 
         do z = interface_loc(x,y),psz_g
-           my_ph = my_ph + (14.0d0 - ph_g(x,y,z))
+           my_ph = my_ph + (14.0d0 - pH_in)
         end do
 
         my_ph = my_ph/(psz_g-interface_loc(x,y))       

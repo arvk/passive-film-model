@@ -65,10 +65,7 @@ subroutine read_geometry
   end do
   close(108)  
 
-  ph_g = pH_in
-
   avg_mu_met = mus_met_pht_eqb + (R*T*0.1d0)
-!  avg_mu_env = (R*T*(0.0d0-0.99d0))                                                                                                                                                                               
   avg_mu_env = (R*T*(0.0d0-0.995d0))
   avg_mu_pht = 0.5d0*(avg_mu_met+avg_mu_env)
 

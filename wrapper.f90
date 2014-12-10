@@ -66,7 +66,6 @@ program passive_film_model
   !! Barrier before beginning time loop
   call mpi_barrier(MPI_COMM_WORLD,ierr)
 
-
   ! =========
   ! TIME LOOP
   ! =========
@@ -75,7 +74,6 @@ program passive_film_model
 
      !! Solve PF equations
      call pfsolve(iter)
-
 
      if (mod(iter,freq_scale).eq.0) then
 
@@ -100,7 +98,7 @@ program passive_film_model
      end if
 
 
-     ! !!         Write output files at fixed times
+     !!!         Write output files at fixed times
      if (mod(iter,(nomc/noimg)-1).eq.0) then
 
         call gather_pf()

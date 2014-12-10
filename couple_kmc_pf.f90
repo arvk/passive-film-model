@@ -51,9 +51,6 @@ subroutine couple_kmc_pf
         pht_g(x,y,interface_loc(x,y)) = newpht
         env_g(x,y,interface_loc(x,y)) = newenv
 
-        ph_g(x,y,interface_loc(x,y)) = ph_g(x,y,interface_loc(x,y)) - ((newpht-oldpht)*7.0d0)
-        ph_g(x,y,interface_loc(x,y)) = max(min(ph_g(x,y,interface_loc(x,y)),14.0d0),0.0d0)
-
         if (newpht.gt.oldpht) then
            mu_g(x,y,interface_loc(x,y)) = mu_g(x,y,interface_loc(x,y)) + ((newpht-oldpht)*(avg_mu_pht-mu_g(x,y,interface_loc(x,y))))
         else

@@ -14,9 +14,6 @@ subroutine kmcsolve(iter)
   integer :: fromx,fromy,tox,toy
   real*8 :: sum_kg
 
-
-  real*8 :: my_ph  ! Avg pH used to calculate dissolutipon probability
-
   character*10 :: curr_time
 
   integer, intent(in) :: iter

@@ -71,10 +71,8 @@ subroutine pfsolve(iter)
         call swap_pf()
      end if
 
-
   !! Calculate laplacian of phase/composition fields
   call calc_lap()
-
 
 
   !################################################################
@@ -328,7 +326,6 @@ subroutine musolve(sulfidation_rate,iter)
 
   !! Diffusivities
   real*8 :: D_inter_met, D_inter_env, D_inter_pht, D_inter_pyr, D
-  real*8 :: D_H_met, D_H_env, D_H_pht, D_H_pyr, D_H
 
   !! Derivative of sulfur density with chemical potential
   real*8 :: drho_dmu_pht, drho_dmu_env, drho_dmu_met, drho_dmu_pyr, Chi
@@ -354,8 +351,6 @@ subroutine musolve(sulfidation_rate,iter)
 
            D = ((pht(x,y,z)*D_inter_pht)+(env(x,y,z)*D_inter_env)+(met(x,y,z)*D_inter_met)+(pyr(x,y,z)*D_inter_pyr))
 
-!           D_H = (met(x,y,z)*D_H_met)+(pht(x,y,z)*D_H_pht)+(env(x,y,z)*D_H_env)
-
            !! Calculate derivative of sulfur concentration with chemical potential
            drho_dmu_pht = 52275.0d0/(2*250896.0d0)
            drho_dmu_met = (0.0015d0*140401)/(R*T)
@@ -375,7 +370,6 @@ subroutine musolve(sulfidation_rate,iter)
            !! Apply chemical-potential-field evolution equation
            dmu_dt(x,y,z) = (D*del2mu(x,y,z)) - &
                 &       (((dpht_dt(x,y,z)*rho_pht) + (dmet_dt(x,y,z)*rho_met) + (denv_dt(x,y,z)*rho_env) + (dpyr_dt(x,y,z)*rho_pyr))/Chi)
-!           dph_dt(x,y,z) = (D_H*del2ph(x,y,z))
 
         end do
      end do
@@ -388,14 +382,12 @@ subroutine musolve(sulfidation_rate,iter)
      do x = 1,psx
         do y = 1,psy
            dmu_dt(x,y,2) = 0.0d0
-           dph_dt(x,y,2) = 0.0d0
         end do
      end do
   elseif(rank.eq.procs-1) then
      do x = 1,psx
         do y = 1,psy
            dmu_dt(x,y,psz+1) = 0.0d0
-           dph_dt(x,y,psz+1) = 0.0d0
         end do
      end do
   end if
@@ -407,8 +399,6 @@ subroutine musolve(sulfidation_rate,iter)
         do z = 2,psz+1
            newmu(x,y,z) = mu(x,y,z) + (dt*dmu_dt(x,y,z))
            newmu(x,y,z) = max(min(newmu(x,y,z),max_mu),min_mu)     
-           newph(x,y,z) = ph(x,y,z)! + (dt*dph_dt(x,y,z))
-           newph(x,y,z) = max(min(newph(x,y,z),14.0d0),0.0d0)
         end do
      end do
   end do
@@ -451,8 +441,6 @@ subroutine musolve(sulfidation_rate,iter)
            do z = psz+1,2,-1
               if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
                  interface_loc(x,y) = z
-!                 newmu(x,y,interface_loc(x,y)) = newmu(x,y,interface_loc(x,y)) - (0.5d0*dt*dmu_dt(x,y,interface_loc(x,y)))
-!                 newmu(x,y,interface_loc(x,y)) = newmu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt*20)/(dpf))
                  newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt*20)/(dpf))
                  newmu(x,y,interface_loc(x,y)) = min(newmu(x,y,interface_loc(x,y)),max_mu)
                  newmu(x,y,interface_loc(x,y)+1) = newmu(x,y,interface_loc(x,y)-1)

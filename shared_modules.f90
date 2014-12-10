@@ -12,7 +12,6 @@ module fields
   real*8, dimension(:,:,:), allocatable :: met ! PF grid for metal
   real*8, dimension(:,:,:), allocatable :: pyr ! PF grid for pyrite
   real*8, dimension(:,:,:), allocatable :: mu  ! mu_S grid
-  real*8, dimension(:,:,:), allocatable :: ph  ! pH matrix in the simulation cell
 
   !! Define global phase fields
   real*8, dimension(:,:,:), allocatable :: met_g 
@@ -20,7 +19,6 @@ module fields
   real*8, dimension(:,:,:), allocatable :: env_g 
   real*8, dimension(:,:,:), allocatable :: pyr_g 
   real*8, dimension(:,:,:), allocatable :: mu_g 
-  real*8, dimension(:,:,:), allocatable :: ph_g 
 
 end module fields
 
@@ -70,7 +68,6 @@ module laplacians
   real*8, dimension(:,:,:), allocatable :: del2met
   real*8, dimension(:,:,:), allocatable :: del2pyr
   real*8, dimension(:,:,:), allocatable :: del2mu
-  real*8, dimension(:,:,:), allocatable :: del2ph
 
 end module laplacians
 
@@ -129,8 +126,8 @@ module field_evolution
   implicit none
   save
 
-  real*8, dimension(:,:,:), allocatable :: dpht_dt, denv_dt, dmet_dt, dpyr_dt, dmu_dt, dph_dt
-  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr, oldmu, newph
+  real*8, dimension(:,:,:), allocatable :: dpht_dt, denv_dt, dmet_dt, dpyr_dt, dmu_dt
+  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr, oldmu
 
 end module field_evolution
 

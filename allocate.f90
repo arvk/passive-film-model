@@ -10,27 +10,25 @@ subroutine allocate_matrices()
 
   allocate(mu(psx,psy,psz+2)) ; allocate(met(psx,psy,psz+2))
   allocate(pht(psx,psy,psz+2)) ; allocate(env(psx,psy,psz+2)) 
-  allocate(ph(psx,psy,psz+2));  allocate(pyr(psx,psy,psz+2))
+  allocate(pyr(psx,psy,psz+2))
 
   allocate(met_g(psx_g,psy_g,psz_g))
   allocate(pht_g(psx_g,psy_g,psz_g))
   allocate(env_g(psx_g,psy_g,psz_g))
   allocate(pyr_g(psx_g,psy_g,psz_g))
   allocate(mu_g(psx_g,psy_g,psz_g))
-  allocate(ph_g(psx_g,psy_g,psz_g))
 
   allocate(del2pht(psx,psy,psz+2)) 
   allocate(del2env(psx,psy,psz+2))
   allocate(del2met(psx,psy,psz+2))
   allocate(del2pyr(psx,psy,psz+2))
   allocate(del2mu(psx,psy,psz+2))
-  allocate(del2ph(psx,psy,psz+2))
 
   allocate(dpht_dt(psx,psy,psz+2)); allocate(denv_dt(psx,psy,psz+2)) 
   allocate(dmet_dt(psx,psy,psz+2)); allocate(dmu_dt(psx,psy,psz+2))
-  allocate(dph_dt(psx,psy,psz+2)); allocate(dpyr_dt(psx,psy,psz+2))
+  allocate(dpyr_dt(psx,psy,psz+2))
 
-  dpht_dt = 0.0d0 ; denv_dt = 0.0d0 ; dmet_dt = 0.0d0 ; dpyr_dt = 0.0d0 ; dmu_dt = 0.0d0 ; dph_dt = 0.0d0
+  dpht_dt = 0.0d0 ; denv_dt = 0.0d0 ; dmet_dt = 0.0d0 ; dpyr_dt = 0.0d0 ; dmu_dt = 0.0d0
 
   allocate(plist((ksx+2)*(ksy+2),12))
   allocate(kg_g(psx_g*kg_scale, psy_g*kg_scale))
@@ -41,7 +39,7 @@ subroutine allocate_matrices()
 
   allocate(newpht(psx,psy,psz+2)) ; allocate(newmet(psx,psy,psz+2))
   allocate(newenv(psx,psy,psz+2)) ; allocate(oldmu(psx,psy,psz+2))
-  allocate(newph(psx,psy,psz+2)) ; allocate(newpyr(psx,psy,psz+2)) 
+  allocate(newpyr(psx,psy,psz+2)) 
  
   oldmu = 0.0d0
 

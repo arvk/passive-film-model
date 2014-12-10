@@ -64,7 +64,7 @@ write(6,*) 'KMCSIZE = ', ksx,ksy
   call system ("rm .ph.readin")
 
   if (error_ph .lt. 0) then
-     pH = 3.0d0
+     pH_in = 3.0d0
      write(6,*) "------------------------------------------------------------"
      write(6,*) "WARNING: No pH input. Simulation will continue at a pH of 3."    
      write(6,*) "------------------------------------------------------------"

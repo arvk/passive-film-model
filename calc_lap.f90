@@ -13,8 +13,6 @@ subroutine calc_lap
   del2met = 0.0d0 
   del2pyr = 0.0d0 
   del2mu = 0.0d0 
-  del2ph = 0.0d0 
-
 
 !!!!! Calculating laplacian in the bulk
 
@@ -92,20 +90,6 @@ wrap(y+1,psy),z-1)+met(wrap(x+1,psx),wrap(y-1,psy),z-1)+met(wrap(x-1,psx),wrap(y
 &wrap(y+1,psy),z-1)+mu(wrap(x+1,psx),wrap(y-1,psy),z-1)+mu(wrap(x-1,psx),wrap(y-1,psy),z-1))
            del2mu(x,y,z) = (del2mu(x,y,z) - 128*mu(x,y,z))/(30*dpf*dpf)
 
-           del2ph(x,y,z) = 14*(ph(wrap(x+1,psx),y,z)+ph(wrap(x-1,psx),y,z)+ph(x,wrap(y+1,psy),z)+&
-&ph(x,wrap(y-1,psy),z)+ph(x,y,z+1)+ph(x,y,z-1))
-           del2ph(x,y,z) = del2ph(x,y,z) + 3*(ph(wrap(x+1,psx),wrap(y+1,psy),z)+ph(wrap(x-1,psx),wrap(y+1,psy),z)+&
-&ph(wrap(x+1,psx),wrap(y-1,psy),z)+ph(wrap(x-1,psx),wrap(y-1,psy),z))
-           del2ph(x,y,z) = del2ph(x,y,z) + 3*(ph(x,wrap(y+1,psy),z+1)+ph(x,wrap(y+1,psy),z-1)+&
-&ph(x,wrap(y-1,psy),z+1)+ph(x,wrap(y-1,psy),z-1))
-           del2ph(x,y,z) = del2ph(x,y,z) + 3*(ph(wrap(x+1,psx),y,z+1)+ph(wrap(x-1,psx),y,z+1)+&
-&ph(wrap(x+1,psx),y,z-1)+ph(wrap(x-1,psx),y,z-1))
-           del2ph(x,y,z) = del2ph(x,y,z) + 1*(ph(wrap(x+1,psx),wrap(y+1,psy),z+1)+ph(wrap(x-1,psx),&
-&wrap(y+1,psy),z+1)+ph(wrap(x+1,psx),wrap(y-1,psy),z+1)+ph(wrap(x-1,psx),wrap(y-1,psy),z+1))
-           del2ph(x,y,z) = del2ph(x,y,z) + 1*(ph(wrap(x+1,psx),wrap(y+1,psy),z-1)+ph(wrap(x-1,psx),&
-&wrap(y+1,psy),z-1)+ph(wrap(x+1,psx),wrap(y-1,psy),z-1)+ph(wrap(x-1,psx),wrap(y-1,psy),z-1))
-           del2ph(x,y,z) = (del2ph(x,y,z) - 128*ph(x,y,z))/(30*dpf*dpf)
-
         end do
      end do
   end do
@@ -120,7 +104,6 @@ wrap(y+1,psy),z-1)+met(wrap(x+1,psx),wrap(y-1,psy),z-1)+met(wrap(x-1,psx),wrap(y
         del2met(x,y,1) = 0.0d0 ; del2met(x,y,psz+2) = 0.0d0
         del2pyr(x,y,1) = 0.0d0 ; del2pyr(x,y,psz+2) = 0.0d0
         del2mu(x,y,1) = 0.0d0 ; del2mu(x,y,psz+2) = 0.0d0
-        del2ph(x,y,1) = 0.0d0 ; del2ph(x,y,psz+2) = 0.0d0
      end do
   end do
 
