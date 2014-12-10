@@ -1,5 +1,5 @@
 subroutine estimate_timestep
-  use commondata
+  use fields
   use diffusion_constants
 
   real*8 :: dt_stable       ! Maximum stable forward-euler timestep

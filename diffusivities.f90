@@ -1,6 +1,7 @@
 subroutine diffusivities
   use commondata
   use fields
+  use thermo_constants
   use diffusion_constants
 
   D_Fe_pht = 10**((0-7056/T)-3.679)    ! Ref = William's data
