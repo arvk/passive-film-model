@@ -1,5 +1,6 @@
 subroutine read_geometry
   use commondata
+  use fields
   use thermo_constants
   use laplacians
 

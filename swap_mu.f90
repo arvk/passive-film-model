@@ -1,5 +1,6 @@
 subroutine swap_mu()
   use commondata
+  use fields
   implicit none
   include 'mpif.h'
 

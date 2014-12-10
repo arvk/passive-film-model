@@ -1,5 +1,6 @@
 subroutine calc_lap
   use commondata
+  use fields
   use laplacians
   implicit none
 

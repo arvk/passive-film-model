@@ -1,6 +1,7 @@
 subroutine diffusivities
-use commondata
-use diffusion_constants
+  use commondata
+  use fields
+  use diffusion_constants
 
   D_Fe_pht = 10**((0-7056/T)-3.679)    ! Ref = William's data
   D_S_pht = D_Fe_pht/10                ! Ref = Assumption of one order of magnitude lesser

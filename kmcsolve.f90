@@ -1,5 +1,6 @@
 subroutine kmcsolve(iter)
   use commondata
+  use fields
   use kmc_data
   implicit none
   include 'mpif.h'
@@ -125,6 +126,7 @@ end subroutine kmcsolve
 
 subroutine add_to_plist(x,y)
   use commondata
+  use fields
   use kmc_data
   implicit none
 
@@ -222,6 +224,7 @@ end subroutine add_to_plist
 
 subroutine make_ptl(fromx,fromy,tox,toy,from,to,prob)
   use commondata
+  use fields
   use kmc_data
 
   implicit none
@@ -261,6 +264,7 @@ end subroutine make_ptl
 
 subroutine upnl(x,y)
   use commondata
+  use fields
   use kmc_data
   implicit none
 
@@ -286,6 +290,7 @@ end subroutine upnl
 
 subroutine rfpls(x,y)
   use commondata
+  use fields
   use kmc_data
   implicit none
 

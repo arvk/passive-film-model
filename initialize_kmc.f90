@@ -1,5 +1,6 @@
 subroutine initialize_kmc()
   use commondata
+  use fields
   use kmc_data
   implicit none
 

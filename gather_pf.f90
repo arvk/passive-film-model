@@ -1,5 +1,6 @@
 subroutine gather_pf()
   use commondata
+  use fields
   implicit none
   include 'mpif.h'
 

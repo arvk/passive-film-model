@@ -1,5 +1,6 @@
 subroutine pfsolve(iter)
   use commondata
+  use fields
   use laplacians
   use thermo_constants
   use field_evolution
@@ -325,6 +326,7 @@ end subroutine pfsolve
 
 subroutine musolve(dt, sulfidation_rate,iter)
   use commondata
+  use fields
   use laplacians
   use thermo_constants
   use field_evolution

@@ -1,5 +1,6 @@
 program passive_film_model
   use commondata
+  use fields
   use kmc_data
   implicit none
   include 'mpif.h'

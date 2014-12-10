@@ -1,5 +1,6 @@
 subroutine couple_kmc_pf
   use commondata
+  use fields
   use kmc_data
   implicit none
   include 'mpif.h'

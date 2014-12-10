@@ -1,5 +1,6 @@
 subroutine write_parameters()
   use commondata
+  use fields
   implicit none
 
   call system("rm -rf PARAMS.out")

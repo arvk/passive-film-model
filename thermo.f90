@@ -1,6 +1,7 @@
 subroutine thermo
   use thermo_constants
   use commondata
+  use fields
   implicit none
 
   integer :: i              ! Loop index

@@ -1,16 +1,12 @@
-module commondata
+module fields
   implicit none
   save
 
-  character*1 :: isrestart     ! Is the calculation a restarted one?
-  integer :: ksx,ksy           ! Number of kMC gridpoints in 3 directions
-  integer :: ksx_g,ksy_g       ! Number of kMC gridpoints in 3 directions
+  !! Define the extent of phase fields
   integer :: psx_g,psy_g,psz_g ! Number of PF gridpoints in 3 directions
   integer :: psx,psy,psz       ! Number of PF gridpoints in 3 directions
-  integer :: T                 ! Temperature of the simulation box
-  real*8 :: pH_in              ! Scalar pH input
-  integer :: rank, procs
-
+  
+  !! Define local phase fields
   real*8, dimension(:,:,:), allocatable :: pht ! PF grid for pyrrhotite
   real*8, dimension(:,:,:), allocatable :: env ! PF grid for environment (liquid or gas)
   real*8, dimension(:,:,:), allocatable :: met ! PF grid for metal
@@ -18,12 +14,28 @@ module commondata
   real*8, dimension(:,:,:), allocatable :: mu  ! mu_S grid
   real*8, dimension(:,:,:), allocatable :: ph  ! pH matrix in the simulation cell
 
+  !! Define global phase fields
   real*8, dimension(:,:,:), allocatable :: met_g 
   real*8, dimension(:,:,:), allocatable :: pht_g 
   real*8, dimension(:,:,:), allocatable :: env_g 
   real*8, dimension(:,:,:), allocatable :: pyr_g 
   real*8, dimension(:,:,:), allocatable :: mu_g 
   real*8, dimension(:,:,:), allocatable :: ph_g 
+
+end module fields
+
+
+
+module commondata
+  implicit none
+  save
+
+  character*1 :: isrestart     ! Is the calculation a restarted one?
+  integer :: ksx,ksy           ! Number of kMC gridpoints in 3 directions
+  integer :: ksx_g,ksy_g       ! Number of kMC gridpoints in 3 directions
+  integer :: T                 ! Temperature of the simulation box
+  real*8 :: pH_in              ! Scalar pH input
+  integer :: rank, procs
 
   integer, dimension(:,:), allocatable :: kg
   integer, dimension(:,:), allocatable :: kg_g
@@ -103,7 +115,6 @@ module kmc_data
   real*8, dimension(:,:), allocatable :: fes_diss         !!!!
   real*8, dimension(:,:), allocatable :: v_diff           !!!!
 !!!!------------------------------------------------------!!!!
-
 
 end module kmc_data
 

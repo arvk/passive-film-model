@@ -1,5 +1,6 @@
 subroutine write_fields(iter)
   use commondata
+  use fields
   implicit none
 
   integer, intent(in) :: iter  

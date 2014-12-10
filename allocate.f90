@@ -1,5 +1,6 @@
 subroutine allocate_matrices()
   use commondata
+  use fields
   use laplacians
   use thermo_constants
   use field_evolution
