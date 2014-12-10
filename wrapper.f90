@@ -29,7 +29,7 @@ program passive_film_model
   !=======================
   ! SYSTEM INITIALIZATION
   !=======================
-  
+
 
   !! Read in input parameters -- Root only
   if (isroot) then
@@ -69,7 +69,7 @@ program passive_film_model
   ! =========
   ! TIME LOOP
   ! =========
- 
+
   do iter = 1,nomc
 
      !! Solve PF equations
@@ -98,7 +98,7 @@ program passive_film_model
      end if
 
 
-     !!!         Write output files at fixed times
+!!!         Write output files at fixed times
      if (mod(iter,(nomc/noimg)-1).eq.0) then
 
         call gather_pf()
