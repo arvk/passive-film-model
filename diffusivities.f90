@@ -3,7 +3,8 @@ subroutine diffusivities
   use fields
   use thermo_constants
   use diffusion_constants
-
+  implicit none
+  
   D_Fe_pht = 10**((0-7056/T)-3.679)    ! Ref = William's data
   D_S_pht = D_Fe_pht/10                ! Ref = Assumption of one order of magnitude lesser
 
