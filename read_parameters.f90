@@ -1,6 +1,7 @@
 subroutine read_parameters()
   use commondata
   use fields
+  use kmc_data
   implicit none
 
   integer :: error_temp, error_nomc, error_ph

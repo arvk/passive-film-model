@@ -1,6 +1,7 @@
 subroutine distrib_params()
   use commondata
   use fields
+  use kmc_data
   implicit none
   include 'mpif.h'
 

@@ -31,8 +31,6 @@ module commondata
   save
 
   character*1 :: isrestart     ! Is the calculation a restarted one?
-  integer :: ksx,ksy           ! Number of kMC gridpoints in 3 directions
-  integer :: ksx_g,ksy_g       ! Number of kMC gridpoints in 3 directions
   integer :: T                 ! Temperature of the simulation box
   real*8 :: pH_in              ! Scalar pH input
   integer :: rank, procs
@@ -94,6 +92,9 @@ end module thermo_constants
 module kmc_data
   implicit none
   save
+
+  integer :: ksx,ksy           ! Number of local kMC gridpoints
+  integer :: ksx_g,ksy_g       ! Number of global kMC gridpoints
 
   type :: prol                       
      integer :: fx,fy,tx,ty,from,to

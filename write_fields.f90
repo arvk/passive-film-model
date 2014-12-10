@@ -1,6 +1,7 @@
 subroutine write_fields(iter)
   use commondata
   use fields
+  use kmc_data
   implicit none
 
   integer, intent(in) :: iter  
