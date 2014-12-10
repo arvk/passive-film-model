@@ -42,6 +42,7 @@ program passive_film_model
   !! Import the thermodynamic module -- All processors
   call thermo()
   call diffusivities()
+  call estimate_timestep()
 
   !! Allocate all matrices -- All processors
   call allocate_matrices()
@@ -69,7 +70,7 @@ program passive_film_model
   ! =========
   ! TIME LOOP
   ! =========
-  
+ 
   do iter = 1,nomc
 
      !! Solve PF equations

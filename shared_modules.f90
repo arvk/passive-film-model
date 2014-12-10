@@ -26,6 +26,8 @@ end module fields
 
 
 
+
+
 module commondata
   implicit none
   save
@@ -34,11 +36,6 @@ module commondata
   integer :: T                 ! Temperature of the simulation box
   real*8 :: pH_in              ! Scalar pH input
   integer :: rank, procs
-
-  integer, dimension(:,:), allocatable :: kg
-  integer, dimension(:,:), allocatable :: kg_g
-  integer, dimension(:,:), allocatable :: kg_recv
-
 
   integer :: nomc                         ! Number of kMC steps
   integer :: noimg = 20                   ! Number of output files
@@ -57,6 +54,7 @@ module commondata
   real*8 :: max_mu, min_mu
 
   logical :: isroot
+  real*8 :: dt
 
 end module commondata
 
@@ -95,6 +93,11 @@ module kmc_data
 
   integer :: ksx,ksy           ! Number of local kMC gridpoints
   integer :: ksx_g,ksy_g       ! Number of global kMC gridpoints
+
+
+  integer, dimension(:,:), allocatable :: kg      ! Global kMC grid
+  integer, dimension(:,:), allocatable :: kg_g    ! Local kMC grid
+  integer, dimension(:,:), allocatable :: kg_recv
 
   type :: prol                       
      integer :: fx,fy,tx,ty,from,to

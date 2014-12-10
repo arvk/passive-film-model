@@ -43,11 +43,7 @@ subroutine pfsolve(iter)
   real*8 :: dF_denv_met, dF_denv_pht, dF_denv_pyr
   real*8 :: dF_dpyr_met, dF_dpyr_pht, dF_dpyr_env
 
-  !! Timestep for evolution
-  real*8 :: dt = 0.75E-3
-
   integer :: int_count
-  integer :: muloop,muloop_max
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -290,13 +286,9 @@ subroutine pfsolve(iter)
 
 !  write(6,*) 'Sulf rate is ', sulfidation_rate
 
-muloop_max = 1
-
-do muloop = 1,muloop_max
   call swap_mu()
   call calc_lap()
-  call musolve(dt/muloop_max, sulfidation_rate,iter)
-end do
+  call musolve(sulfidation_rate,iter)
 
   !###########################################################
   !##################--UPDATE ALL FIELDS--####################
@@ -324,7 +316,7 @@ end subroutine pfsolve
 
 
 
-subroutine musolve(dt, sulfidation_rate,iter)
+subroutine musolve(sulfidation_rate,iter)
   use commondata
   use fields
   use laplacians
@@ -348,24 +340,11 @@ subroutine musolve(dt, sulfidation_rate,iter)
   !! Derivative of sulfur density with chemical potential
   real*8 :: drho_dmu_pht, drho_dmu_env, drho_dmu_met, drho_dmu_pyr, Chi
 
-  !! Timesteps
-  real*8, intent(in) :: dt  ! Actual timestep for evolution
-  real*8 :: dt_stable       ! Maximum stable forward-euler timestep
-
   real*8, intent(in) :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
 
   integer, dimension(psx,psy) :: interface_loc
 
   real*8, dimension(psx,psy,psz+2) :: newmu
-
-
-
-
-
-!! Verify that the timestep is stable for forward-Euler integration
-  dt_stable = (dpf*dpf)/(2*dmax1(D_S_met, D_S_pht, D_S_pyr,D_Fe_met, D_Fe_pht, D_Fe_pyr))
-  write(6,*) "The largest stable timestep for forward-Euler integration of the concentration field is ", dt_stable
-  write(6,*) "The timestep currently used is ", dt
 
   newmu = 0.0d0
 
