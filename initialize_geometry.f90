@@ -4,12 +4,17 @@ subroutine initialize_geometry()
   use laplacians
   use thermo_constants
   use kmc_data
-
   implicit none
 
   integer :: x,y,z
   integer :: pht_z_beg, pht_z_end
   integer :: rank_loop
+
+  !! Random number generation for initializing the orientation field
+  integer, dimension(:), allocatable :: seed
+  integer :: n
+
+
 
   pht_z_beg = 2*(psz_g/4)
   pht_z_end = 3*(psz_g/4)
@@ -21,38 +26,27 @@ subroutine initialize_geometry()
   min_mu = R*T*(0-50.0d0)
   max_mu = avg_mu_env+(R*T*3.005)
 
+
+!! Initialize global phase-fraction fields
   do x = 1,psx_g
      do y = 1,psy_g
 
         do z = 1,pht_z_beg
-           met_g(x,y,z) = 1.0d0      ! Initialize metal
-           pht_g(x,y,z) = 0.0d0
-           env_g(x,y,z) = 0.0d0
-           pyr_g(x,y,z) = 0.0d0
-           mu_g(x,y,z) = avg_mu_met
+           met_g(x,y,z) = 1.0d0; pht_g(x,y,z) = 0.0d0; pyr_g(x,y,z) = 0.0d0; env_g(x,y,z) = 0.0d0
         end do
 
         do z = pht_z_beg+1, pht_z_end
-           met_g(x,y,z) = 0.0d0
-           pht_g(x,y,z) = 1.0d0      ! Initialize pyrrhotite
-           env_g(x,y,z) = 0.0d0
-           pyr_g(x,y,z) = 0.0d0
-           mu_g(x,y,z) = avg_mu_met + (z-pht_z_beg)*10
+           met_g(x,y,z) = 0.0d0; pht_g(x,y,z) = 1.0d0; pyr_g(x,y,z) = 0.0d0; env_g(x,y,z) = 0.0d0
         end do
 
         do z = pht_z_end+1,psz_g
-           met_g(x,y,z) = 0.0d0
-           pht_g(x,y,z) = 0.0d0
-           env_g(x,y,z) = 1.0d0      ! Initialize environment
-           pyr_g(x,y,z) = 0.0d0
-           mu_g(x,y,z) = avg_mu_env
+           met_g(x,y,z) = 0.0d0; pht_g(x,y,z) = 0.0d0; pyr_g(x,y,z) = 0.0d0; env_g(x,y,z) = 1.0d0
         end do
 
         do z = -2,2
            met_g(x,y,pht_z_beg+z) = met_g(x,y,pht_z_beg-3)+((met_g(x,y,pht_z_beg+3)-met_g(x,y,pht_z_beg-3))*(0.2*(z+2)))
            pht_g(x,y,pht_z_beg+z) = pht_g(x,y,pht_z_beg-3)+((pht_g(x,y,pht_z_beg+3)-pht_g(x,y,pht_z_beg-3))*(0.2*(z+2)))
            env_g(x,y,pht_z_beg+z) = env_g(x,y,pht_z_beg-3)+((env_g(x,y,pht_z_beg+3)-env_g(x,y,pht_z_beg-3))*(0.2*(z+2)))
-           mu_g(x,y,pht_z_beg+z) = mu_g(x,y,pht_z_beg-3)+((mu_g(x,y,pht_z_beg+3)-mu_g(x,y,pht_z_beg-3))*(0.2*(z+2)))
         end do
         
      end do
@@ -60,6 +54,46 @@ subroutine initialize_geometry()
 
 
 
-end subroutine initialize_geometry
+!! Initialize global chemical-potential field
+  do x = 1,psx_g
+     do y = 1,psy_g
 
+        do z = 1,pht_z_beg
+           mu_g(x,y,z) = avg_mu_met
+        end do
+
+        do z = pht_z_beg+1, pht_z_end
+           mu_g(x,y,z) = avg_mu_met + (z-pht_z_beg)*10
+        end do
+
+        do z = pht_z_end+1,psz_g
+           mu_g(x,y,z) = avg_mu_env
+        end do
+
+        do z = -2,2
+           mu_g(x,y,pht_z_beg+z) = mu_g(x,y,pht_z_beg-3)+((mu_g(x,y,pht_z_beg+3)-mu_g(x,y,pht_z_beg-3))*(0.2*(z+2)))
+        end do
+        
+     end do
+  end do
+
+
+!! Initialize global pyrite orientation field
+
+!! Initialize the random seed from /dev/random
+  call random_seed(size=n)
+  allocate(seed(n))
+
+  open(89,file='/dev/urandom',access='stream',form='unformatted')
+  read(89) seed
+  close(89)
+  call random_seed(put=seed)
+
+
+!! Populate the global orientation field with random numbers
+  call random_number(opyr_g)
+
+
+
+end subroutine initialize_geometry
 
