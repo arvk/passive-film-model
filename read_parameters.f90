@@ -37,8 +37,6 @@ subroutine read_parameters()
   ksx_g = psx_g*kg_scale ; ksy_g = psy_g*kg_scale
   ksx = ksx_g ; ksy = ksy_g/procs
 
-write(6,*) 'KMCSIZE = ', ksx,ksy
-
   !! What is the temperature of the simulation box?
   call system("cat param.in | grep ^TEMP | sed 's/TEMP//g'| sed 's/=//g' > .temp.readin")
   open(unit = 7102, file = ".temp.readin", status = 'old');   read(7102,*,IOSTAT=error_temp) T ; close(7102)
@@ -85,7 +83,9 @@ write(6,*) 'KMCSIZE = ', ksx,ksy
 
   if (nomc .le. 0) then
      nomc = 1000000
-     write(6,*) "WARNING: Error in reading SIMLEN. Simulation will run for 10^6 steps."   
+     write(6,*) "---------------------------------------------------------------------"
+     write(6,*) "WARNING: Error in reading SIMLEN. Simulation will run for 10^6 steps."
+     write(6,*) "---------------------------------------------------------------------"   
   end if
 
 
