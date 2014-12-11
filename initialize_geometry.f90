@@ -12,8 +12,8 @@ subroutine initialize_geometry()
 
   !! Random number generation for initializing the orientation field
   integer, dimension(:), allocatable :: seed
-  integer :: n
-
+  integer :: n,istat
+  integer, dimension(8) :: datetime
 
 
   pht_z_beg = 2*(psz_g/4)
@@ -84,11 +84,18 @@ subroutine initialize_geometry()
   call random_seed(size=n)
   allocate(seed(n))
 
-  open(89,file='/dev/urandom',access='stream',form='unformatted')
-  read(89) seed
-  close(89)
-  call random_seed(put=seed)
+  call random_seed(get=seed)
+  
+  open(89, file="/dev/urandom", access="stream", form="unformatted", action="read", status="old", iostat=istat)
+  if (istat == 0) then
+     read(89) seed
+     close(89)
+  else
+     call date_and_time(values=datetime)
+     seed(n) = datetime(8); seed(1) = datetime(8)*datetime(7)*datetime(6)
+  end if
 
+  call random_seed(put=seed)
 
 !! Populate the global orientation field with random numbers
   call random_number(opyr_g)
