@@ -10,60 +10,77 @@ subroutine read_geometry
   integer :: x, y, z   ! Loop variables
   character*1 :: hash
 
-  open (unit=101, file="PHT.out", status="old")
+!! Read phase-fraction fields; Units == 1XX
+
+  open (unit=101, file="MET.out", status="old")
   read(101,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(101,*)  pht_g(x,y,z)
+           read(101,*)  met_g(x,y,z)
         end do
      end do
   end do
   close(101)  
 
-  open (unit=102, file="ENV.out", status="old")
+  open (unit=102, file="PHT.out", status="old")
   read(102,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(102,*)  env_g(x,y,z)
+           read(102,*)  pht_g(x,y,z)
         end do
      end do
   end do
   close(102)  
 
-  open (unit=103, file="MET.out", status="old")
+  open (unit=103, file="PYR.out", status="old")
   read(103,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g
+  do x = 1,psx_g 
      do y = 1,psy_g
         do z = 1,psz_g
-           read(103,*)  met_g(x,y,z)
+           read(103,*)  pyr_g(x,y,z)
         end do
      end do
   end do
   close(103)  
 
-  open (unit=105, file="MUS.out", status="old")
-  read(105,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  open (unit=104, file="ENV.out", status="old")
+  read(104,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(105,*)  mu_g(x,y,z)
+           read(104,*)  env_g(x,y,z)
         end do
      end do
   end do
-  close(105)  
+  close(104)  
 
-  open (unit=108, file="PYR.out", status="old")
-  read(108,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
+!! Read chemical-potential field; Units == 2XX
+
+  open (unit=200, file="MUS.out", status="old")
+  read(200,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g 
      do y = 1,psy_g
         do z = 1,psz_g
-           read(108,*)  pyr_g(x,y,z)
+           read(200,*)  mu_g(x,y,z)
         end do
      end do
   end do
-  close(108)  
+  close(200)  
+
+!! Read orientation field; Units == 3XX
+
+  open (unit=303, file="OPYR.out", status="old")
+  read(303,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
+  do x = 1,psx_g 
+     do y = 1,psy_g
+        do z = 1,psz_g
+           read(303,*)  opyr_g(x,y,z)
+        end do
+     end do
+  end do
+  close(303)  
 
   avg_mu_met = mus_met_pht_eqb + (R*T*0.1d0)
   avg_mu_env = (R*T*(0.0d0-0.995d0))
