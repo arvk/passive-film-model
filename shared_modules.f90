@@ -10,18 +10,14 @@ module fields
   integer :: psx,psy,psz       ! Number of PF gridpoints in 3 directions
 
   !! Define local phase fields
-  real*8, dimension(:,:,:), allocatable :: pht ! PF grid for pyrrhotite
-  real*8, dimension(:,:,:), allocatable :: env ! PF grid for environment (liquid or gas)
-  real*8, dimension(:,:,:), allocatable :: met ! PF grid for metal
-  real*8, dimension(:,:,:), allocatable :: pyr ! PF grid for pyrite
-  real*8, dimension(:,:,:), allocatable :: mu  ! mu_S grid
+  real*8, dimension(:,:,:), allocatable :: met,pht,pyr,env ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
+  real*8, dimension(:,:,:), allocatable :: mu  ! Local mu_S grid
+  real*8, dimension(:,:,:), allocatable :: opyr  ! Local orientation field for pyrite
 
   !! Define global phase fields
-  real*8, dimension(:,:,:), allocatable :: met_g 
-  real*8, dimension(:,:,:), allocatable :: pht_g 
-  real*8, dimension(:,:,:), allocatable :: env_g 
-  real*8, dimension(:,:,:), allocatable :: pyr_g 
-  real*8, dimension(:,:,:), allocatable :: mu_g 
+  real*8, dimension(:,:,:), allocatable :: met_g, pht_g, pyr_g, env_g ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
+  real*8, dimension(:,:,:), allocatable :: mu_g ! Local mu_S grid
+  real*8, dimension(:,:,:), allocatable :: opyr_g  ! Global orientation field for pyrite
 
   real*8 :: avg_mu_pht, avg_mu_env, avg_mu_met, avg_mu_pyr
 
@@ -29,15 +25,11 @@ module fields
   real*8 :: dt          ! Timestep for PF evolution
 
 
-
   real*8, dimension(:,:,:), allocatable :: dpht_dt, denv_dt, dmet_dt, dpyr_dt, dmu_dt
-  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr, oldmu
-
-
+  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr
 
 
   !! Thermodynamic parameters
-
   real*8 :: sigma_pht_env= -1E-6
   real*8 :: sigma_env_pht= -1E-6
 
