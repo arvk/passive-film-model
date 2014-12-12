@@ -100,7 +100,7 @@ subroutine initialize_geometry()
 !! Populate the global orientation field with random numbers
   call random_number(opyr_g)
 
-
+  opyr_g = opyr_g * (3.14d0/4.0d0)
 
 end subroutine initialize_geometry
 
