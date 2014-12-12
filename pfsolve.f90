@@ -3,7 +3,6 @@ subroutine pfsolve(iter)
   use fields
   use laplacians
   use thermo_constants
-  use field_evolution
   implicit none
   include 'mpif.h'
 

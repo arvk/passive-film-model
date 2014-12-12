@@ -3,7 +3,6 @@ subroutine musolve(iter)
   use fields
   use laplacians
   use thermo_constants
-  use field_evolution
   use diffusion_constants
   implicit none
 

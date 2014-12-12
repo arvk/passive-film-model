@@ -3,7 +3,6 @@ subroutine allocate_matrices()
   use fields
   use laplacians
   use thermo_constants
-  use field_evolution
   use kmc_data
   implicit none
   include 'mpif.h'
