@@ -2,6 +2,7 @@ subroutine pfsolve(iter)
   use commondata
   use fields
   use laplacians
+  use gradients
   use thermo_constants
   implicit none
   include 'mpif.h'
@@ -23,6 +24,16 @@ subroutine pfsolve(iter)
   real*8 :: dF_denv_met, dF_denv_pht, dF_denv_pyr
   real*8 :: dF_dpyr_met, dF_dpyr_pht, dF_dpyr_env
 
+
+
+  real*8 :: sigma_pht_pyr
+  real*8 :: sigma_pyr_pht
+  real*8 :: sigma_met_pyr
+  real*8 :: sigma_pyr_met
+  real*8 :: sigma_env_pyr
+  real*8 :: sigma_pyr_env
+
+
   integer :: int_count
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -36,7 +47,7 @@ subroutine pfsolve(iter)
 
   !! Calculate laplacian of phase/composition fields
   call calc_lap_pf()
-
+  call calc_grad_pf()
 
   !################################################################
   !#######################--PF EVOLUTION--#########################
@@ -76,6 +87,15 @@ subroutine pfsolve(iter)
            !! Number of moles per m^3 = 41667
            f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
            w_pyr = f_pyr - (mu(x,y,z)*2*41667)
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
 
 
            dF_dpht_met = (sigma_pht_met*((pht(x,y,z)*del2met(x,y,z))-(met(x,y,z)*del2pht(x,y,z)))) + &

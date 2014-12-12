@@ -37,17 +37,17 @@ module fields
   real*8 :: sigma_pht_met= -1E-6
   real*8 :: sigma_met_pht= -1E-6
 
-  real*8 :: sigma_pht_pyr= -2.5E-8
-  real*8 :: sigma_pyr_pht= -2.5E-8
+  real*8 :: sigma_pht_pyr_0 = -2.5E-8
+  real*8 :: sigma_pyr_pht_0 = -2.5E-8
 
   real*8 :: sigma_met_env= -1E-5
   real*8 :: sigma_env_met= -1E-5
 
-  real*8 :: sigma_met_pyr= -1E-6
-  real*8 :: sigma_pyr_met= -1E-6
+  real*8 :: sigma_met_pyr_0 = -1E-6
+  real*8 :: sigma_pyr_met_0 = -1E-6
 
-  real*8 :: sigma_env_pyr= -2.5E-8
-  real*8 :: sigma_pyr_env= -2.5E-8
+  real*8 :: sigma_env_pyr_0 = -2.5E-8
+  real*8 :: sigma_pyr_env_0 = -2.5E-8
 
 
 
@@ -201,6 +201,18 @@ module diffusion_constants
   real*8 :: D_Fe_met, D_Fe_env, D_Fe_pht, D_Fe_pyr
 
 end module diffusion_constants
+
+
+!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
+
+
+module gradients
+  implicit none
+  save
+
+  real*8, dimension(:,:,:), allocatable :: delypyr,delzpyr
+
+end module gradients
 
 
 !=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
