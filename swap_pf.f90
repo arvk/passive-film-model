@@ -1,4 +1,4 @@
-subroutine swap_pf()
+subroutine swap_pf
   use commondata
   use fields
   implicit none
@@ -6,73 +6,59 @@ subroutine swap_pf()
 
   integer :: x, y   ! Loop variables
   integer :: ierr
-  integer :: stat1(MPI_STATUS_SIZE),stat2(MPI_STATUS_SIZE),stat3(MPI_STATUS_SIZE),stat4(MPI_STATUS_SIZE),stat5(MPI_STATUS_SIZE)
-  integer :: stat6(MPI_STATUS_SIZE),stat7(MPI_STATUS_SIZE),stat8(MPI_STATUS_SIZE),stat9(MPI_STATUS_SIZE),stat10(MPI_STATUS_SIZE)
-  integer :: stat11(MPI_STATUS_SIZE),stat12(MPI_STATUS_SIZE),stat13(MPI_STATUS_SIZE),stat14(MPI_STATUS_SIZE),stat15(MPI_STATUS_SIZE)
-  integer :: stat16(MPI_STATUS_SIZE),stat17(MPI_STATUS_SIZE),stat18(MPI_STATUS_SIZE),stat19(MPI_STATUS_SIZE),stat20(MPI_STATUS_SIZE)
-  integer :: stat21(MPI_STATUS_SIZE),stat22(MPI_STATUS_SIZE),stat23(MPI_STATUS_SIZE),stat24(MPI_STATUS_SIZE)
-  integer :: req1,req2,req3,req4,req5,req6,req7,req8,req9,req10
-  integer :: req11,req12,req13,req14,req15,req16,req17,req18,req19,req20,req21,req22,req23,req24
+  integer :: stat(MPI_STATUS_SIZE)
+
+  !! Triple number codes for MPI request variables
+  !! a) First number denotes field: 1 - Met, 2 - Pht, 3 - Pyr, 4 - Env
+  !! b) Second number denotes sending/receiving: 1 - Sending, 2 - Receiving
+  !! c) Third number denotes target: 0 - Lower rank, 1 - Higher rank (Rank 0 is assumed to be higher when data is transferred to it from rank N-1)
+  integer :: q110, q111, q120, q121
+  integer :: q210, q211, q220, q221
+  integer :: q310, q311, q320, q321
+  integer :: q410, q411, q420, q421
+
+  !! Double number codes for MPI tags
+  !! a) First number denotes field: 1 - Met, 2 - Pht, 3 - Pyr, 4 - Env
+  !! b) Second number denotes sending/receiving and destination combo: 0 = Sending to higher or receiving from lower. 1 = Sending to lower rank or receiving from higher rank
 
   if ((rank.gt.0).and.(rank.lt.procs-1)) then
-     call mpi_isend(met(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,1,MPI_COMM_WORLD,req1,ierr)
-     call mpi_isend(pht(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,3,MPI_COMM_WORLD,req3,ierr)
-     call mpi_isend(env(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,5,MPI_COMM_WORLD,req5,ierr)
-     call mpi_isend(mu(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,7,MPI_COMM_WORLD,req7,ierr)
-     call mpi_isend(pyr(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,11,MPI_COMM_WORLD,req21,ierr)
 
-     call mpi_isend(met(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,2,MPI_COMM_WORLD,req2,ierr)
-     call mpi_isend(pht(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,4,MPI_COMM_WORLD,req4,ierr)
-     call mpi_isend(env(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,6,MPI_COMM_WORLD,req6,ierr)
-     call mpi_isend(mu(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,8,MPI_COMM_WORLD,req8,ierr)
-     call mpi_isend(pyr(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,12,MPI_COMM_WORLD,req22,ierr)
+     call mpi_isend(met(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,10,MPI_COMM_WORLD,q111,ierr)
+     call mpi_isend(pht(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,20,MPI_COMM_WORLD,q211,ierr)
+     call mpi_isend(pyr(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,30,MPI_COMM_WORLD,q311,ierr)
+     call mpi_isend(env(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,40,MPI_COMM_WORLD,q411,ierr)
 
-     call mpi_irecv(met(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,1,MPI_COMM_WORLD,req11,ierr)
-     call mpi_irecv(pht(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,3,MPI_COMM_WORLD,req13,ierr)
-     call mpi_irecv(env(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,5,MPI_COMM_WORLD,req15,ierr)
-     call mpi_irecv(mu(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,7,MPI_COMM_WORLD,req17,ierr)
-     call mpi_irecv(pyr(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,11,MPI_COMM_WORLD,req23,ierr)
+     call mpi_isend(met(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,11,MPI_COMM_WORLD,q110,ierr)
+     call mpi_isend(pht(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,21,MPI_COMM_WORLD,q210,ierr)
+     call mpi_isend(pyr(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,31,MPI_COMM_WORLD,q310,ierr)
+     call mpi_isend(env(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,41,MPI_COMM_WORLD,q410,ierr)
 
-     call mpi_irecv(met(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,2,MPI_COMM_WORLD,req12,ierr)
-     call mpi_irecv(pht(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,4,MPI_COMM_WORLD,req14,ierr)
-     call mpi_irecv(env(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,6,MPI_COMM_WORLD,req16,ierr)
-     call mpi_irecv(mu(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,8,MPI_COMM_WORLD,req18,ierr)
-     call mpi_irecv(pyr(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,12,MPI_COMM_WORLD,req24,ierr)
+     call mpi_irecv(met(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,10,MPI_COMM_WORLD,q120,ierr)
+     call mpi_irecv(pht(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,20,MPI_COMM_WORLD,q220,ierr)
+     call mpi_irecv(pyr(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,30,MPI_COMM_WORLD,q320,ierr)
+     call mpi_irecv(env(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,40,MPI_COMM_WORLD,q420,ierr)
 
-     call mpi_wait(req1,stat1,ierr)
-     call mpi_wait(req2,stat2,ierr)
-     call mpi_wait(req3,stat3,ierr)
-     call mpi_wait(req4,stat4,ierr)
-     call mpi_wait(req5,stat5,ierr)
-     call mpi_wait(req6,stat6,ierr)
-     call mpi_wait(req7,stat7,ierr)
-     call mpi_wait(req8,stat8,ierr)
-     call mpi_wait(req11,stat11,ierr)
-     call mpi_wait(req12,stat12,ierr)
-     call mpi_wait(req13,stat13,ierr)
-     call mpi_wait(req14,stat14,ierr)
-     call mpi_wait(req15,stat15,ierr)
-     call mpi_wait(req16,stat16,ierr)
-     call mpi_wait(req17,stat17,ierr)
-     call mpi_wait(req18,stat18,ierr)
-     call mpi_wait(req21,stat21,ierr)
-     call mpi_wait(req22,stat22,ierr)
-     call mpi_wait(req23,stat23,ierr)
-     call mpi_wait(req24,stat24,ierr)
+     call mpi_irecv(met(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,11,MPI_COMM_WORLD,q121,ierr)
+     call mpi_irecv(pht(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,21,MPI_COMM_WORLD,q221,ierr)
+     call mpi_irecv(pyr(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,31,MPI_COMM_WORLD,q321,ierr)
+     call mpi_irecv(env(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,41,MPI_COMM_WORLD,q421,ierr)
+
+     call mpi_wait(q111,stat,ierr); call mpi_wait(q211,stat,ierr); call mpi_wait(q311,stat,ierr); call mpi_wait(q411,stat,ierr) 
+     call mpi_wait(q110,stat,ierr); call mpi_wait(q210,stat,ierr); call mpi_wait(q310,stat,ierr); call mpi_wait(q410,stat,ierr) 
+     call mpi_wait(q120,stat,ierr); call mpi_wait(q220,stat,ierr); call mpi_wait(q320,stat,ierr); call mpi_wait(q420,stat,ierr) 
+     call mpi_wait(q121,stat,ierr); call mpi_wait(q221,stat,ierr); call mpi_wait(q321,stat,ierr); call mpi_wait(q421,stat,ierr) 
 
   elseif (rank.eq.0) then
 
-     call mpi_irecv(met(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,2,MPI_COMM_WORLD,req12,ierr)
-     call mpi_irecv(pht(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,4,MPI_COMM_WORLD,req14,ierr)
-     call mpi_irecv(env(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,6,MPI_COMM_WORLD,req16,ierr)
-     call mpi_irecv(mu(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,8,MPI_COMM_WORLD,req18,ierr)
-     call mpi_irecv(pyr(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,12,MPI_COMM_WORLD,req24,ierr)
+     call mpi_isend(met(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,10,MPI_COMM_WORLD,q111,ierr)
+     call mpi_isend(pht(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,20,MPI_COMM_WORLD,q211,ierr)
+     call mpi_isend(pyr(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,30,MPI_COMM_WORLD,q311,ierr)
+     call mpi_isend(env(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,40,MPI_COMM_WORLD,q411,ierr)
 
-     call mpi_isend(met(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,1,MPI_COMM_WORLD,req1,ierr)
-     call mpi_isend(pht(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,3,MPI_COMM_WORLD,req3,ierr)
-     call mpi_isend(env(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,5,MPI_COMM_WORLD,req5,ierr)
-     call mpi_isend(mu(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,7,MPI_COMM_WORLD,req7,ierr)
-     call mpi_isend(pyr(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,11,MPI_COMM_WORLD,req21,ierr)
+     call mpi_irecv(met(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,11,MPI_COMM_WORLD,q121,ierr)
+     call mpi_irecv(pht(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,21,MPI_COMM_WORLD,q221,ierr)
+     call mpi_irecv(pyr(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,31,MPI_COMM_WORLD,q321,ierr)
+     call mpi_irecv(env(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,41,MPI_COMM_WORLD,q421,ierr)
 
      do x = 1,psx
         do y = 1,psy
@@ -80,35 +66,23 @@ subroutine swap_pf()
            pht(x,y,1) = pht(x,y,2)
            env(x,y,1) = env(x,y,2)
            pyr(x,y,1) = pyr(x,y,2)
-           mu(x,y,1) = mu(x,y,2)
         end do
      end do
 
-     call mpi_wait(req1,stat1,ierr)
-     call mpi_wait(req12,stat12,ierr)
-     call mpi_wait(req3,stat3,ierr)
-     call mpi_wait(req14,stat14,ierr)
-     call mpi_wait(req5,stat5,ierr)
-     call mpi_wait(req16,stat16,ierr)
-     call mpi_wait(req7,stat7,ierr)
-     call mpi_wait(req18,stat18,ierr)
-     call mpi_wait(req21,stat21,ierr)
-     call mpi_wait(req24,stat24,ierr)
-
+     call mpi_wait(q111,stat,ierr); call mpi_wait(q211,stat,ierr); call mpi_wait(q311,stat,ierr); call mpi_wait(q411,stat,ierr) 
+     call mpi_wait(q121,stat,ierr); call mpi_wait(q221,stat,ierr); call mpi_wait(q321,stat,ierr); call mpi_wait(q421,stat,ierr) 
 
   else
 
-     call mpi_irecv(met(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,1,MPI_COMM_WORLD,req11,ierr)
-     call mpi_irecv(pht(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,3,MPI_COMM_WORLD,req13,ierr)
-     call mpi_irecv(env(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,5,MPI_COMM_WORLD,req15,ierr)
-     call mpi_irecv(mu(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,7,MPI_COMM_WORLD,req17,ierr)
-     call mpi_irecv(pyr(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,11,MPI_COMM_WORLD,req23,ierr)
+     call mpi_isend(met(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,11,MPI_COMM_WORLD,q110,ierr)
+     call mpi_isend(pht(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,21,MPI_COMM_WORLD,q210,ierr)
+     call mpi_isend(pyr(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,31,MPI_COMM_WORLD,q310,ierr)
+     call mpi_isend(env(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,41,MPI_COMM_WORLD,q410,ierr)
 
-     call mpi_isend(met(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,2,MPI_COMM_WORLD,req2,ierr)
-     call mpi_isend(pht(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,4,MPI_COMM_WORLD,req4,ierr)
-     call mpi_isend(env(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,6,MPI_COMM_WORLD,req6,ierr)
-     call mpi_isend(mu(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,8,MPI_COMM_WORLD,req8,ierr)
-     call mpi_isend(pyr(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,12,MPI_COMM_WORLD,req22,ierr)
+     call mpi_irecv(met(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,10,MPI_COMM_WORLD,q120,ierr)
+     call mpi_irecv(pht(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,20,MPI_COMM_WORLD,q220,ierr)
+     call mpi_irecv(pyr(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,30,MPI_COMM_WORLD,q320,ierr)
+     call mpi_irecv(env(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,40,MPI_COMM_WORLD,q420,ierr)
 
      do x = 1,psx
         do y = 1,psy
@@ -116,20 +90,11 @@ subroutine swap_pf()
            pht(x,y,psz+2) = pht(x,y,psz+1)
            env(x,y,psz+2) = env(x,y,psz+1)
            pyr(x,y,psz+2) = pyr(x,y,psz+1)
-           mu(x,y,psz+2) = mu(x,y,psz+1)
         end do
      end do
 
-     call mpi_wait(req11,stat11,ierr)
-     call mpi_wait(req2,stat2,ierr)
-     call mpi_wait(req13,stat13,ierr)
-     call mpi_wait(req4,stat4,ierr)
-     call mpi_wait(req15,stat15,ierr)
-     call mpi_wait(req6,stat6,ierr)
-     call mpi_wait(req17,stat17,ierr)
-     call mpi_wait(req8,stat8,ierr)
-     call mpi_wait(req23,stat23,ierr)
-     call mpi_wait(req22,stat22,ierr)
+     call mpi_wait(q110,stat,ierr); call mpi_wait(q210,stat,ierr); call mpi_wait(q310,stat,ierr); call mpi_wait(q410,stat,ierr) 
+     call mpi_wait(q120,stat,ierr); call mpi_wait(q220,stat,ierr); call mpi_wait(q320,stat,ierr); call mpi_wait(q420,stat,ierr) 
 
   end if
 
