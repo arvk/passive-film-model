@@ -88,6 +88,7 @@ program passive_film_model
 !!!! Couple KMC surface to PF
 
         call gather_pf()
+        call gather_mu()
         call gather_kmc()
 
         if (isroot) then           
@@ -102,6 +103,7 @@ program passive_film_model
      if (mod(iter,(nomc/noimg)-1).eq.0) then
 
         call gather_pf()
+        call gather_mu()
 
         if(isroot)then
            call write_fields(iter)
