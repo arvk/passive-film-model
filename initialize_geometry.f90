@@ -63,7 +63,7 @@ subroutine initialize_geometry()
         end do
 
         do z = pht_z_beg+1, pht_z_end
-           mu_g(x,y,z) = avg_mu_met + (z-pht_z_beg)*10
+           mu_g(x,y,z) = avg_mu_met + (z-pht_z_beg)*150
         end do
 
         do z = pht_z_end+1,psz_g

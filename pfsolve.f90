@@ -255,14 +255,13 @@ subroutine pfsolve(iter)
         do z = psz+1,2,-1
            if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
               int_count = int_count + 1
-              sulfidation_rate = sulfidation_rate + 0.04356E-9*(exp(avg_mu_env/(R*T)) - exp(-2.3025/(R*T)))  !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
+              sulfidation_rate = sulfidation_rate + 0.04356E-9*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
            end if
         end do
      end do
   end do
 
   sulfidation_rate = max((sulfidation_rate/int_count) + 0.01372E-9,0.0d0)
-
 
   !###########################################################
   !##################--UPDATE ALL FIELDS--####################
