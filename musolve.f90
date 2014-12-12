@@ -17,8 +17,6 @@ subroutine musolve(iter)
   !! Derivative of sulfur density with chemical potential
   real*8 :: drho_dmu_pht, drho_dmu_env, drho_dmu_met, drho_dmu_pyr, Chi
 
-!  real*8, intent(in) :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
-
   integer, dimension(psx,psy) :: interface_loc
 
   real*8, dimension(psx,psy,psz+2) :: newmu
@@ -99,26 +97,15 @@ subroutine musolve(iter)
 
 
   !! Normalize chemical potential in bulk phases
-  ! do x = 1,psx
-  !    do y = 1,psy
-  !       do z = 2,psz+1
-  !          if (env(x,y,z).gt.0.97) then
-  !             newmu(x,y,z) = avg_mu_env
-  !          end if
-  !       end do
-  !    end do
-  ! end do
-
-
-  ! do x = 1,psx
-  !    do y = 1,psy
-  !       do z = 2,psz+1
-  !          if (env(x,y,z).gt.0.97) then
-  !             newph(x,y,z) = pH_in
-  !          end if
-  !       end do
-  !    end do
-  ! end do
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+           if (env(x,y,z).gt.0.97) then
+              newmu(x,y,z) = avg_mu_env
+           end if
+        end do
+     end do
+  end do
 
 
   !! Impose boundary counditions on the composition field (sulfidation rate)
@@ -135,7 +122,7 @@ subroutine musolve(iter)
            do z = psz+1,2,-1
               if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
                  interface_loc(x,y) = z
-                 newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt*20)/(dpf))
+                 newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
                  newmu(x,y,interface_loc(x,y)) = min(newmu(x,y,interface_loc(x,y)),max_mu)
                  newmu(x,y,interface_loc(x,y)+1) = newmu(x,y,interface_loc(x,y)-1)
                  exit
