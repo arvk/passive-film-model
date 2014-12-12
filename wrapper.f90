@@ -89,6 +89,7 @@ program passive_film_model
 
         call gather_pf()
         call gather_mu()
+        call gather_opyr()
         call gather_kmc()
 
         if (isroot) then           
@@ -104,6 +105,7 @@ program passive_film_model
 
         call gather_pf()
         call gather_mu()
+        call gather_opyr()
 
         if(isroot)then
            call write_fields(iter)
