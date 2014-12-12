@@ -8,7 +8,6 @@ subroutine pfsolve(iter)
   include 'mpif.h'
 
   integer :: x, y, z   ! Loop variables
-  real*8 :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
   real*8 :: correct_rounding     ! Error correction variable used while updating fields
   integer :: ierr,status(MPI_STATUS_SIZE)
   integer, intent(in) :: iter
@@ -37,7 +36,7 @@ subroutine pfsolve(iter)
      end if
 
   !! Calculate laplacian of phase/composition fields
-  call calc_lap()
+  call calc_lap_pf()
 
 
   !################################################################
@@ -245,9 +244,6 @@ subroutine pfsolve(iter)
 
   sulfidation_rate = max((sulfidation_rate/int_count) + 0.01372E-9,0.0d0)
 
-  call swap_mu()
-  call calc_lap()
-  call musolve(sulfidation_rate,iter)
 
   !###########################################################
   !##################--UPDATE ALL FIELDS--####################

@@ -1,4 +1,4 @@
-subroutine musolve(sulfidation_rate,iter)
+subroutine musolve(iter)
   use commondata
   use fields
   use laplacians
@@ -18,13 +18,20 @@ subroutine musolve(sulfidation_rate,iter)
   !! Derivative of sulfur density with chemical potential
   real*8 :: drho_dmu_pht, drho_dmu_env, drho_dmu_met, drho_dmu_pyr, Chi
 
-  real*8, intent(in) :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
+!  real*8, intent(in) :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
 
   integer, dimension(psx,psy) :: interface_loc
 
   real*8, dimension(psx,psy,psz+2) :: newmu
 
   newmu = 0.0d0
+
+
+  if (mod(iter,swap_freq_pf).eq.1) then
+     call swap_mu()
+  end if
+  call calc_lap_mu()
+
 
   do x = 1,psx
      do y = 1,psy

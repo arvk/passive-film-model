@@ -20,6 +20,7 @@ module fields
   real*8, dimension(:,:,:), allocatable :: opyr_g  ! Global orientation field for pyrite
 
   real*8 :: avg_mu_pht, avg_mu_env, avg_mu_met, avg_mu_pyr
+  real*8 :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
 
   real*8 :: dpf = 5E-9  ! Phase-field grid size
   real*8 :: dt          ! Timestep for PF evolution
