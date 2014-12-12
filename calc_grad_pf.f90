@@ -9,6 +9,7 @@ subroutine calc_grad_pf
 
 !!!! Initialize all variables to zero
   delypyr = 0.0d0 
+  delzpyr = 0.0d0 
 
 !!!!! Calculating laplacian in the bulk
 
