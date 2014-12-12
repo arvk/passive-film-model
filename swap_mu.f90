@@ -1,4 +1,4 @@
-subroutine swap_mu()
+subroutine swap_mu
   use commondata
   use fields
   implicit none
@@ -6,28 +6,30 @@ subroutine swap_mu()
 
   integer :: x, y   ! Loop variables
   integer :: ierr
-  integer :: stat1(MPI_STATUS_SIZE),stat2(MPI_STATUS_SIZE),stat3(MPI_STATUS_SIZE),stat4(MPI_STATUS_SIZE),stat5(MPI_STATUS_SIZE)
-  integer :: stat6(MPI_STATUS_SIZE),stat7(MPI_STATUS_SIZE),stat8(MPI_STATUS_SIZE),stat9(MPI_STATUS_SIZE),stat10(MPI_STATUS_SIZE)
-  integer :: stat11(MPI_STATUS_SIZE),stat12(MPI_STATUS_SIZE),stat13(MPI_STATUS_SIZE),stat14(MPI_STATUS_SIZE),stat15(MPI_STATUS_SIZE)
-  integer :: stat16(MPI_STATUS_SIZE),stat17(MPI_STATUS_SIZE),stat18(MPI_STATUS_SIZE),stat19(MPI_STATUS_SIZE),stat20(MPI_STATUS_SIZE)
-  integer :: req1,req2,req3,req4,req5,req6,req7,req8,req9,req10
-  integer :: req11,req12,req13,req14,req15,req16,req17,req18,req19,req20
+  integer :: stat(MPI_STATUS_SIZE)
+
+  !! Triple number codes for MPI request variables
+  !! a) First number denotes field: 1 - Mu
+  !! b) Second number denotes sending/receiving: 1 - Sending, 2 - Receiving
+  !! c) Third number denotes target: 0 - Lower rank, 1 - Higher rank (Rank 0 is assumed to be higher when data is transferred to it from rank N-1)
+  integer :: q110, q111, q120, q121
+
+  !! Double number codes for MPI tags
+  !! a) First number denotes field: 1 - Mu
+  !! b) Second number denotes sending/receiving and destination combo: 0 = Sending to higher or receiving from lower. 1 = Sending to lower rank or receiving from higher rank
 
   if ((rank.gt.0).and.(rank.lt.procs-1)) then
-     call mpi_isend(mu(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,7,MPI_COMM_WORLD,req7,ierr)
-     call mpi_isend(mu(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,8,MPI_COMM_WORLD,req8,ierr)
-     call mpi_irecv(mu(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,7,MPI_COMM_WORLD,req17,ierr)
-     call mpi_irecv(mu(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,8,MPI_COMM_WORLD,req18,ierr)
+     call mpi_isend(mu(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,10,MPI_COMM_WORLD,q111,ierr)
+     call mpi_isend(mu(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,11,MPI_COMM_WORLD,q110,ierr)
+     call mpi_irecv(mu(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,10,MPI_COMM_WORLD,q120,ierr)
+     call mpi_irecv(mu(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,11,MPI_COMM_WORLD,q121,ierr)
 
-     call mpi_wait(req7,stat1,ierr)
-     call mpi_wait(req8,stat1,ierr)
-     call mpi_wait(req17,stat1,ierr)
-     call mpi_wait(req18,stat1,ierr)
+     call mpi_wait(q111,stat,ierr); call mpi_wait(q121,stat,ierr); call mpi_wait(q110,stat,ierr); call mpi_wait(q120,stat,ierr)
 
   elseif (rank.eq.0) then
 
-     call mpi_irecv(mu(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,8,MPI_COMM_WORLD,req18,ierr)
-     call mpi_isend(mu(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,7,MPI_COMM_WORLD,req7,ierr)
+     call mpi_irecv(mu(1,1,psz+2),psx*psy,MPI_DOUBLE_PRECISION,rank+1,11,MPI_COMM_WORLD,q121,ierr)
+     call mpi_isend(mu(1,1,psz+1),psx*psy,MPI_DOUBLE_PRECISION,rank+1,10,MPI_COMM_WORLD,q111,ierr)
 
      do x = 1,psx
         do y = 1,psy
@@ -35,14 +37,12 @@ subroutine swap_mu()
         end do
      end do
 
-     call mpi_wait(req7,stat1,ierr)
-     call mpi_wait(req18,stat1,ierr)
+     call mpi_wait(q111,stat,ierr); call mpi_wait(q121,stat,ierr)
 
   else
 
-     call mpi_irecv(mu(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,7,MPI_COMM_WORLD,req17,ierr)
-     call mpi_isend(mu(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,8,MPI_COMM_WORLD,req8,ierr)
-
+     call mpi_irecv(mu(1,1,1),psx*psy,MPI_DOUBLE_PRECISION,rank-1,10,MPI_COMM_WORLD,q120,ierr)
+     call mpi_isend(mu(1,1,2),psx*psy,MPI_DOUBLE_PRECISION,rank-1,11,MPI_COMM_WORLD,q110,ierr)
 
      do x = 1,psx
         do y = 1,psy
@@ -50,8 +50,7 @@ subroutine swap_mu()
         end do
      end do
 
-     call mpi_wait(req17,stat1,ierr)
-     call mpi_wait(req8,stat1,ierr)
+     call mpi_wait(q110,stat,ierr); call mpi_wait(q120,stat,ierr)
 
   end if
 
