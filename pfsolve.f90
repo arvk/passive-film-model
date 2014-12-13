@@ -89,9 +89,9 @@ subroutine pfsolve(iter)
            w_pyr = f_pyr - (mu(x,y,z)*2*41667)
 
 
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
 
            sigma_met_pyr = sigma_pyr_met
            sigma_pht_pyr = sigma_pyr_pht
@@ -150,7 +150,6 @@ subroutine pfsolve(iter)
                 & (2*(pyr(x,y,z)+env(x,y,z))*(pyr(x,y,z)+env(x,y,z))*(w_pyr-w_env))
 
 
-
            !! Error correction        
            correct_rounding = 0.50d0*(dF_dpht_met - dF_dmet_pht)
            dF_dpht_met = correct_rounding ; dF_dmet_pht = 0.0d0 - correct_rounding
@@ -175,6 +174,7 @@ subroutine pfsolve(iter)
            denv_dt(x,y,z) = (M_env_met*dF_denv_met)+(M_env_pht*dF_denv_pht)+(M_env_pyr*dF_denv_pyr)
            dmet_dt(x,y,z) = (M_met_pht*dF_dmet_pht)+(M_met_env*dF_dmet_env)+(M_met_pyr*dF_dmet_pyr)
            dpyr_dt(x,y,z) = (M_pyr_pht*dF_dpyr_pht)+(M_pyr_env*dF_dpyr_env)+(M_pyr_met*dF_dpyr_met)
+!           dpyr_dt(x,y,z) = dpyr_dt(x,y,z) + (pyr(x,y,z)*((M_pyr_pht+M_pyr_pht+M_pyr_pht)*del_opyr(x,y,z-1)))
         end do
      end do
   end do
@@ -279,3 +279,4 @@ subroutine pfsolve(iter)
   end do
 
 end subroutine pfsolve
+

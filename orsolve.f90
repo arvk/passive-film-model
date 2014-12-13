@@ -6,17 +6,18 @@ subroutine orsolve(iter)
 
   integer :: x, y, z   ! Loop variables
   integer, intent(in) :: iter
+  integer :: ierr
 
   real*8, dimension(psx,psy,psz) :: M_opyr
-  real*8 :: M_opyr_max = 1E-9
-  real*8 :: M_opyr_min = 1E-14
+  real*8 :: M_opyr_max = 1E-6
+  real*8 :: M_opyr_min = 1E-8
 
   real*8, dimension(psx,psy,psz) :: D_opyr
   real*8, dimension(psx,psy,psz) :: del_opyr
-  real*8 :: D_opyr_max = 1E-8   !! Truncation for the orientation field
+  real*8 :: D_opyr_max = 1E-7   !! Truncation for the orientation field
 
   real*8 :: delx,dely,delz
-  real*8 :: epsilon = 1E-12
+  real*8 :: epsilon = 1E-8
 
   real*8 :: odiff
   integer :: wrap
@@ -49,7 +50,7 @@ subroutine orsolve(iter)
      do y = 1,psy
         do z = 1,psz
 
-           M_opyr(x,y,z) = M_opyr_min + (M_opyr_max-M_opyr_min)*pyr(x,y,z+1) !! Modify as necessary
+           M_opyr(x,y,z) = M_opyr_min + (M_opyr_max-M_opyr_min)*(1.0d0-pyr(x,y,z+1)) !! Modify as necessary
 
            delx = odiff(opyr(wrap(x+1,psx),y,z+1),opyr(wrap(x-1,psx),y,z+1))
            dely = odiff(opyr(x,wrap(y+1,psy),z+1),opyr(x,wrap(y-1,psy),z+1))
@@ -65,7 +66,7 @@ subroutine orsolve(iter)
   end do
 
 
-  approxsol = 1.0d0
+  approxsol = 0.0d0
 
   !! Calculate the RHS (B matrix in Ax=B)
   !! B = C_{i,j} + o_pyr/dt
@@ -98,14 +99,12 @@ subroutine orsolve(iter)
 
            orc = (orc2+orc4+orc6)-(orc1+orc3+orc5)
 
-
-           approxsol(linindex) = opyr(x,y,z+1)
-
            if (pyr(x,y,z+1).gt.0.1d0) then
               solve_for_theta = .TRUE.
               B(linindex) = (opyr(x,y,z+1)/dt) + orc
+              approxsol(linindex) = opyr(x,y,z+1)
            else
-              B(linindex) = 1E-1
+              B(linindex) = 0.0d0
            end if
 
         end do
@@ -172,7 +171,7 @@ subroutine orsolve(iter)
 
   if (solve_for_theta) then
 
-     call iccglu(A,psx*psy*psz,IA,JA,LU,B,approxsol,scratch1,scratch2,scratch3,1E-2,20,iterations,0,solver_info)
+     call iccglu(A,int(psx*psy*psz),IA,JA,LU,B,approxsol,scratch1,scratch2,scratch3,1E-2,50,iterations,0,solver_info)
 
      do z = 1,psz
         do y = 1,psy
@@ -181,7 +180,7 @@ subroutine orsolve(iter)
               if (pyr(x,y,z+1).gt.0.1d0) then
 
                  if (approxsol(linindex).eq.approxsol(linindex)) then
-                    opyr(x,y,z+1) = min(max(approxsol(linindex),3.14d0/4.0d0),0.0d0)
+                    opyr(x,y,z+1) = max(min(approxsol(linindex),3.14159265d0/4.0d0),0.0d0)
                  end if
 
               end if
