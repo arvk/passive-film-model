@@ -16,8 +16,8 @@ subroutine initialize_geometry()
   integer, dimension(8) :: datetime
 
 
-  pht_z_beg = 2*(psz_g/4)
-  pht_z_end = 3*(psz_g/4)
+  pht_z_beg = 9*(psz_g/16)
+  pht_z_end = 11*(psz_g/16)
 
   avg_mu_met = mus_met_pht_eqb + (R*T*0.1d0) 
   avg_mu_env = (R*T*(0.0d0-0.995d0))
