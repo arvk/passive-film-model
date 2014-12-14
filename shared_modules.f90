@@ -103,6 +103,7 @@ module commondata
 
   logical :: isroot
   integer :: rank, procs
+  integer, dimension(:), allocatable :: seed  !! Seed for PRNG
 
 
   character*1 :: isrestart     ! Is the calculation a restarted one?

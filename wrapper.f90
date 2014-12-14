@@ -43,6 +43,7 @@ program passive_film_model
   call thermo()
   call diffusivities()
   call estimate_timestep()
+  call seed_prng()
 
   !! Allocate all matrices -- All processors
   call allocate_matrices()

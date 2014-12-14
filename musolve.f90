@@ -21,6 +21,8 @@ subroutine musolve(iter)
 
   real*8, dimension(psx,psy,psz+2) :: newmu
 
+  real*8 :: noise
+
   newmu = 0.0d0
 
 
@@ -117,12 +119,14 @@ subroutine musolve(iter)
      rho_pht = 52275.0d0
      rho_met = 0.0015d0*140401       
 
+
      do x = 1,psx
         do y = 1,psy
            do z = psz+1,2,-1
               if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
                  interface_loc(x,y) = z
-                 newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+                 call random_number(noise)
+                 newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*2.0d0*noise*sulfidation_rate*dt)/(dpf))
                  newmu(x,y,interface_loc(x,y)) = min(newmu(x,y,interface_loc(x,y)),max_mu)
                  newmu(x,y,interface_loc(x,y)+1) = newmu(x,y,interface_loc(x,y)-1)
                  exit

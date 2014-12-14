@@ -10,12 +10,6 @@ subroutine initialize_geometry()
   integer :: pht_z_beg, pht_z_end
   integer :: rank_loop
 
-  !! Random number generation for initializing the orientation field
-  integer, dimension(:), allocatable :: seed
-  integer :: n,istat
-  integer, dimension(8) :: datetime
-
-
   pht_z_beg = 9*(psz_g/16)
   pht_z_end = 11*(psz_g/16)
 
@@ -79,23 +73,6 @@ subroutine initialize_geometry()
 
 
 !! Initialize global pyrite orientation field
-
-!! Initialize the random seed from /dev/random
-  call random_seed(size=n)
-  allocate(seed(n))
-
-  call random_seed(get=seed)
-  
-  open(89, file="/dev/urandom", access="stream", form="unformatted", action="read", status="old", iostat=istat)
-  if (istat == 0) then
-     read(89) seed
-     close(89)
-  else
-     call date_and_time(values=datetime)
-     seed(n) = datetime(8); seed(1) = datetime(8)*datetime(7)*datetime(6)
-  end if
-
-  call random_seed(put=seed)
 
 !! Populate the global orientation field with random numbers
   call random_number(opyr_g)

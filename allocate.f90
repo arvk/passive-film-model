@@ -9,6 +9,17 @@ subroutine allocate_matrices()
   include 'mpif.h'
 
 
+  integer :: n ! For seeding the PRNG
+
+
+
+!! ALLOCATE PRNG SEED
+!! ==================
+
+  call random_seed(size=n)
+  allocate(seed(n))
+
+
 !! ALLOCATE PF VARIABLES
 !! =====================
 
