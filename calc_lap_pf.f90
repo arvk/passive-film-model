@@ -92,13 +92,3 @@ wrap(y+1,psy),z-1)+met(wrap(x+1,psx),wrap(y-1,psy),z-1)+met(wrap(x-1,psx),wrap(y
   end do
 
 end subroutine calc_lap_pf
-
-
-
-
-integer function wrap(a,lim)
-  implicit none
-  integer, intent(in) :: a,lim
-  wrap = modulo(a-1,lim)+1
-  return
-end function wrap

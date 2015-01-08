@@ -44,12 +44,3 @@ subroutine calc_lap_mu
   end do
 
 end subroutine calc_lap_mu
-
-
-
-integer function wrap(a,lim)
-  implicit none
-  integer, intent(in) :: a,lim
-  wrap = modulo(a-1,lim)+1
-  return
-end function wrap

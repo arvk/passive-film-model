@@ -34,13 +34,3 @@ subroutine calc_grad_pf
   end do
 
 end subroutine calc_grad_pf
-
-
-
-
-integer function wrap(a,lim)
-  implicit none
-  integer, intent(in) :: a,lim
-  wrap = modulo(a-1,lim)+1
-  return
-end function wrap
