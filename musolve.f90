@@ -125,7 +125,9 @@ subroutine musolve(iter)
            do z = psz+1,2,-1
               if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
                  interface_loc(x,y) = z
+                 call random_seed(put=seed)
                  call random_number(noise)
+                 seed = seed + (int(noise*10.0d0)-5)
                  newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*2.0d0*noise*sulfidation_rate*dt)/(dpf))
                  newmu(x,y,interface_loc(x,y)) = min(newmu(x,y,interface_loc(x,y)),max_mu)
                  newmu(x,y,interface_loc(x,y)+1) = newmu(x,y,interface_loc(x,y)-1)
