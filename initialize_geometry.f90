@@ -75,9 +75,10 @@ subroutine initialize_geometry()
 !! Initialize global pyrite orientation field
 
 !! Populate the global orientation field with random numbers
+  call random_seed(put=seed)
   call random_number(opyr_g)
 
-  opyr_g = opyr_g * (3.14159265d0/4.0d0)
+  opyr_g = opyr_g * (3.14159265d0/2.0d0)
 
 end subroutine initialize_geometry
 
