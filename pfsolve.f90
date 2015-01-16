@@ -36,6 +36,11 @@ subroutine pfsolve(iter)
 
   integer :: int_count
 
+  real*8, dimension(psx,psy,psz+2) :: del_opyr
+  real*8 :: odiff
+  integer :: wrap
+  real*8 :: delx,dely,delz
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   !! Initialize field variables to 0
@@ -48,6 +53,24 @@ subroutine pfsolve(iter)
   !! Calculate laplacian of phase/composition fields
   call calc_lap_pf()
   call calc_grad_pf()
+
+
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+
+           delx = odiff(opyr(wrap(x+1,psx),y,z),opyr(wrap(x-1,psx),y,z))
+           dely = odiff(opyr(x,wrap(y+1,psy),z),opyr(x,wrap(y-1,psy),z))
+           delz = odiff(opyr(x,y,z+1),opyr(x,y,z-1))
+
+           del_opyr(x,y,z) = sqrt((delx*delx)+(dely*dely)+(delz*delz))/dpf
+
+        end do
+     end do
+  end do
+
+
 
   !################################################################
   !#######################--PF EVOLUTION--#########################
@@ -89,9 +112,9 @@ subroutine pfsolve(iter)
            w_pyr = f_pyr - (mu(x,y,z)*2*41667)
 
 
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-10)))-opyr(x,y,z)))
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
 
            sigma_met_pyr = sigma_pyr_met
            sigma_pht_pyr = sigma_pyr_pht
@@ -174,7 +197,7 @@ subroutine pfsolve(iter)
            denv_dt(x,y,z) = (M_env_met*dF_denv_met)+(M_env_pht*dF_denv_pht)+(M_env_pyr*dF_denv_pyr)
            dmet_dt(x,y,z) = (M_met_pht*dF_dmet_pht)+(M_met_env*dF_dmet_env)+(M_met_pyr*dF_dmet_pyr)
            dpyr_dt(x,y,z) = (M_pyr_pht*dF_dpyr_pht)+(M_pyr_env*dF_dpyr_env)+(M_pyr_met*dF_dpyr_met)
-!           dpyr_dt(x,y,z) = dpyr_dt(x,y,z) + (pyr(x,y,z)*((M_pyr_pht+M_pyr_pht+M_pyr_pht)*del_opyr(x,y,z-1)))
+           dpyr_dt(x,y,z) = dpyr_dt(x,y,z) - (25.0d0*pyr(x,y,z)*((M_pyr_pht+M_pyr_pht+M_pyr_pht)*del_opyr(x,y,z)))
         end do
      end do
   end do
