@@ -10,7 +10,7 @@ subroutine orsolve(iter)
 
   real*8, dimension(psx,psy,psz) :: M_opyr
   real*8 :: M_opyr_max = 1.5E-10
-  real*8 :: M_opyr_min = 1.5E-12
+  real*8 :: M_opyr_min = 1.5E-13
 
   real*8, dimension(psx,psy,psz) :: D_opyr
   real*8, dimension(psx,psy,psz) :: del_opyr
@@ -50,7 +50,7 @@ subroutine orsolve(iter)
      do y = 1,psy
         do z = 1,psz
 
-           M_opyr(x,y,z) = M_opyr_min/((pyr(x,y,z+1)+0.1d0)**2)
+           M_opyr(x,y,z) = min(M_opyr_min/((pyr(x,y,z+1)+0.01d0)**10),M_opyr_max)
 
            delx = odiff(opyr(wrap(x+1,psx),y,z+1),opyr(wrap(x-1,psx),y,z+1))
            dely = odiff(opyr(x,wrap(y+1,psy),z+1),opyr(x,wrap(y-1,psy),z+1))
