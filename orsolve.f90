@@ -174,7 +174,7 @@ subroutine orsolve(iter)
      end do
   end do
 
-  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+7
+  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+6
 
 
 
