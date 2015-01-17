@@ -2,7 +2,7 @@
 FC=mpif90
 
 # Define compiler flags
-CFLAG= -CB
+CFLAG= -CB -fp-model precise
 
 # Define optimization flags
 OFLAG= -O3 -xhost -ipo

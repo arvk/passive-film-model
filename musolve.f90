@@ -12,38 +12,68 @@ subroutine musolve(iter)
   real*8 :: asd ! Anti-Surface-Diffusion
 
   !! Diffusivities
-  real*8 :: D_inter_met, D_inter_env, D_inter_pht, D_inter_pyr, D
+  real*8 :: D_inter_met, D_inter_env, D_inter_pht, D_inter_pyr
+  real*8, dimension(psx,psy,psz+2) :: D
 
   !! Derivative of sulfur density with chemical potential
   real*8 :: drho_dmu_pht, drho_dmu_env, drho_dmu_met, drho_dmu_pyr, Chi
 
   integer, dimension(psx,psy) :: interface_loc
-
-  real*8, dimension(psx,psy,psz+2) :: newmu
-
   real*8 :: noise
 
-  newmu = 0.0d0
+  real*8, dimension(psx,psy,psz+2) :: newmu
+  integer :: wrap
 
+
+  ! A/B/JA matrices for implicit solver
+  real*8, dimension(psx*psy*psz) :: B
+  real*8, dimension(psx*psy*psz) :: approxsol
+  real*8, dimension(psx*psy*psz) :: scratch1,scratch2,scratch3
+
+  real*8, dimension(:), allocatable :: A, LU
+  integer, dimension(:), allocatable :: JA, IA
+
+  integer :: linindex, contindex
+  integer :: iterations, solver_info
+
+
+  ! Sorting for A/B/JA
+  logical :: is_sorted
+  integer :: rowindex, JAleft, JAright, JAswap
+  real*8 :: Aswap
+
+  newmu = 0.0d0
 
   if (mod(iter,swap_freq_pf).eq.1) then
      call swap_mu()
   end if
-  call calc_lap_mu()
 
+  open(unit = 55, file = '/dev/null')
+
+  D_inter_pht = D_Fe_pht
+  D_inter_met = D_Fe_met
+  D_inter_env = D_S_env
+  D_inter_pyr = D_inter_pht/10
 
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+1
+        do z = 1,psz+2
 
-           !! Calculate inter-diffusivities in each phase 
+           D(x,y,z) = ((pht(x,y,z)*D_inter_pht)+(env(x,y,z)*D_inter_env)+(met(x,y,z)*D_inter_met)+(pyr(x,y,z)*D_inter_pyr))
 
-           D_inter_pht = D_Fe_pht
-           D_inter_met = D_Fe_met
-           D_inter_env = D_S_env
-           D_inter_pyr = D_inter_pht/10
+        end do
+     end do
+  end do
 
-           D = ((pht(x,y,z)*D_inter_pht)+(env(x,y,z)*D_inter_env)+(met(x,y,z)*D_inter_met)+(pyr(x,y,z)*D_inter_pyr))
+
+  approxsol = 0.0d0
+
+
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            !! Calculate derivative of sulfur concentration with chemical potential
            drho_dmu_pht = 52275.0d0/(2*250896.0d0)
@@ -59,15 +89,160 @@ subroutine musolve(iter)
            drho_dmu_pyr = (2*41667.0d0)/(2*250896.0d0)
 
            !! Calculate chemical 'specific heat'
-           Chi = (pht(x,y,z)*drho_dmu_pht) + (met(x,y,z)*drho_dmu_met) + (env(x,y,z)*drho_dmu_env) + (pyr(x,y,z)*drho_dmu_pyr)
+           Chi = (pht(x,y,z+1)*drho_dmu_pht) + (met(x,y,z+1)*drho_dmu_met) + (env(x,y,z+1)*drho_dmu_env) + (pyr(x,y,z+1)*drho_dmu_pyr)
 
-           !! Apply chemical-potential-field evolution equation
-           dmu_dt(x,y,z) = (D*del2mu(x,y,z)) - &
-                &       (((dpht_dt(x,y,z)*rho_pht) + (dmet_dt(x,y,z)*rho_met) + (denv_dt(x,y,z)*rho_env) + (dpyr_dt(x,y,z)*rho_pyr))/Chi)
+           B(linindex) =  (mu(x,y,z+1)/dt) - (((dpht_dt(x,y,z+1)*rho_pht) + (dmet_dt(x,y,z+1)*rho_met) + (denv_dt(x,y,z+1)*rho_env) + (dpyr_dt(x,y,z+1)*rho_pyr))/Chi)
+
+           if (z.eq.1) then
+              B(linindex) = B(linindex) + ((0.5d0*(D(x,y,z+1)+D(x,y,z+1-1))/(dpf*dpf))*mu(x,y,z+1-1))
+           elseif (z.eq.psz) then
+              B(linindex) = B(linindex) + ((0.5d0*(D(x,y,z+1+1)+D(x,y,z+1))/(dpf*dpf))*mu(x,y,z+1+1))
+           end if
+
+           approxsol(linindex) = mu(x,y,z+1)
 
         end do
      end do
   end do
+
+
+
+
+
+
+
+
+
+  !! Calculate the LHS (A matrix in Ax=B)
+  allocate(A((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(LU((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(IA((psx*psy*psz)+1))
+
+
+  IA=0 ; JA=0 ; A=0
+  contindex = 0
+  linindex = 0
+
+
+
+
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+           IA(linindex) = contindex + 1
+
+           if (z .gt. 1) then
+              contindex = contindex + 1
+              A(contindex) = 0.0d0 - (0.5d0*(D(x,y,(z+1)-1)+D(x,y,z+1)))/(dpf*dpf)
+              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+           end if
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D(x,wrap(y-1,psy),z+1)+D(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D(wrap(x-1,psx),y,z+1)+D(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
+
+           contindex = contindex + 1
+           A(contindex) = D(x,y,(z+1)+1)+D(x,y,(z+1)-1)+&
+                &D(x,wrap(y+1,psy),z+1)+D(x,wrap(y-1,psy),z+1)+&
+                &D(wrap(x+1,psx),y,z+1)+D(wrap(x-1,psx),y,z+1)
+           A(contindex) = A(contindex) + 6*D(x,y,z+1)
+           A(contindex) = A(contindex)*0.5d0/(dpf*dpf)
+           A(contindex) = A(contindex) + (1.0d0/dt)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D(wrap(x+1,psx),y,z+1)+D(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx)
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D(x,wrap(y+1,psy),z+1)+D(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
+
+           if (z .lt. psz) then
+              contindex = contindex + 1
+              A(contindex) = 0.0d0 - (0.5d0*(D(x,y,(z+1)+1)+D(x,y,z+1)))/(dpf*dpf)
+              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+           end if
+
+
+        end do
+     end do
+  end do
+
+  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+6
+
+
+
+
+
+
+
+
+
+
+
+  do linindex = 1,psx*psy*psz
+     is_sorted = .FALSE.
+
+     do while (is_sorted .eq. .FALSE.)
+
+        do rowindex = IA(linindex),IA(linindex+1)-2
+
+           is_sorted = .TRUE.
+
+           JAleft = JA(rowindex)
+           JAright = JA(rowindex+1)
+
+           if (JAleft .gt. JAright) then
+
+              JAswap = JA(rowindex)
+              JA(rowindex) = JA(rowindex+1)
+              JA(rowindex+1) = JAswap
+
+              Aswap = A(rowindex)
+              A(rowindex) = A(rowindex+1)
+              A(rowindex+1) = Aswap
+
+              is_sorted = .FALSE.
+              exit
+           end if
+
+        end do
+
+
+     end do
+
+  end do
+
+
+  call iccglu(A,int(psx*psy*psz),IA,JA,LU,B,approxsol,scratch1,scratch2,scratch3,1E-15,200,iterations,0,solver_info)
+
+  write(55,*) "RANK", rank,iterations
+  
+
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+              if (approxsol(linindex).eq.approxsol(linindex)) then
+                 newmu(x,y,z+1) =  approxsol(linindex)
+                 else
+                    write(6,*) 'Uh-oh' 
+              end if
+
+        end do
+     end do
+  end do
+
 
 
 
@@ -75,28 +250,16 @@ subroutine musolve(iter)
   if (rank.eq.0) then
      do x = 1,psx
         do y = 1,psy
-           dmu_dt(x,y,2) = 0.0d0
+           newmu(x,y,2) = mu(x,y,2)
         end do
      end do
   elseif(rank.eq.procs-1) then
      do x = 1,psx
         do y = 1,psy
-           dmu_dt(x,y,psz+1) = 0.0d0
+           newmu(x,y,psz+1) = mu(x,y,psz+1)
         end do
      end do
   end if
-
-
-  !!! Update chemical potential field
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-           newmu(x,y,z) = mu(x,y,z) + (dt*dmu_dt(x,y,z))
-           newmu(x,y,z) = max(min(newmu(x,y,z),max_mu),min_mu)     
-        end do
-     end do
-  end do
-
 
   !! Normalize chemical potential in bulk phases
   do x = 1,psx
@@ -146,5 +309,10 @@ subroutine musolve(iter)
         end do
      end do
   end do
+
+
+
+close(55)
+
 
 end subroutine musolve
