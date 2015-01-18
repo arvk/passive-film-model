@@ -223,7 +223,7 @@ subroutine musolve(iter)
   end do
 
 
-  call iccglu(A,int(psx*psy*psz),IA,JA,LU,B,approxsol,scratch1,scratch2,scratch3,1E-15,200,iterations,0,solver_info)
+  call iccglu(A,int(psx*psy*psz),IA,JA,LU,B,approxsol,scratch1,scratch2,scratch3,0.0000000001d0,200,iterations,0,solver_info)
 
   write(55,*) "RANK", rank,iterations
   

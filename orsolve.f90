@@ -212,7 +212,7 @@ subroutine orsolve(iter)
   end do
 
 
-  call iccglu(A,int(psx*psy*psz),IA,JA,LU,B,approxsol,scratch1,scratch2,scratch3,1E-3,100,iterations,0,solver_info)
+  call iccglu(A,int(psx*psy*psz),IA,JA,LU,B,approxsol,scratch1,scratch2,scratch3,0.001d0,100,iterations,0,solver_info)
 
   do z = 1,psz
      do y = 1,psy
