@@ -5,12 +5,28 @@ subroutine pfsolve(iter)
   use gradients
   use thermo_constants
   implicit none
-  include 'mpif.h'
+  external PhtFunction, PhtJacobian
+
+#include <finclude/petscsys.h>
+#include <finclude/petscvec.h>
+#include <finclude/petscvec.h90>
+#include <finclude/petscmat.h>
+#include <finclude/petscpc.h>
+#include <finclude/petscksp.h>
+#include <finclude/petscsnes.h>
+
+  PetscErrorCode ierr
+  Vec pht_vec,rhs_pht_vec,ret_pht_vec
+  Mat jac_pht
+  PetscScalar, pointer :: point_pht_vec(:)
+  SNES snes_pht
 
   integer :: x, y, z   ! Loop variables
+  integer :: linindex
   real*8 :: correct_rounding     ! Error correction variable used while updating fields
-  integer :: ierr,status(MPI_STATUS_SIZE)
+  integer :: status(MPI_STATUS_SIZE)
   integer, intent(in) :: iter
+  integer :: snesiter
 
   !!---------------PF evolution-----------------!!
 
@@ -34,12 +50,20 @@ subroutine pfsolve(iter)
   real*8 :: sigma_pyr_env
 
 
+  real*8 :: D_local
+
   integer :: int_count
 
   real*8, dimension(psx,psy,psz+2) :: del_opyr
   real*8 :: odiff
   integer :: wrap
   real*8 :: delx,dely,delz
+
+
+  ! Vectors for implicit solver
+  real*8, dimension(psx*psy*psz) :: approxsol
+  real*8, dimension(psx*psy*psz) :: B
+  integer, dimension(psx*psy*psz) :: vector_locator
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -69,6 +93,80 @@ subroutine pfsolve(iter)
         end do
      end do
   end do
+
+
+
+
+
+
+
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+           B(linindex) =  (pht(x,y,z+1)/dt) + &
+                & 2*(w_pht-w_met)*(met(x,y,z+1)*met(x,y,z+1)) + &
+                & 2*(w_pht-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) + &
+                & 2*(w_pht-w_env)*(env(x,y,z+1)*env(x,y,z+1)) 
+
+           if (z.eq.1) then
+
+              D_local = 0.5d0*(M_pht_met*sigma_pht_met*(met(x,y,1)+met(x,y,2)) + &
+                   & M_pht_pyr*sigma_pht_pyr*(pyr(x,y,1)+pyr(x,y,2)) + &
+                   & M_pht_env*sigma_pht_env*(env(x,y,1)+env(x,y,2)))
+
+              B(linindex) = B(linindex) + ((D_local/(dpf*dpf))*pht(x,y,z+1-1))
+
+           elseif (z.eq.psz) then
+
+              D_local = 0.5d0*(M_pht_met*sigma_pht_met*(met(x,y,psz+1)+met(x,y,psz+2)) + &
+                   & M_pht_pyr*sigma_pht_pyr*(pyr(x,y,psz+1)+pyr(x,y,psz+2)) + &
+                   & M_pht_env*sigma_pht_env*(env(x,y,psz+1)+env(x,y,psz+2)))
+
+              B(linindex) = B(linindex) + ((D_local/(dpf*dpf))*pht(x,y,z+1+1))
+           end if
+
+           approxsol(linindex) = pht(x,y,z+1)
+
+           vector_locator(linindex) = linindex-1
+
+        end do
+     end do
+  end do
+
+  call VecCreate(PETSC_COMM_SELF,pht_vec,ierr)
+  call VecSetSizes(pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(pht_vec,ierr)
+  call VecSetUp(pht_vec,ierr)
+
+
+  call VecCreate(PETSC_COMM_SELF,ret_pht_vec,ierr)
+  call VecSetSizes(ret_pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(ret_pht_vec,ierr)
+  call VecSetUp(ret_pht_vec,ierr)
+
+
+  call VecCreate(PETSC_COMM_SELF,rhs_pht_vec,ierr)
+  call VecSetSizes(rhs_pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(rhs_pht_vec,ierr)
+  call VecSetUp(rhs_pht_vec,ierr)
+  call VecSetValues(rhs_pht_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+
+
+  call MatCreate(PETSC_COMM_SELF,jac_pht,ierr)
+  call MatSetSizes(jac_pht,PETSC_DECIDE,PETSC_DECIDE,psx*psy*psz,psx*psy*psz,ierr)
+  call MatSetUp(jac_pht,ierr)
+
+  call SNESCreate(PETSC_COMM_SELF,snes_pht,ierr)
+  call SNESSetFunction(snes_pht,ret_pht_vec,PhtFunction,PETSC_NULL_OBJECT,ierr)
+  call SNESSetJacobian(snes_pht,jac_pht,jac_pht,PhtJacobian,PETSC_NULL_OBJECT,ierr)
+  call SNESSetFromOptions(snes_pht,ierr)
+  call SNESSolve(snes_pht,rhs_pht_vec,pht_vec,ierr)
+
+  call SNESGetIterationNumber(snes_pht,snesiter,ierr)
+  write(6,*) "Rank,iter", rank, snesiter
 
 
 
@@ -301,5 +399,555 @@ subroutine pfsolve(iter)
      end do
   end do
 
+
+
+  call VecDestroy(pht_vec,ierr)
+  call VecDestroy(rhs_pht_vec,ierr)
+  call MatDestroy(jac_pht,ierr)
+  call SNESDestroy(snes_pht,ierr)
+
+
 end subroutine pfsolve
 
+
+
+
+
+
+
+
+subroutine PhtFunction(snes,pht_vec,ret_vec,dummy,ierr)
+  use commondata
+  use fields
+  use laplacians
+  use gradients
+  use thermo_constants
+  implicit none
+
+#include <finclude/petscsys.h>
+#include <finclude/petscvec.h>
+#include <finclude/petscvec.h90>
+#include <finclude/petscmat.h>
+#include <finclude/petscpc.h>
+#include <finclude/petscksp.h>
+#include <finclude/petscsnes.h>
+
+  SNES snes
+  Vec pht_vec,ret_vec
+  Mat lhs_pht_mat
+  integer dummy(*)
+  PetscErrorCode ierr
+  PetscScalar, pointer :: point_pht_vec(:)
+
+  real*8, dimension(psx,psy,psz+2) :: D_pht
+
+  ! A/B/JA matrices for implicit solver
+  integer, dimension(psx*psy*psz) :: vector_locator
+  real*8, dimension(psx*psy*psz) :: vecread
+  real*8, dimension(psx*psy*psz) :: lnr,sqr
+
+  real*8, dimension(:), allocatable :: A, LU
+  integer, dimension(:), allocatable :: JA, IA
+
+  integer :: x, y, z   ! Loop variables
+  integer :: linindex, contindex
+  integer :: wrap
+
+  ! Sorting for A/B/JA
+  logical :: is_sorted
+  integer :: rowindex, JAleft, JAright, JAswap
+  real*8 :: Aswap
+
+
+  !! Bulk free energy 
+  real*8 :: f_pht, f_env, f_met, f_pyr
+  real*8 :: w_pht, w_env, w_met, w_pyr
+
+
+  real*8 :: sigma_pht_pyr
+  real*8 :: sigma_pyr_pht
+  real*8 :: sigma_met_pyr
+  real*8 :: sigma_pyr_met
+  real*8 :: sigma_env_pyr
+  real*8 :: sigma_pyr_env
+
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 1,psz+2
+
+           D_pht(x,y,z) = M_pht_met*sigma_pht_met*met(x,y,z) + M_pht_pyr*sigma_pht_pyr*pyr(x,y,z) + M_pht_env*sigma_pht_env*env(x,y,z) 
+
+        end do
+     end do
+  end do
+
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+
+!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
+           w_met = 0.0d0*140401
+
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
+
+
+
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+        end do
+     end do
+  end do
+
+
+
+
+  allocate(A((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(LU((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(IA((psx*psy*psz)+1))
+
+  IA=0 ; JA=0 ; A=0
+  contindex = 0
+  linindex = 0
+
+
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+           vector_locator(linindex) = linindex-1
+
+           IA(linindex) = contindex + 1
+
+           if (z .gt. 1) then
+              contindex = contindex + 1
+              A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,y,(z+1)-1)+D_pht(x,y,z+1)))/(dpf*dpf)
+              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+           end if
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,wrap(y-1,psy),z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D_pht(wrap(x-1,psx),y,z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
+
+           contindex = contindex + 1
+           A(contindex) = D_pht(x,y,(z+1)+1)+D_pht(x,y,(z+1)-1)+&
+                &D_pht(x,wrap(y+1,psy),z+1)+D_pht(x,wrap(y-1,psy),z+1)+&
+                &D_pht(wrap(x+1,psx),y,z+1)+D_pht(wrap(x-1,psx),y,z+1)
+           A(contindex) = A(contindex) + 6*D_pht(x,y,z+1)
+           A(contindex) = A(contindex)*0.5d0/(dpf*dpf)
+           A(contindex) = A(contindex) + (1.0d0/dt)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D_pht(wrap(x+1,psx),y,z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx)
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,wrap(y+1,psy),z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
+
+           if (z .lt. psz) then
+              contindex = contindex + 1
+              A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,y,(z+1)+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+           end if
+
+
+        end do
+     end do
+  end do
+
+  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+6
+
+
+
+
+
+
+
+
+  do linindex = 1,psx*psy*psz
+     is_sorted = .FALSE.
+
+     do while (is_sorted .eq. .FALSE.)
+
+        do rowindex = IA(linindex),IA(linindex+1)-2
+
+           is_sorted = .TRUE.
+
+           JAleft = JA(rowindex)
+           JAright = JA(rowindex+1)
+
+           if (JAleft .gt. JAright) then
+
+              JAswap = JA(rowindex)
+              JA(rowindex) = JA(rowindex+1)
+              JA(rowindex+1) = JAswap
+
+              Aswap = A(rowindex)
+              A(rowindex) = A(rowindex+1)
+              A(rowindex+1) = Aswap
+
+              is_sorted = .FALSE.
+              exit
+           end if
+
+        end do
+
+
+     end do
+
+  end do
+
+
+  IA = IA - 1
+  JA = JA - 1
+
+
+  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*psz,psx*psy*psz,IA,JA,A,lhs_pht_mat,ierr)
+
+  call MatMult(lhs_pht_mat,pht_vec,ret_vec,ierr)
+
+
+  call VecGetArrayF90(pht_vec,point_pht_vec,ierr)
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+!!! Calculate linear prefactor
+           lnr(linindex) = (M_pht_met*sigma_pht_met*del2met(x,y,z+1)) + (2*hill_pht_met*met(x,y,z+1)*met(x,y,z+1)) + (2*(w_pht-w_met)) + &
+& (M_pht_pyr*sigma_pht_pyr*del2pyr(x,y,z+1)) + (2*hill_pht_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) + (2*(w_pht-w_pyr)) + &
+& (M_pht_env*sigma_pht_env*del2env(x,y,z+1)) + (2*hill_pht_env*env(x,y,z+1)*env(x,y,z+1)) + (2*(w_pht-w_env)) 
+
+           lnr(linindex) = lnr(linindex)*point_pht_vec(linindex)
+
+!!! Calculate quadratic prefactor
+           sqr(linindex) = ((2*(w_pht-w_met)) - 2*hill_pht_met) + ((2*(w_pht-w_pyr)) - 2*hill_pht_pyr) + ((2*(w_pht-w_env)) - 2*hill_pht_env) 
+
+           sqr(linindex) = sqr(linindex)*point_pht_vec(linindex)*point_pht_vec(linindex)
+        end do
+     end do
+  end do
+
+  call VecRestoreArrayF90(pht_vec,point_pht_vec,ierr)
+
+
+  call VecSetValues(ret_vec,psx*psy*psz,vector_locator,lnr,ADD_VALUES,ierr)
+  call VecSetValues(ret_vec,psx*psy*psz,vector_locator,sqr,ADD_VALUES,ierr)
+
+  call MatDestroy(lhs_pht_mat,ierr)
+
+
+
+  return
+
+end subroutine PhtFunction
+
+
+
+
+
+
+
+
+
+
+
+
+
+subroutine PhtJacobian(snes,pht_vec,pht_jacob,pht_precond,dummy,ierr)
+  use commondata
+  use fields
+  use laplacians
+  use gradients
+  use thermo_constants
+  implicit none
+
+#include <finclude/petscsys.h>
+#include <finclude/petscvec.h>
+#include <finclude/petscvec.h90>
+#include <finclude/petscmat.h>
+#include <finclude/petscpc.h>
+#include <finclude/petscksp.h>
+#include <finclude/petscsnes.h>
+
+  SNES snes
+  Vec pht_vec
+  Mat pht_jacob,pht_precond
+  integer dummy(*)
+  PetscErrorCode ierr
+  PetscScalar, pointer :: point_pht_vec(:)
+
+
+  real*8, dimension(psx,psy,psz+2) :: D_pht
+
+  ! A/B/JA matrices for implicit solver
+  integer, dimension(psx*psy*psz) :: vector_locator
+  real*8, dimension(psx*psy*psz) :: vecread
+  real*8, dimension(psx*psy*psz) :: lnr,sqr
+
+  real*8, dimension(:), allocatable :: A, LU
+  integer, dimension(:), allocatable :: JA, IA
+
+  integer :: x, y, z   ! Loop variables
+  integer :: linindex, contindex
+  integer :: wrap
+
+  ! Sorting for A/B/JA
+  logical :: is_sorted
+  integer :: rowindex, JAleft, JAright, JAswap
+  real*8 :: Aswap
+
+
+  !! Bulk free energy 
+  real*8 :: f_pht, f_env, f_met, f_pyr
+  real*8 :: w_pht, w_env, w_met, w_pyr
+
+
+  real*8 :: sigma_pht_pyr
+  real*8 :: sigma_pyr_pht
+  real*8 :: sigma_met_pyr
+  real*8 :: sigma_pyr_met
+  real*8 :: sigma_env_pyr
+  real*8 :: sigma_pyr_env
+
+  PetscInt rowval,colval
+  PetscScalar val
+  integer :: io,jo
+
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 1,psz+2
+
+           D_pht(x,y,z) = M_pht_met*sigma_pht_met*met(x,y,z) + M_pht_pyr*sigma_pht_pyr*pyr(x,y,z) + M_pht_env*sigma_pht_env*env(x,y,z) 
+
+        end do
+     end do
+  end do
+
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+
+!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
+           w_met = 0.0d0*140401
+
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
+
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+        end do
+     end do
+  end do
+
+
+  allocate(A((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(LU((7*psx*psy*psz)-(2*psx*psy)))
+  allocate(IA((psx*psy*psz)+1))
+
+  IA=0 ; JA=0 ; A=0
+  contindex = 0
+  linindex = 0
+
+  call VecGetArrayF90(pht_vec,point_pht_vec,ierr)
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+      !!! Calculate linear prefactor
+           lnr(linindex) = (M_pht_met*sigma_pht_met*del2met(x,y,z+1)) + (2*hill_pht_met*met(x,y,z+1)*met(x,y,z+1)) + (2*(w_pht-w_met)) + &
+& (M_pht_pyr*sigma_pht_pyr*del2pyr(x,y,z+1)) + (2*hill_pht_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) + (2*(w_pht-w_pyr)) + &
+& (M_pht_env*sigma_pht_env*del2env(x,y,z+1)) + (2*hill_pht_env*env(x,y,z+1)*env(x,y,z+1)) + (2*(w_pht-w_env)) 
+
+      !!! Calculate quadratic prefactor
+           sqr(linindex) = ((2*(w_pht-w_met)) - 2*hill_pht_met) + ((2*(w_pht-w_pyr)) - 2*hill_pht_pyr) + ((2*(w_pht-w_env)) - 2*hill_pht_env) 
+
+           sqr(linindex) = sqr(linindex)*2.0d0*point_pht_vec(linindex)
+
+
+           IA(linindex) = contindex + 1
+
+           if (z .gt. 1) then
+              contindex = contindex + 1
+              A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,y,(z+1)-1)+D_pht(x,y,z+1)))/(dpf*dpf)
+              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+           end if
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,wrap(y-1,psy),z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D_pht(wrap(x-1,psx),y,z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
+
+           contindex = contindex + 1
+           A(contindex) = D_pht(x,y,(z+1)+1)+D_pht(x,y,(z+1)-1)+&
+                &D_pht(x,wrap(y+1,psy),z+1)+D_pht(x,wrap(y-1,psy),z+1)+&
+                &D_pht(wrap(x+1,psx),y,z+1)+D_pht(wrap(x-1,psx),y,z+1)
+           A(contindex) = A(contindex) + 6*D_pht(x,y,z+1)
+           A(contindex) = A(contindex)*0.5d0/(dpf*dpf)
+           A(contindex) = A(contindex) + (1.0d0/dt)
+           A(contindex) = A(contindex) + lnr(linindex) + sqr(linindex)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D_pht(wrap(x+1,psx),y,z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx)
+
+           contindex = contindex + 1
+           A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,wrap(y+1,psy),z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
+
+           if (z .lt. psz) then
+              contindex = contindex + 1
+              A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,y,(z+1)+1)+D_pht(x,y,z+1)))/(dpf*dpf)
+              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+           end if
+
+
+        end do
+     end do
+  end do
+
+  call VecRestoreArrayF90(pht_vec,point_pht_vec,ierr)
+
+
+  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+6
+
+
+
+  do linindex = 1,psx*psy*psz
+     is_sorted = .FALSE.
+
+     do while (is_sorted .eq. .FALSE.)
+
+        do rowindex = IA(linindex),IA(linindex+1)-2
+
+           is_sorted = .TRUE.
+
+           JAleft = JA(rowindex)
+           JAright = JA(rowindex+1)
+
+           if (JAleft .gt. JAright) then
+
+              JAswap = JA(rowindex)
+              JA(rowindex) = JA(rowindex+1)
+              JA(rowindex+1) = JAswap
+
+              Aswap = A(rowindex)
+              A(rowindex) = A(rowindex+1)
+              A(rowindex+1) = Aswap
+
+              is_sorted = .FALSE.
+              exit
+           end if
+
+        end do
+
+
+     end do
+
+  end do
+
+
+  IA = IA - 1
+  JA = JA - 1
+
+
+
+
+
+
+
+  do io = 1,psx*psy*psz ! Nrows
+
+     rowval = io-1
+
+     do jo = 1,IA(io+1)-IA(io)
+
+        colval = JA(IA(io) + jo)
+
+        val = A(IA(io) + jo)
+
+        call MatSetValue(pht_precond,rowval,colval,val,INSERT_VALUES,ierr)
+
+     end do
+     
+
+  end do
+
+
+  call MatAssemblyBegin(pht_precond,MAT_FINAL_ASSEMBLY,ierr)
+  call MatAssemblyEnd(pht_precond,MAT_FINAL_ASSEMBLY,ierr)
+
+
+  return
+
+end subroutine PhtJacobian
