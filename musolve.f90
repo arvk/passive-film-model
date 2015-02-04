@@ -17,7 +17,7 @@ subroutine musolve(iter)
   PetscErrorCode ierr
   Vec mus_vec,rhs_vec
   Mat lhs_mat
-  KSP ksp
+  KSP ksp_mu
   PetscScalar, pointer :: point_mu_vec(:)
 
   integer, intent(in) :: iter
@@ -256,9 +256,9 @@ subroutine musolve(iter)
   call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*psz,psx*psy*psz,IA,JA,A,lhs_mat,ierr)
 
 
-  call KSPCreate(PETSC_COMM_SELF,ksp,ierr)
-  call KSPSetOperators(ksp,lhs_mat,lhs_mat,ierr)
-  call KSPSolve(ksp,rhs_vec,mus_vec,ierr)
+  call KSPCreate(PETSC_COMM_SELF,ksp_mu,ierr)
+  call KSPSetOperators(ksp_mu,lhs_mat,lhs_mat,ierr)
+  call KSPSolve(ksp_mu,rhs_vec,mus_vec,ierr)
 
 
 
@@ -288,7 +288,7 @@ subroutine musolve(iter)
   call VecDestroy(mus_vec,ierr)
   call VecDestroy(rhs_vec,ierr)
   call MatDestroy(lhs_mat,ierr)
-  call KSPDestroy(ksp,ierr)
+  call KSPDestroy(ksp_mu,ierr)
 
 
   !! Apply boundary conditions to chemical-potential-field update
