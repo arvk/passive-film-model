@@ -2,11 +2,22 @@ subroutine orsolve(iter)
   use commondata
   use fields
   implicit none
-  include 'mpif.h'
+
+#include <finclude/petscsys.h>
+#include <finclude/petscvec.h>
+#include <finclude/petscvec.h90>
+#include <finclude/petscmat.h>
+#include <finclude/petscpc.h>
+#include <finclude/petscksp.h>
+
+  PetscErrorCode ierr
+  Vec or_vec,rhs_vec
+  Mat lhs_mat
+  KSP ksp_or
+  PetscScalar, pointer :: point_or_vec(:)
 
   integer :: x, y, z   ! Loop variables
   integer, intent(in) :: iter
-  integer :: ierr
 
   real*8, dimension(psx,psy,psz) :: M_opyr
   real*8 :: M_opyr_max = 1.5E-10
@@ -28,6 +39,8 @@ subroutine orsolve(iter)
 
   real*8, dimension(psx*psy*psz) :: B
   real*8, dimension(psx*psy*psz) :: approxsol
+  integer, dimension(psx*psy*psz) :: vector_locator
+  real*8, dimension(psx*psy*psz) :: vecread
   real*8, dimension(psx*psy*psz) :: scratch1,scratch2,scratch3
 
   real*8, dimension(:), allocatable :: A, LU
@@ -109,9 +122,26 @@ subroutine orsolve(iter)
 
            approxsol(linindex) = opyr(x,y,z+1)
 
+           vector_locator(linindex) = linindex-1
+
         end do
      end do
   end do
+
+
+
+  call VecCreate(PETSC_COMM_SELF,or_vec,ierr)
+  call VecSetSizes(or_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(or_vec,ierr)
+  call VecSetUp(or_vec,ierr)
+
+
+  call VecCreate(PETSC_COMM_SELF,rhs_vec,ierr)
+  call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(rhs_vec,ierr)
+  call VecSetUp(rhs_vec,ierr)
+  call VecSetValues(rhs_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+
 
 
   !! Calculate the LHS (A matrix in Ax=B)
@@ -212,7 +242,18 @@ subroutine orsolve(iter)
   end do
 
 
-  call iccglu(A,int(psx*psy*psz),IA,JA,LU,B,approxsol,scratch1,scratch2,scratch3,0.001d0,100,iterations,0,solver_info)
+
+  IA = IA - 1
+  JA = JA - 1
+
+  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*psz,psx*psy*psz,IA,JA,A,lhs_mat,ierr)
+
+  call KSPCreate(PETSC_COMM_SELF,ksp_or,ierr)
+  call KSPSetOperators(ksp_or,lhs_mat,lhs_mat,ierr)
+  call KSPSolve(ksp_or,rhs_vec,or_vec,ierr)
+
+
+  call VecGetArrayF90(or_vec,point_or_vec,ierr)
 
   do z = 1,psz
      do y = 1,psy
@@ -220,8 +261,8 @@ subroutine orsolve(iter)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
            if (pyr(x,y,z+1).gt.0.1d0) then
 
-              if (approxsol(linindex).eq.approxsol(linindex)) then
-                 opyr(x,y,z+1) = approxsol(linindex)
+              if (point_or_vec(linindex).eq.point_or_vec(linindex)) then
+                 opyr(x,y,z+1) = point_or_vec(linindex)
               end if
 
            end if
@@ -229,7 +270,21 @@ subroutine orsolve(iter)
      end do
   end do
 
+
+  call VecRestoreArrayF90(or_vec,point_or_vec,ierr)
+
+
+  call VecDestroy(or_vec,ierr)
+  call VecDestroy(rhs_vec,ierr)
+  call MatDestroy(lhs_mat,ierr)
+  call KSPDestroy(ksp_or,ierr)
+
+
+
+
 end subroutine orsolve
+
+
 
 
 
