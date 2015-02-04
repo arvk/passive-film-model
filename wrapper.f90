@@ -3,7 +3,8 @@ program passive_film_model
   use fields
   use kmc_data
   implicit none
-  include 'mpif.h'
+#include <finclude/petscsys.h>
+
 
   integer :: x, y, z   ! Loop variables
   integer :: iter      ! Loop variable for current iteration 
@@ -15,6 +16,8 @@ program passive_film_model
 
   !! Initialize Parallelization
   call mpi_init(ierr)
+  call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
+
   call mpi_comm_size(MPI_COMM_WORLD,procs,ierr)
   call mpi_comm_rank(MPI_COMM_WORLD,rank,ierr)
 
@@ -118,6 +121,7 @@ program passive_film_model
 
   end do
 
+  call PetscFinalize(ierr)
   call mpi_finalize(ierr)
 
 
