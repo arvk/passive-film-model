@@ -31,23 +31,23 @@ module fields
 
 
   !! Thermodynamic parameters
-  real*8 :: sigma_pht_env= -1E-6
-  real*8 :: sigma_env_pht= -1E-6
+  real*8 :: sigma_pht_env= 1E-6
+  real*8 :: sigma_env_pht= 1E-6
 
-  real*8 :: sigma_pht_met= -1E-6
-  real*8 :: sigma_met_pht= -1E-6
+  real*8 :: sigma_pht_met= 1E-6
+  real*8 :: sigma_met_pht= 1E-6
 
-  real*8 :: sigma_pht_pyr_0 = -2.5E-8
-  real*8 :: sigma_pyr_pht_0 = -2.5E-8
+  real*8 :: sigma_pht_pyr_0 = 2.5E-8
+  real*8 :: sigma_pyr_pht_0 = 2.5E-8
 
-  real*8 :: sigma_met_env= -1E-5
-  real*8 :: sigma_env_met= -1E-5
+  real*8 :: sigma_met_env= 1E-5
+  real*8 :: sigma_env_met= 1E-5
 
-  real*8 :: sigma_met_pyr_0 = -1E-6
-  real*8 :: sigma_pyr_met_0 = -1E-6
+  real*8 :: sigma_met_pyr_0 = 1E-6
+  real*8 :: sigma_pyr_met_0 = 1E-6
 
-  real*8 :: sigma_env_pyr_0 = -2.5E-8
-  real*8 :: sigma_pyr_env_0 = -2.5E-8
+  real*8 :: sigma_env_pyr_0 = 2.5E-8
+  real*8 :: sigma_pyr_env_0 = 2.5E-8
 
 
 

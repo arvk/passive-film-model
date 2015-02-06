@@ -37,7 +37,7 @@ subroutine pfsolve(iter)
   real*8 :: correct_rounding     ! Error correction variable used while updating fields
   integer :: status(MPI_STATUS_SIZE)
   integer, intent(in) :: iter
-
+  integer :: its
 
   !!---------------PF evolution-----------------!!
 
@@ -73,6 +73,7 @@ subroutine pfsolve(iter)
 
   ! Vectors for implicit solver
   real*8, dimension(psx*psy*psz) :: B
+  real*8, dimension(psx*psy*psz) :: approxsol
   integer, dimension(psx*psy*psz) :: vector_locator
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -106,40 +107,20 @@ subroutine pfsolve(iter)
 
 
 
-  call VecCreate(PETSC_COMM_SELF,met_vec,ierr)
-  call VecSetSizes(met_vec,PETSC_DECIDE,psx*psy*psz,ierr)
-  call VecSetFromOptions(met_vec,ierr)
-  call VecSetUp(met_vec,ierr)
-
   call VecCreate(PETSC_COMM_SELF,ret_met_vec,ierr)
   call VecSetSizes(ret_met_vec,PETSC_DECIDE,psx*psy*psz,ierr)
   call VecSetFromOptions(ret_met_vec,ierr)
   call VecSetUp(ret_met_vec,ierr)
-
-  call VecCreate(PETSC_COMM_SELF,pht_vec,ierr)
-  call VecSetSizes(pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
-  call VecSetFromOptions(pht_vec,ierr)
-  call VecSetUp(pht_vec,ierr)
 
   call VecCreate(PETSC_COMM_SELF,ret_pht_vec,ierr)
   call VecSetSizes(ret_pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
   call VecSetFromOptions(ret_pht_vec,ierr)
   call VecSetUp(ret_pht_vec,ierr)
 
-  call VecCreate(PETSC_COMM_SELF,pyr_vec,ierr)
-  call VecSetSizes(pyr_vec,PETSC_DECIDE,psx*psy*psz,ierr)
-  call VecSetFromOptions(pyr_vec,ierr)
-  call VecSetUp(pyr_vec,ierr)
-
   call VecCreate(PETSC_COMM_SELF,ret_pyr_vec,ierr)
   call VecSetSizes(ret_pyr_vec,PETSC_DECIDE,psx*psy*psz,ierr)
   call VecSetFromOptions(ret_pyr_vec,ierr)
   call VecSetUp(ret_pyr_vec,ierr)
-
-  call VecCreate(PETSC_COMM_SELF,env_vec,ierr)
-  call VecSetSizes(env_vec,PETSC_DECIDE,psx*psy*psz,ierr)
-  call VecSetFromOptions(env_vec,ierr)
-  call VecSetUp(env_vec,ierr)
 
   call VecCreate(PETSC_COMM_SELF,ret_env_vec,ierr)
   call VecSetSizes(ret_env_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -153,10 +134,10 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-           B(linindex) =  (met(x,y,z+1)/dt) + &
-                & 2*(w_met-w_pht)*(pht(x,y,z+1)*pht(x,y,z+1)) + &
-                & 2*(w_met-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) + &
-                & 2*(w_met-w_env)*(env(x,y,z+1)*env(x,y,z+1)) 
+           B(linindex) =  (met(x,y,z+1)/dt) - &
+                & 2*M_met_pht*(w_met-w_pht)*(pht(x,y,z+1)*pht(x,y,z+1)) - &
+                & 2*M_met_pyr*(w_met-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) - &
+                & 2*M_met_env*(w_met-w_env)*(env(x,y,z+1)*env(x,y,z+1)) 
 
            if (z.eq.1) then
 
@@ -176,11 +157,18 @@ subroutine pfsolve(iter)
 
            end if
 
+           approxsol(linindex) = met(x,y,z+1)
            vector_locator(linindex) = linindex-1
 
         end do
      end do
   end do
+
+  call VecCreate(PETSC_COMM_SELF,met_vec,ierr)
+  call VecSetSizes(met_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(met_vec,ierr)
+  call VecSetUp(met_vec,ierr)
+  call VecSetValues(met_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
 
   call VecCreate(PETSC_COMM_SELF,rhs_met_vec,ierr)
   call VecSetSizes(rhs_met_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -206,10 +194,10 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-           B(linindex) =  (pht(x,y,z+1)/dt) + &
-                & 2*(w_pht-w_met)*(met(x,y,z+1)*met(x,y,z+1)) + &
-                & 2*(w_pht-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) + &
-                & 2*(w_pht-w_env)*(env(x,y,z+1)*env(x,y,z+1)) 
+           B(linindex) =  (pht(x,y,z+1)/dt) - &
+                & 2*M_pht_met*(w_pht-w_met)*(met(x,y,z+1)*met(x,y,z+1)) - &
+                & 2*M_pht_pyr*(w_pht-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) - &
+                & 2*M_pht_env*(w_pht-w_env)*(env(x,y,z+1)*env(x,y,z+1)) 
 
            if (z.eq.1) then
 
@@ -229,11 +217,18 @@ subroutine pfsolve(iter)
 
            end if
 
+           approxsol(linindex) = pht(x,y,z+1)
            vector_locator(linindex) = linindex-1
 
         end do
      end do
   end do
+
+  call VecCreate(PETSC_COMM_SELF,pht_vec,ierr)
+  call VecSetSizes(pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(pht_vec,ierr)
+  call VecSetUp(pht_vec,ierr)
+  call VecSetValues(pht_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
 
   call VecCreate(PETSC_COMM_SELF,rhs_pht_vec,ierr)
   call VecSetSizes(rhs_pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -273,10 +268,10 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-           B(linindex) =  (pyr(x,y,z+1)/dt) + &
-                & 2*(w_pyr-w_met)*(met(x,y,z+1)*met(x,y,z+1)) + &
-                & 2*(w_pyr-w_pht)*(pht(x,y,z+1)*pht(x,y,z+1)) + &
-                & 2*(w_pyr-w_env)*(env(x,y,z+1)*env(x,y,z+1)) 
+           B(linindex) =  (pyr(x,y,z+1)/dt) - &
+                & 2*M_pyr_met*(w_pyr-w_met)*(met(x,y,z+1)*met(x,y,z+1)) - &
+                & 2*M_pyr_pht*(w_pyr-w_pht)*(pht(x,y,z+1)*pht(x,y,z+1)) - &
+                & 2*M_pyr_env*(w_pyr-w_env)*(env(x,y,z+1)*env(x,y,z+1)) 
 
            if (z.eq.1) then
 
@@ -296,11 +291,18 @@ subroutine pfsolve(iter)
 
            end if
 
+           approxsol(linindex) = pyr(x,y,z+1)
            vector_locator(linindex) = linindex-1
 
         end do
      end do
   end do
+
+  call VecCreate(PETSC_COMM_SELF,pyr_vec,ierr)
+  call VecSetSizes(pyr_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(pyr_vec,ierr)
+  call VecSetUp(pyr_vec,ierr)
+  call VecSetValues(pyr_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
 
   call VecCreate(PETSC_COMM_SELF,rhs_pyr_vec,ierr)
   call VecSetSizes(rhs_pyr_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -335,10 +337,10 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-           B(linindex) =  (env(x,y,z+1)/dt) + &
-                & 2*(w_env-w_met)*(met(x,y,z+1)*met(x,y,z+1)) + &
-                & 2*(w_env-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) + &
-                & 2*(w_env-w_pht)*(pht(x,y,z+1)*pht(x,y,z+1)) 
+           B(linindex) =  (env(x,y,z+1)/dt) - &
+                & 2*M_env_met*(w_env-w_met)*(met(x,y,z+1)*met(x,y,z+1)) - &
+                & 2*M_env_pyr*(w_env-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) - &
+                & 2*M_env_pht*(w_env-w_pht)*(pht(x,y,z+1)*pht(x,y,z+1)) 
 
            if (z.eq.1) then
 
@@ -358,11 +360,18 @@ subroutine pfsolve(iter)
 
            end if
 
+           approxsol(linindex) = env(x,y,z+1)
            vector_locator(linindex) = linindex-1
 
         end do
      end do
   end do
+
+  call VecCreate(PETSC_COMM_SELF,env_vec,ierr)
+  call VecSetSizes(env_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(env_vec,ierr)
+  call VecSetUp(env_vec,ierr)
+  call VecSetValues(env_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
 
   call VecCreate(PETSC_COMM_SELF,rhs_env_vec,ierr)
   call VecSetSizes(rhs_env_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -401,7 +410,6 @@ subroutine pfsolve(iter)
   call SNESSolve(snes_pht,rhs_pht_vec,pht_vec,ierr)
 
 
-
   call SNESCreate(PETSC_COMM_SELF,snes_pyr,ierr)
   call SNESSetFunction(snes_pyr,ret_pyr_vec,PyrFunction,PETSC_NULL_OBJECT,ierr)
   call SNESSetJacobian(snes_pyr,jac_pyr,jac_pyr,PyrJacobian,PETSC_NULL_OBJECT,ierr)
@@ -409,13 +417,11 @@ subroutine pfsolve(iter)
   call SNESSolve(snes_pyr,rhs_pyr_vec,pyr_vec,ierr)
 
 
-
   call SNESCreate(PETSC_COMM_SELF,snes_env,ierr)
   call SNESSetFunction(snes_env,ret_env_vec,EnvFunction,PETSC_NULL_OBJECT,ierr)
   call SNESSetJacobian(snes_env,jac_env,jac_env,EnvJacobian,PETSC_NULL_OBJECT,ierr)
   call SNESSetFromOptions(snes_env,ierr)
   call SNESSolve(snes_env,rhs_env_vec,env_vec,ierr)
-
 
 
 
@@ -432,19 +438,19 @@ subroutine pfsolve(iter)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
               if (point_met_vec(linindex).eq.point_met_vec(linindex)) then
-                 newmet(x,y,z+1) =  point_met_vec(linindex)
+                 newmet(x,y,z+1) =  max(min(point_met_vec(linindex),1.0d0),0.0d0)
               end if
 
-              if (point_met_vec(linindex).eq.point_met_vec(linindex)) then
-                 newmet(x,y,z+1) =  point_met_vec(linindex)
+              if (point_pht_vec(linindex).eq.point_pht_vec(linindex)) then
+                 newpht(x,y,z+1) =  max(min(point_pht_vec(linindex),1.0d0),0.0d0)
               end if
 
               if (point_pyr_vec(linindex).eq.point_pyr_vec(linindex)) then
-                 newpyr(x,y,z+1) =  point_pyr_vec(linindex)
+                 newpyr(x,y,z+1) =  max(min(point_pyr_vec(linindex),1.0d0),0.0d0)
               end if
 
               if (point_env_vec(linindex).eq.point_env_vec(linindex)) then
-                 newenv(x,y,z+1) =  point_env_vec(linindex)
+                 newenv(x,y,z+1) =  max(min(point_env_vec(linindex),1.0d0),0.0d0)
               end if
 
         end do
@@ -481,6 +487,24 @@ subroutine pfsolve(iter)
 
 
 
+  !! Update phase fields
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+
+           if (newenv(x,y,z).gt.0.97) then
+              newmet(x,y,z) = met(x,y,z)
+              newpht(x,y,z) = pht(x,y,z)
+              newpyr(x,y,z) = pyr(x,y,z)
+              newenv(x,y,z) = env(x,y,z)
+           end if
+           
+        end do
+     end do
+  end do
+
+
+
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+1
@@ -494,18 +518,19 @@ subroutine pfsolve(iter)
 
 
 
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-           if (env(x,y,z).gt.0.99) then
-              newenv(x,y,z) = 1.0d0
-              newmet(x,y,z) = 0.0d0
-              newpht(x,y,z) = 0.0d0
-              newpyr(x,y,z) = 0.0d0
-           end if
-        end do
-     end do
-  end do
+
+  ! do x = 1,psx
+  !    do y = 1,psy
+  !       do z = 2,psz+1
+  !          if (env(x,y,z).gt.0.99) then
+  !             newenv(x,y,z) = 1.0d0
+  !             newmet(x,y,z) = 0.0d0
+  !             newpht(x,y,z) = 0.0d0
+  !             newpyr(x,y,z) = 0.0d0
+  !          end if
+  !       end do
+  !    end do
+  ! end do
 
 
   do x = 1,psx

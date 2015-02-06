@@ -222,14 +222,16 @@ subroutine MetFunction(snes,met_vec,ret_vec,dummy,ierr)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
        !!! Calculate linear prefactor
-           lnr(linindex) = (M_met_pht*sigma_met_pht*del2pht(x,y,z+1)) - (2*hill_met_pht*pht(x,y,z+1)*pht(x,y,z+1)) - (4*(w_met-w_pht)*pht(x,y,z+1)) + &
-                & (M_met_pyr*sigma_met_pyr*del2pyr(x,y,z+1)) - (2*hill_met_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) - (4*(w_met-w_pyr)*pyr(x,y,z+1)) + &
-                & (M_met_env*sigma_met_env*del2env(x,y,z+1)) - (2*hill_met_env*env(x,y,z+1)*env(x,y,z+1)) - (4*(w_met-w_env)*env(x,y,z+1)) 
+           lnr(linindex) = (M_met_pht*sigma_met_pht*del2pht(x,y,z+1)) + (2*M_met_pht*hill_met_pht*pht(x,y,z+1)*pht(x,y,z+1)) + (4*(w_met-w_pht)*pht(x,y,z+1)*M_met_pht) + &
+                & (M_met_pyr*sigma_met_pyr*del2pyr(x,y,z+1)) + (2*M_met_pyr*hill_met_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) + (4*(w_met-w_pyr)*pyr(x,y,z+1)*M_met_pyr) + &
+                & (M_met_env*sigma_met_env*del2env(x,y,z+1)) + (2*M_met_env*hill_met_env*env(x,y,z+1)*env(x,y,z+1)) + (4*(w_met-w_env)*env(x,y,z+1)*M_met_env) 
 
            lnr(linindex) = lnr(linindex)*point_met_vec(linindex)
 
        !!! Calculate quadratic prefactor
-           sqr(linindex) = ((2*hill_met_pht) - (2*(w_met-w_pht))) + ((2*hill_met_pyr) - (2*(w_met-w_pyr))) + ((2*hill_met_env) - (2*(w_met-w_env)))
+           sqr(linindex) = - ((2*M_met_pht*hill_met_pht*pht(x,y,z+1)) + (2*M_met_pht*(w_met-w_pht))) - &
+                & (M_met_pyr*((2*hill_met_pyr*pyr(x,y,z+1)) + (2*M_met_pyr*(w_met-w_pyr)))) - &
+                & (M_met_env*((2*hill_met_env*env(x,y,z+1)) + (2*M_met_env*(w_met-w_env))))
 
            sqr(linindex) = sqr(linindex)*point_met_vec(linindex)*point_met_vec(linindex)
         end do
@@ -509,14 +511,16 @@ subroutine PhtFunction(snes,pht_vec,ret_vec,dummy,ierr)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
        !!! Calculate linear prefactor
-           lnr(linindex) = (M_pht_met*sigma_pht_met*del2met(x,y,z+1)) - (2*hill_pht_met*met(x,y,z+1)*met(x,y,z+1)) - (4*(w_pht-w_met)*met(x,y,z+1)) + &
-                & (M_pht_pyr*sigma_pht_pyr*del2pyr(x,y,z+1)) - (2*hill_pht_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) - (4*(w_pht-w_pyr)*pyr(x,y,z+1)) + &
-                & (M_pht_env*sigma_pht_env*del2env(x,y,z+1)) - (2*hill_pht_env*env(x,y,z+1)*env(x,y,z+1)) - (4*(w_pht-w_env)*env(x,y,z+1)) 
+           lnr(linindex) = (M_pht_met*sigma_pht_met*del2met(x,y,z+1)) + (2*M_pht_met*hill_pht_met*met(x,y,z+1)*met(x,y,z+1)) + (4*M_pht_met*(w_pht-w_met)*met(x,y,z+1)) + &
+                & (M_pht_pyr*sigma_pht_pyr*del2pyr(x,y,z+1)) + (2*M_pht_pyr*hill_pht_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) + (4*M_pht_pyr*(w_pht-w_pyr)*pyr(x,y,z+1)) + &
+                & (M_pht_env*sigma_pht_env*del2env(x,y,z+1)) + (2*M_pht_env*hill_pht_env*env(x,y,z+1)*env(x,y,z+1)) + (4*M_pht_env*(w_pht-w_env)*env(x,y,z+1)) 
 
            lnr(linindex) = lnr(linindex)*point_pht_vec(linindex)
 
        !!! Calculate quadratic prefactor
-           sqr(linindex) = ((2*hill_pht_met) - (2*(w_pht-w_met))) + ((2*hill_pht_pyr) - (2*(w_pht-w_pyr))) + ((2*hill_pht_env) - (2*(w_pht-w_env)))
+           sqr(linindex) = -((2*M_pht_met*hill_pht_met*met(x,y,z+1)) + (2*M_pht_met*(w_pht-w_met))) - &
+                & ((2*M_pht_pyr*hill_pht_pyr*pyr(x,y,z+1)) + (2*M_pht_pyr*(w_pht-w_pyr))) - &
+                & ((2*M_pht_env*hill_pht_env*env(x,y,z+1)) + (2*M_pht_env*(w_pht-w_env)))
 
            sqr(linindex) = sqr(linindex)*point_pht_vec(linindex)*point_pht_vec(linindex)
         end do
@@ -794,14 +798,16 @@ subroutine PyrFunction(snes,pyr_vec,ret_vec,dummy,ierr)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
        !!! Calculate linear prefactor
-           lnr(linindex) = (M_pyr_met*sigma_pyr_met*del2met(x,y,z+1)) - (2*hill_pyr_met*met(x,y,z+1)*met(x,y,z+1)) - (4*(w_pyr-w_met)*met(x,y,z+1)) + &
-                & (M_pyr_pht*sigma_pyr_pht*del2pht(x,y,z+1)) - (2*hill_pyr_pht*pht(x,y,z+1)*pht(x,y,z+1)) - (4*(w_pyr-w_pht)*pht(x,y,z+1)) + &
-                & (M_pyr_env*sigma_pyr_env*del2env(x,y,z+1)) - (2*hill_pyr_env*env(x,y,z+1)*env(x,y,z+1)) - (4*(w_pyr-w_env)*env(x,y,z+1)) 
+           lnr(linindex) = (M_pyr_met*sigma_pyr_met*del2met(x,y,z+1)) + (2*M_pyr_met*hill_pyr_met*met(x,y,z+1)*met(x,y,z+1)) + (4*M_pyr_met*(w_pyr-w_met)*met(x,y,z+1)) + &
+                & (M_pyr_pht*sigma_pyr_pht*del2pht(x,y,z+1)) + (2*M_pyr_pht*hill_pyr_pht*pht(x,y,z+1)*pht(x,y,z+1)) + (4*M_pyr_pht*(w_pyr-w_pht)*pht(x,y,z+1)) + &
+                & (M_pyr_env*sigma_pyr_env*del2env(x,y,z+1)) + (2*M_pyr_env*hill_pyr_env*env(x,y,z+1)*env(x,y,z+1)) + (4*M_pyr_env*(w_pyr-w_env)*env(x,y,z+1)) 
 
            lnr(linindex) = lnr(linindex)*point_pyr_vec(linindex)
 
        !!! Calculate quadratic prefactor
-           sqr(linindex) = ((2*hill_pyr_met) - (2*(w_pyr-w_met))) + ((2*hill_pyr_pht) - (2*(w_pyr-w_pht))) + ((2*hill_pyr_env) - (2*(w_pyr-w_env)))
+           sqr(linindex) = -((2*M_pyr_met*hill_pyr_met*met(x,y,z+1)) + (2*M_pyr_met*(w_pyr-w_met))) - &
+                & ((2*M_pyr_pht*hill_pyr_pht*pht(x,y,z+1)) + (2*M_pyr_pht*(w_pyr-w_pht))) - &
+                & ((2*M_pyr_env*hill_pyr_env*env(x,y,z+1)) + (2*M_pyr_env*(w_pyr-w_env)))
 
            sqr(linindex) = sqr(linindex)*point_pyr_vec(linindex)*point_pyr_vec(linindex)
         end do
@@ -1111,14 +1117,16 @@ subroutine EnvFunction(snes,env_vec,ret_vec,dummy,ierr)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
        !!! Calculate linear prefactor
-           lnr(linindex) = (M_env_met*sigma_env_met*del2met(x,y,z+1)) - (2*hill_env_met*met(x,y,z+1)*met(x,y,z+1)) - (4*(w_env-w_met)*met(x,y,z+1)) + &
-                & (M_env_pyr*sigma_env_pyr*del2pyr(x,y,z+1)) - (2*hill_env_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) - (4*(w_env-w_pyr)*pyr(x,y,z+1)) + &
-                & (M_env_pht*sigma_env_pht*del2pht(x,y,z+1)) - (2*hill_env_pht*pht(x,y,z+1)*pht(x,y,z+1)) - (4*(w_env-w_pht)*pht(x,y,z+1)) 
+           lnr(linindex) = (M_env_met*sigma_env_met*del2met(x,y,z+1)) + (2*M_env_met*hill_env_met*met(x,y,z+1)*met(x,y,z+1)) + (4*M_env_met*(w_env-w_met)*met(x,y,z+1)) + &
+                & (M_env_pyr*sigma_env_pyr*del2pyr(x,y,z+1)) + (2*M_env_pyr*hill_env_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) + (4*M_env_pyr*(w_env-w_pyr)*pyr(x,y,z+1)) + &
+                & (M_env_pht*sigma_env_pht*del2pht(x,y,z+1)) + (2*M_env_pht*hill_env_pht*pht(x,y,z+1)*pht(x,y,z+1)) + (4*M_env_pht*(w_env-w_pht)*pht(x,y,z+1)) 
 
            lnr(linindex) = lnr(linindex)*point_env_vec(linindex)
 
        !!! Calculate quadratic prefactor
-           sqr(linindex) = ((2*hill_env_met) - (2*(w_env-w_met))) + ((2*hill_env_pyr) - (2*(w_env-w_pyr))) + ((2*hill_env_pht) - (2*(w_env-w_pht)))
+           sqr(linindex) = -((2*M_env_met*hill_env_met*met(x,y,z+1)) + (2*M_env_met*(w_env-w_met))) - &
+                & ((2*M_env_pyr*hill_env_pyr*pyr(x,y,z+1)) + (2*M_env_pyr*(w_env-w_pyr))) - &
+                & ((2*M_env_pht*hill_env_pht*pht(x,y,z+1)) + (2*M_env_pht*(w_env-w_pht)))
 
            sqr(linindex) = sqr(linindex)*point_env_vec(linindex)*point_env_vec(linindex)
         end do
