@@ -6,7 +6,7 @@ subroutine thermo
 
   integer :: i              ! Loop index
   real*8 :: my_mu           ! Chemical potential
-  real*8 :: my_pht, my_met, my_pyr  ! Free energy of each phase
+  real*8 :: my_met, my_mkw, my_pht, my_pyr  ! Free energy of each phase
   real*8 :: min_met_mkw, min_mkw_pht, min_pht_pyr
 
 
