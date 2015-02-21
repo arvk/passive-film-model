@@ -218,7 +218,7 @@ subroutine musolve(iter)
   do linindex = 1,psx*psy*psz
      is_sorted = .FALSE.
 
-     do while (is_sorted .eq. .FALSE.)
+     do while (is_sorted .eqv. .FALSE.)
 
         do rowindex = IA(linindex),IA(linindex+1)-2
 
