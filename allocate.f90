@@ -47,7 +47,7 @@ subroutine allocate_matrices()
   allocate(dmet_dt(psx,psy,psz+2)); allocate(dmkw_dt(psx,psy,psz+2)); allocate(dpht_dt(psx,psy,psz+2)); allocate(dpyr_dt(psx,psy,psz+2)); allocate(denv_dt(psx,psy,psz+2))
   allocate(dmu_dt(psx,psy,psz+2))
   
-  dpht_dt = 0.0d0 ; denv_dt = 0.0d0 ; dmet_dt = 0.0d0 ; dpyr_dt = 0.0d0 ; dmu_dt = 0.0d0
+  dpht_dt = 0.0d0 ; denv_dt = 0.0d0 ; dmet_dt = 0.0d0 ; dmkw_dt = 0.0d0 ; dpyr_dt = 0.0d0 ; dmu_dt = 0.0d0
 
 
 !! Allocate local matrices for updated phase-fields
