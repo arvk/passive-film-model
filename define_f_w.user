@@ -1,0 +1,21 @@
+  
+  !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+  !! Number of moles per m^3 = 52275
+  f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+  w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+  !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+  !! Number of moles per m^3 = 13303/T
+  f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+  w_env = 0.0d0
+
+  !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+  !! Number of moles per m^3 = 140401
+  f_met = 0.0d0*140401
+  w_met = 0.0d0*140401
+
+  !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+  !! Number of moles per m^3 = 41667
+  f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+  w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+

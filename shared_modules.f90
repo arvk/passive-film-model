@@ -37,37 +37,37 @@ module fields
   real*8 :: sigma_pht_met= -1E-6
   real*8 :: sigma_met_pht= -1E-6
 
-  real*8 :: sigma_pht_pyr_0 = -2.5E-8
-  real*8 :: sigma_pyr_pht_0 = -2.5E-8
+  real*8 :: sigma_pht_pyr = -2.5E-8
+  real*8 :: sigma_pyr_pht = -2.5E-8
 
   real*8 :: sigma_met_env= -1E-5
   real*8 :: sigma_env_met= -1E-5
 
-  real*8 :: sigma_met_pyr_0 = -1E-6
-  real*8 :: sigma_pyr_met_0 = -1E-6
+  real*8 :: sigma_met_pyr = -1E-6
+  real*8 :: sigma_pyr_met = -1E-6
 
-  real*8 :: sigma_env_pyr_0 = -2.5E-8
-  real*8 :: sigma_pyr_env_0 = -2.5E-8
+  real*8 :: sigma_env_pyr = -2.5E-8
+  real*8 :: sigma_pyr_env = -2.5E-8
 
 
 
   real*8 :: M_pht_met = 1.7E-09
   real*8 :: M_met_pht = 1.7E-09
 
-  real*8 :: M_met_pyr = 1.7E-09
-  real*8 :: M_pyr_met = 1.7E-09
+  real*8 :: M_met_pyr = 0.0d0! 1.7E-09
+  real*8 :: M_pyr_met = 0.0d0! 1.7E-09
 
-  real*8 :: M_pht_env = 1.7E-12
-  real*8 :: M_env_pht = 1.7E-12
+  real*8 :: M_pht_env = 0.0d0! 1.7E-12
+  real*8 :: M_env_pht = 0.0d0! 1.7E-12
 
-  real*8 :: M_env_pyr = 8.7E-09
-  real*8 :: M_pyr_env = 8.7E-09
+  real*8 :: M_env_pyr = 0.0d0! 8.7E-09
+  real*8 :: M_pyr_env = 0.0d0! 8.7E-09
 
-  real*8 :: M_met_env = 1.7E-26
-  real*8 :: M_env_met = 1.7E-26
+  real*8 :: M_met_env = 0.0d0! 1.7E-26
+  real*8 :: M_env_met = 0.0d0! 1.7E-26
 
-  real*8 :: M_pht_pyr = 8.7E-09
-  real*8 :: M_pyr_pht = 8.7E-09
+  real*8 :: M_pht_pyr = 0.0d0! 8.7E-09
+  real*8 :: M_pyr_pht = 0.0d0! 8.7E-09
 
 
 
@@ -112,7 +112,7 @@ module commondata
   integer :: nomc              ! Number of kMC steps
 
 
-  integer :: noimg = 20                   ! Number of output files
+  integer :: noimg = 5                   ! Number of output files
   integer :: freq_scale = 1750000000      ! KMC information is transferred every freq_scale steps
   integer :: kg_scale = 5                 ! Number of KMC grid points per PF grid
   integer :: swap_freq_pf = 5             ! Frequency with which MPI swaps are conducted for PF solving

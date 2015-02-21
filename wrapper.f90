@@ -78,8 +78,8 @@ program passive_film_model
 
      !! Solve PF equations
      call pfsolve(iter)
-     call musolve(iter)
-     call orsolve(iter)
+!     call musolve(iter)
+!     call orsolve(iter)
 
      if (mod(iter,freq_scale).eq.0) then
 
