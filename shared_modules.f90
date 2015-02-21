@@ -10,27 +10,39 @@ module fields
   integer :: psx,psy,psz       ! Number of PF gridpoints in 3 directions
 
   !! Define local phase fields
-  real*8, dimension(:,:,:), allocatable :: met,pht,pyr,env ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
+  real*8, dimension(:,:,:), allocatable :: met,mkw,pht,pyr,env ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
   real*8, dimension(:,:,:), allocatable :: mu  ! Local mu_S grid
   real*8, dimension(:,:,:), allocatable :: opyr  ! Local orientation field for pyrite
 
   !! Define global phase fields
-  real*8, dimension(:,:,:), allocatable :: met_g, pht_g, pyr_g, env_g ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
+  real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
   real*8, dimension(:,:,:), allocatable :: mu_g ! Local mu_S grid
   real*8, dimension(:,:,:), allocatable :: opyr_g  ! Global orientation field for pyrite
 
-  real*8 :: avg_mu_pht, avg_mu_env, avg_mu_met, avg_mu_pyr
+  real*8 :: avg_mu_met, avg_mu_mkw, avg_mu_pht, avg_mu_env, avg_mu_pyr
   real*8 :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
 
   real*8 :: dpf = 5E-9  ! Phase-field grid size
   real*8 :: dt          ! Timestep for PF evolution
 
 
-  real*8, dimension(:,:,:), allocatable :: dpht_dt, denv_dt, dmet_dt, dpyr_dt, dmu_dt
-  real*8, dimension(:,:,:), allocatable :: newpht, newenv, newmet, newpyr
+  real*8, dimension(:,:,:), allocatable :: dmet_dt, dmkw_dt, dpht_dt, dpyr_dt, denv_dt, dmu_dt
+  real*8, dimension(:,:,:), allocatable :: newmet, newmkw, newpht, newpyr, newenv
 
 
   !! Thermodynamic parameters
+  real*8 :: sigma_mkw_env= -1E-6
+  real*8 :: sigma_env_mkw= -1E-6
+
+  real*8 :: sigma_mkw_met= -1E-6
+  real*8 :: sigma_met_mkw= -1E-6
+
+  real*8 :: sigma_mkw_pht= -1E-6
+  real*8 :: sigma_pht_mkw= -1E-6
+
+  real*8 :: sigma_mkw_pyr_0 = -2.5E-8
+  real*8 :: sigma_pyr_mkw_0 = -2.5E-8
+
   real*8 :: sigma_pht_env= -1E-6
   real*8 :: sigma_env_pht= -1E-6
 
@@ -54,11 +66,17 @@ module fields
   real*8 :: M_pht_met = 1.7E-09
   real*8 :: M_met_pht = 1.7E-09
 
+  real*8 :: M_mkw_met = 1.7E-09
+  real*8 :: M_met_mkw = 1.7E-09
+
   real*8 :: M_met_pyr = 1.7E-09
   real*8 :: M_pyr_met = 1.7E-09
 
   real*8 :: M_pht_env = 1.7E-12
   real*8 :: M_env_pht = 1.7E-12
+
+  real*8 :: M_mkw_env = 1.7E-12
+  real*8 :: M_env_mkw = 1.7E-12
 
   real*8 :: M_env_pyr = 8.7E-09
   real*8 :: M_pyr_env = 8.7E-09
@@ -69,16 +87,28 @@ module fields
   real*8 :: M_pht_pyr = 8.7E-09
   real*8 :: M_pyr_pht = 8.7E-09
 
+  real*8 :: M_mkw_pyr = 8.7E-09
+  real*8 :: M_pyr_mkw = 8.7E-09
+
+  real*8 :: M_pht_mkw = 8.7E-09
+  real*8 :: M_mkw_pht = 8.7E-09
+
 
 
   real*8 :: hill_pht_met = 8E10
   real*8 :: hill_met_pht = 8E10
+
+  real*8 :: hill_mkw_met = 8E10
+  real*8 :: hill_met_mkw = 8E10
 
   real*8 :: hill_met_pyr = 8E10
   real*8 :: hill_pyr_met = 8E10
 
   real*8 :: hill_pht_env = 5E11
   real*8 :: hill_env_pht = 5E11
+
+  real*8 :: hill_mkw_env = 5E11
+  real*8 :: hill_env_mkw = 5E11
 
   real*8 :: hill_env_pyr = 5E7
   real*8 :: hill_pyr_env = 5E7
@@ -88,6 +118,12 @@ module fields
 
   real*8 :: hill_pht_pyr = 5E7
   real*8 :: hill_pyr_pht = 5E7
+
+  real*8 :: hill_mkw_pyr = 5E7
+  real*8 :: hill_pyr_mkw = 5E7
+
+  real*8 :: hill_pht_mkw = 5E7
+  real*8 :: hill_mkw_pht = 5E7
 
 
 
@@ -129,10 +165,11 @@ module laplacians
   implicit none
   save
 
-  real*8, dimension(:,:,:), allocatable :: del2pht
-  real*8, dimension(:,:,:), allocatable :: del2env
   real*8, dimension(:,:,:), allocatable :: del2met
+  real*8, dimension(:,:,:), allocatable :: del2mkw
+  real*8, dimension(:,:,:), allocatable :: del2pht
   real*8, dimension(:,:,:), allocatable :: del2pyr
+  real*8, dimension(:,:,:), allocatable :: del2env
   real*8, dimension(:,:,:), allocatable :: del2mu
 
 end module laplacians
@@ -146,7 +183,7 @@ module thermo_constants
   save
 
   real*8 :: mus_met_pht_eqb, mus_pht_pyr_eqb
-  real*8 :: rho_pht, rho_env, rho_met, rho_pyr    !! Sulfur density in different phases
+  real*8 :: rho_met, rho_mkw, rho_pht, rho_pyr, rho_env    !! Sulfur density in different phases
   real*8 :: R = 8.3144621   
 
 end module thermo_constants
@@ -198,8 +235,8 @@ module diffusion_constants
   implicit none
   save
 
-  real*8 :: D_S_met, D_S_env, D_S_pht, D_S_pyr
-  real*8 :: D_Fe_met, D_Fe_env, D_Fe_pht, D_Fe_pyr
+  real*8 :: D_S_met, D_S_mkw, D_S_pht, D_S_pyr, D_S_env
+  real*8 :: D_Fe_met, D_Fe_mkw, D_Fe_pht, D_Fe_pyr, D_Fe_env
 
 end module diffusion_constants
 
