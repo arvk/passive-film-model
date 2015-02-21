@@ -24,19 +24,19 @@ subroutine allocate_matrices()
 !! =====================
 
 !! Allocate global matrices  
-  allocate(met_g(psx_g,psy_g,psz_g)); allocate(pht_g(psx_g,psy_g,psz_g)); allocate(pyr_g(psx_g,psy_g,psz_g)); allocate(env_g(psx_g,psy_g,psz_g))
+  allocate(met_g(psx_g,psy_g,psz_g)); allocate(mkw_g(psx_g,psy_g,psz_g)); allocate(pht_g(psx_g,psy_g,psz_g)); allocate(pyr_g(psx_g,psy_g,psz_g)); allocate(env_g(psx_g,psy_g,psz_g))
   allocate(mu_g(psx_g,psy_g,psz_g))
   allocate(opyr_g(psx_g,psy_g,psz_g))
 
 
 !! Allocate local matrices
-  allocate(met(psx,psy,psz+2)); allocate(pht(psx,psy,psz+2)); allocate(pyr(psx,psy,psz+2)); allocate(env(psx,psy,psz+2)) 
+  allocate(met(psx,psy,psz+2)); allocate(mkw(psx,psy,psz+2)) ; allocate(pht(psx,psy,psz+2)); allocate(pyr(psx,psy,psz+2)); allocate(env(psx,psy,psz+2)) 
   allocate(mu(psx,psy,psz+2)) 
   allocate(opyr(psx,psy,psz+2)) 
 
   
 !! Allocate Laplacian matrices
-  allocate(del2met(psx,psy,psz+2)); allocate(del2pht(psx,psy,psz+2)); allocate(del2pyr(psx,psy,psz+2)); allocate(del2env(psx,psy,psz+2))
+  allocate(del2met(psx,psy,psz+2)); allocate(del2mkw(psx,psy,psz+2)); allocate(del2pht(psx,psy,psz+2)); allocate(del2pyr(psx,psy,psz+2)); allocate(del2env(psx,psy,psz+2))
   allocate(del2mu(psx,psy,psz+2))
 
 !! Allocate gradient matrices
@@ -44,14 +44,14 @@ subroutine allocate_matrices()
 
 
 !! Allocate time-evolution matrices
-  allocate(dmet_dt(psx,psy,psz+2)); allocate(dpht_dt(psx,psy,psz+2)); allocate(dpyr_dt(psx,psy,psz+2)); allocate(denv_dt(psx,psy,psz+2))
+  allocate(dmet_dt(psx,psy,psz+2)); allocate(dmkw_dt(psx,psy,psz+2)); allocate(dpht_dt(psx,psy,psz+2)); allocate(dpyr_dt(psx,psy,psz+2)); allocate(denv_dt(psx,psy,psz+2))
   allocate(dmu_dt(psx,psy,psz+2))
   
   dpht_dt = 0.0d0 ; denv_dt = 0.0d0 ; dmet_dt = 0.0d0 ; dpyr_dt = 0.0d0 ; dmu_dt = 0.0d0
 
 
 !! Allocate local matrices for updated phase-fields
-  allocate(newmet(psx,psy,psz+2)); allocate(newpht(psx,psy,psz+2)); allocate(newpyr(psx,psy,psz+2)); allocate(newenv(psx,psy,psz+2))
+  allocate(newmet(psx,psy,psz+2)); allocate(newmkw(psx,psy,psz+2)); allocate(newpht(psx,psy,psz+2)); allocate(newpyr(psx,psy,psz+2)); allocate(newenv(psx,psy,psz+2))
 
 
 
