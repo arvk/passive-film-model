@@ -68,48 +68,6 @@ subroutine MetJacobian(snes,met_vec,met_jacob,met_precond,dummy,ierr)
   end do
 
 
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-
-           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
-           !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z)*52275)
-
-           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
-           !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
-           w_env = 0.0d0
-
-           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
-           !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-
-!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
-           w_met = 0.0d0*140401
-
-
-           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
-           !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
-
-
-
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-
-           sigma_met_pyr = sigma_pyr_met
-           sigma_pht_pyr = sigma_pyr_pht
-           sigma_env_pyr = sigma_pyr_env
-
-        end do
-     end do
-  end do
-
-
   allocate(A((7*psx*psy*psz)-(2*psx*psy)))
   allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
   allocate(IA((psx*psy*psz)+1))
@@ -124,6 +82,53 @@ subroutine MetJacobian(snes,met_vec,met_jacob,met_precond,dummy,ierr)
         do x = 1,psx
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
        !!! Calculate linear prefactor
 
@@ -356,51 +361,7 @@ subroutine PhtJacobian(snes,pht_vec,pht_jacob,pht_precond,dummy,ierr)
   do x = 1,psx
      do y = 1,psy
         do z = 1,psz+2
-
            D_pht(x,y,z) = M_pht_met*sigma_pht_met*met(x,y,z) + M_pht_pyr*sigma_pht_pyr*pyr(x,y,z) + M_pht_env*sigma_pht_env*env(x,y,z) 
-
-        end do
-     end do
-  end do
-
-
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-
-           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
-           !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z)*52275)
-
-           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
-           !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
-           w_env = 0.0d0
-
-           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
-           !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-
-!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
-           w_met = 0.0d0*140401
-
-
-           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
-           !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
-
-
-
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-
-           sigma_met_pyr = sigma_pyr_met
-           sigma_pht_pyr = sigma_pyr_pht
-           sigma_env_pyr = sigma_pyr_env
-
         end do
      end do
   end do
@@ -420,6 +381,52 @@ subroutine PhtJacobian(snes,pht_vec,pht_jacob,pht_precond,dummy,ierr)
         do x = 1,psx
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+
+
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
+
+
+
+
+
+
 
        !!! Calculate linear prefactor
 
@@ -658,48 +665,6 @@ subroutine PyrJacobian(snes,pyr_vec,pyr_jacob,pyr_precond,dummy,ierr)
   end do
 
 
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-
-           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
-           !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z)*52275)
-
-           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
-           !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
-           w_env = 0.0d0
-
-           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
-           !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-
-!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
-           w_met = 0.0d0*140401
-
-
-           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
-           !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
-
-
-
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-
-           sigma_met_pyr = sigma_pyr_met
-           sigma_pht_pyr = sigma_pyr_pht
-           sigma_env_pyr = sigma_pyr_env
-
-        end do
-     end do
-  end do
-
-
   allocate(A((7*psx*psy*psz)-(2*psx*psy)))
   allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
   allocate(IA((psx*psy*psz)+1))
@@ -714,6 +679,46 @@ subroutine PyrJacobian(snes,pyr_vec,pyr_jacob,pyr_precond,dummy,ierr)
         do x = 1,psx
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
+
+
 
        !!! Calculate linear prefactor
            lnr(linindex) = (M_pyr_met*sigma_pyr_met*del2met(x,y,z+1)) + (2*M_pyr_met*hill_pyr_met*met(x,y,z+1)*met(x,y,z+1)) + (4*M_pyr_met*(w_pyr-w_met)*met(x,y,z+1)) + &
@@ -957,48 +962,6 @@ subroutine EnvJacobian(snes,env_vec,env_jacob,env_precond,dummy,ierr)
   end do
 
 
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-
-           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
-           !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z)*52275)
-
-           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
-           !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
-           w_env = 0.0d0
-
-           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
-           !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-
-!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
-           w_met = 0.0d0*140401
-
-
-           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
-           !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
-
-
-
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-
-           sigma_met_pyr = sigma_pyr_met
-           sigma_pht_pyr = sigma_pyr_pht
-           sigma_env_pyr = sigma_pyr_env
-
-        end do
-     end do
-  end do
-
-
   allocate(A((7*psx*psy*psz)-(2*psx*psy)))
   allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
   allocate(IA((psx*psy*psz)+1))
@@ -1013,6 +976,45 @@ subroutine EnvJacobian(snes,env_vec,env_jacob,env_precond,dummy,ierr)
         do x = 1,psx
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
 
        !!! Calculate linear prefactor
 

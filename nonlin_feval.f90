@@ -55,48 +55,6 @@ subroutine MetFunction(snes,met_vec,ret_vec,dummy,ierr)
 
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+1
-
-           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
-           !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z)*52275)
-
-           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
-           !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
-           w_env = 0.0d0
-
-           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
-           !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-
-!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
-           w_met = 0.0d0*140401
-
-
-           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
-           !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
-
-
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-
-           sigma_met_pyr = sigma_pyr_met
-           sigma_pht_pyr = sigma_pyr_pht
-           sigma_env_pyr = sigma_pyr_env
-
-        end do
-     end do
-  end do
-
-
-
-  do x = 1,psx
-     do y = 1,psy
         do z = 1,psz+2
            D_met(x,y,z) = (M_met_pht*sigma_met_pht*pht(x,y,z)) + (M_met_pyr*sigma_met_pyr*pyr(x,y,z)) + (M_met_env*sigma_met_env*env(x,y,z))
         end do
@@ -111,6 +69,7 @@ subroutine MetFunction(snes,met_vec,ret_vec,dummy,ierr)
 
   IA=0 ; JA=0 ; A=0
   contindex = 0; linindex = 0
+
 
   do z = 1,psz
      do y = 1,psy
@@ -221,6 +180,36 @@ subroutine MetFunction(snes,met_vec,ret_vec,dummy,ierr)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
        !!! Calculate linear prefactor
            lnr(linindex) = (M_met_pht*sigma_met_pht*del2pht(x,y,z+1)) + (2*M_met_pht*hill_met_pht*pht(x,y,z+1)*pht(x,y,z+1)) + (4*(w_met-w_pht)*pht(x,y,z+1)*M_met_pht) + &
                 & (M_met_pyr*sigma_met_pyr*del2pyr(x,y,z+1)) + (2*M_met_pyr*hill_met_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) + (4*(w_met-w_pyr)*pyr(x,y,z+1)*M_met_pyr) + &
@@ -240,8 +229,13 @@ subroutine MetFunction(snes,met_vec,ret_vec,dummy,ierr)
 
   call VecRestoreArrayF90(met_vec,point_met_vec,ierr)
 
+  !write(6,*) M_pht_met,M_met_pht,M_met_pyr,M_pyr_met,M_pht_env,M_env_pht,M_env_pyr,M_pyr_env,M_met_env,M_env_met,M_pht_pyr,M_pyr_pht
+
   call VecSetValues(ret_vec,psx*psy*psz,vector_locator,lnr,ADD_VALUES,ierr)
   call VecSetValues(ret_vec,psx*psy*psz,vector_locator,sqr,ADD_VALUES,ierr)
+
+  call VecAssemblyBegin(ret_vec,ierr)
+  call VecAssemblyEnd(ret_vec,ierr)
 
   call MatDestroy(lhs_met_mat,ierr)
 
@@ -340,48 +334,6 @@ subroutine PhtFunction(snes,pht_vec,ret_vec,dummy,ierr)
   real*8 :: sigma_pyr_met
   real*8 :: sigma_env_pyr
   real*8 :: sigma_pyr_env
-
-
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-
-           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
-           !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z)*52275)
-
-           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
-           !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
-           w_env = 0.0d0
-
-           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
-           !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-
-!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
-           w_met = 0.0d0*140401
-
-
-           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
-           !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
-
-
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-
-           sigma_met_pyr = sigma_pyr_met
-           sigma_pht_pyr = sigma_pyr_pht
-           sigma_env_pyr = sigma_pyr_env
-
-        end do
-     end do
-  end do
-
 
 
   do x = 1,psx
@@ -510,6 +462,50 @@ subroutine PhtFunction(snes,pht_vec,ret_vec,dummy,ierr)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+
+
+
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
+
+
+
+
+
        !!! Calculate linear prefactor
            lnr(linindex) = (M_pht_met*sigma_pht_met*del2met(x,y,z+1)) + (2*M_pht_met*hill_pht_met*met(x,y,z+1)*met(x,y,z+1)) + (4*M_pht_met*(w_pht-w_met)*met(x,y,z+1)) + &
                 & (M_pht_pyr*sigma_pht_pyr*del2pyr(x,y,z+1)) + (2*M_pht_pyr*hill_pht_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) + (4*M_pht_pyr*(w_pht-w_pyr)*pyr(x,y,z+1)) + &
@@ -529,8 +525,13 @@ subroutine PhtFunction(snes,pht_vec,ret_vec,dummy,ierr)
 
   call VecRestoreArrayF90(pht_vec,point_pht_vec,ierr)
 
+  !write(6,*) M_pht_met,M_met_pht,M_met_pyr,M_pyr_met,M_pht_env,M_env_pht,M_env_pyr,M_pyr_env,M_met_env,M_env_met,M_pht_pyr,M_pyr_pht
+
   call VecSetValues(ret_vec,psx*psy*psz,vector_locator,lnr,ADD_VALUES,ierr)
   call VecSetValues(ret_vec,psx*psy*psz,vector_locator,sqr,ADD_VALUES,ierr)
+
+  call VecAssemblyBegin(ret_vec,ierr)
+  call VecAssemblyEnd(ret_vec,ierr)
 
   call MatDestroy(lhs_pht_mat,ierr)
 
@@ -627,47 +628,6 @@ subroutine PyrFunction(snes,pyr_vec,ret_vec,dummy,ierr)
   real*8 :: sigma_pyr_met
   real*8 :: sigma_env_pyr
   real*8 :: sigma_pyr_env
-
-
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-
-           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
-           !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z)*52275)
-
-           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
-           !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
-           w_env = 0.0d0
-
-           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
-           !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-
-!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
-           w_met = 0.0d0*140401
-
-
-           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
-           !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
-
-
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-
-           sigma_met_pyr = sigma_pyr_met
-           sigma_pht_pyr = sigma_pyr_pht
-           sigma_env_pyr = sigma_pyr_env
-
-        end do
-     end do
-  end do
 
 
 
@@ -797,6 +757,45 @@ subroutine PyrFunction(snes,pyr_vec,ret_vec,dummy,ierr)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
+
+
+
        !!! Calculate linear prefactor
            lnr(linindex) = (M_pyr_met*sigma_pyr_met*del2met(x,y,z+1)) + (2*M_pyr_met*hill_pyr_met*met(x,y,z+1)*met(x,y,z+1)) + (4*M_pyr_met*(w_pyr-w_met)*met(x,y,z+1)) + &
                 & (M_pyr_pht*sigma_pyr_pht*del2pht(x,y,z+1)) + (2*M_pyr_pht*hill_pyr_pht*pht(x,y,z+1)*pht(x,y,z+1)) + (4*M_pyr_pht*(w_pyr-w_pht)*pht(x,y,z+1)) + &
@@ -816,8 +815,13 @@ subroutine PyrFunction(snes,pyr_vec,ret_vec,dummy,ierr)
 
   call VecRestoreArrayF90(pyr_vec,point_pyr_vec,ierr)
 
+  !write(6,*) M_pht_met,M_met_pht,M_met_pyr,M_pyr_met,M_pht_env,M_env_pht,M_env_pyr,M_pyr_env,M_met_env,M_env_met,M_pht_pyr,M_pyr_pht
+
   call VecSetValues(ret_vec,psx*psy*psz,vector_locator,lnr,ADD_VALUES,ierr)
   call VecSetValues(ret_vec,psx*psy*psz,vector_locator,sqr,ADD_VALUES,ierr)
+
+  call VecAssemblyBegin(ret_vec,ierr)
+  call VecAssemblyEnd(ret_vec,ierr)
 
   call MatDestroy(lhs_pyr_mat,ierr)
 
@@ -948,47 +952,6 @@ subroutine EnvFunction(snes,env_vec,ret_vec,dummy,ierr)
   real*8 :: sigma_pyr_env
 
 
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-
-           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
-           !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z)*52275)
-
-           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
-           !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z)*(exp(mu(x,y,z)/(R*T))*(13303/T))
-           w_env = 0.0d0
-
-           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
-           !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-
-!           w_met = f_met - (mu(x,y,z)*140401*0.0015d0)
-           w_met = 0.0d0*140401
-
-
-           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
-           !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z)*mu(x,y,z)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z)*2*41667)
-
-
-           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
-
-           sigma_met_pyr = sigma_pyr_met
-           sigma_pht_pyr = sigma_pyr_pht
-           sigma_env_pyr = sigma_pyr_env
-
-        end do
-     end do
-  end do
-
-
 
   do x = 1,psx
      do y = 1,psy
@@ -1116,6 +1079,55 @@ subroutine EnvFunction(snes,env_vec,ret_vec,dummy,ierr)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+
+
+
+
+
+
+
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
+
+
+
+
+
+
        !!! Calculate linear prefactor
            lnr(linindex) = (M_env_met*sigma_env_met*del2met(x,y,z+1)) + (2*M_env_met*hill_env_met*met(x,y,z+1)*met(x,y,z+1)) + (4*M_env_met*(w_env-w_met)*met(x,y,z+1)) + &
                 & (M_env_pyr*sigma_env_pyr*del2pyr(x,y,z+1)) + (2*M_env_pyr*hill_env_pyr*pyr(x,y,z+1)*pyr(x,y,z+1)) + (4*M_env_pyr*(w_env-w_pyr)*pyr(x,y,z+1)) + &
@@ -1135,8 +1147,13 @@ subroutine EnvFunction(snes,env_vec,ret_vec,dummy,ierr)
 
   call VecRestoreArrayF90(env_vec,point_env_vec,ierr)
 
+  !write(6,*) M_pht_met,M_met_pht,M_met_pyr,M_pyr_met,M_pht_env,M_env_pht,M_env_pyr,M_pyr_env,M_met_env,M_env_met,M_pht_pyr,M_pyr_pht
+
   call VecSetValues(ret_vec,psx*psy*psz,vector_locator,lnr,ADD_VALUES,ierr)
   call VecSetValues(ret_vec,psx*psy*psz,vector_locator,sqr,ADD_VALUES,ierr)
+
+  call VecAssemblyBegin(ret_vec,ierr)
+  call VecAssemblyEnd(ret_vec,ierr)
 
   call MatDestroy(lhs_env_mat,ierr)
 

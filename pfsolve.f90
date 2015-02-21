@@ -45,14 +45,6 @@ subroutine pfsolve(iter)
   real*8 :: f_pht, f_env, f_met, f_pyr
   real*8 :: w_pht, w_env, w_met, w_pyr
 
-  !! Derivative of bulk free energy with phase field
-  real*8 :: dF_dpht_met, dF_dpht_env, dF_dpht_pyr
-  real*8 :: dF_dmet_pht, dF_dmet_env, dF_dmet_pyr
-  real*8 :: dF_denv_met, dF_denv_pht, dF_denv_pyr
-  real*8 :: dF_dpyr_met, dF_dpyr_pht, dF_dpyr_env
-
-
-
   real*8 :: sigma_pht_pyr
   real*8 :: sigma_pyr_pht
   real*8 :: sigma_met_pyr
@@ -66,6 +58,7 @@ subroutine pfsolve(iter)
   integer :: int_count
 
   real*8, dimension(psx,psy,psz+2) :: del_opyr
+  real*8 :: sumfields
   real*8 :: odiff
   integer :: wrap
   real*8 :: delx,dely,delz
@@ -90,7 +83,6 @@ subroutine pfsolve(iter)
   call calc_grad_pf()
 
 
-
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+1
@@ -104,6 +96,8 @@ subroutine pfsolve(iter)
         end do
      end do
   end do
+
+
 
 
 
@@ -134,6 +128,37 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
            B(linindex) =  (met(x,y,z+1)/dt) - &
                 & 2*M_met_pht*(w_met-w_pht)*(pht(x,y,z+1)*pht(x,y,z+1)) - &
                 & 2*M_met_pyr*(w_met-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) - &
@@ -157,12 +182,17 @@ subroutine pfsolve(iter)
 
            end if
 
-           approxsol(linindex) = met(x,y,z+1)
+           approxsol(linindex) = 0.0d0!met(x,y,z+1)
            vector_locator(linindex) = linindex-1
 
         end do
      end do
   end do
+
+  if (rank.eq.5) then
+     write(6,*) "Met, I",iter,"B",B(32)
+  end if
+
 
   call VecCreate(PETSC_COMM_SELF,met_vec,ierr)
   call VecSetSizes(met_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -170,11 +200,17 @@ subroutine pfsolve(iter)
   call VecSetUp(met_vec,ierr)
   call VecSetValues(met_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
 
+  call VecAssemblyBegin(met_vec,ierr)
+  call VecAssemblyEnd(met_vec,ierr)
+
   call VecCreate(PETSC_COMM_SELF,rhs_met_vec,ierr)
   call VecSetSizes(rhs_met_vec,PETSC_DECIDE,psx*psy*psz,ierr)
   call VecSetFromOptions(rhs_met_vec,ierr)
   call VecSetUp(rhs_met_vec,ierr)
   call VecSetValues(rhs_met_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+
+  call VecAssemblyBegin(rhs_met_vec,ierr)
+  call VecAssemblyEnd(rhs_met_vec,ierr)
 
   call MatCreate(PETSC_COMM_SELF,jac_met,ierr)
   call MatSetSizes(jac_met,PETSC_DECIDE,PETSC_DECIDE,psx*psy*psz,psx*psy*psz,ierr)
@@ -193,6 +229,41 @@ subroutine pfsolve(iter)
         do x = 1,psx
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
 
            B(linindex) =  (pht(x,y,z+1)/dt) - &
                 & 2*M_pht_met*(w_pht-w_met)*(met(x,y,z+1)*met(x,y,z+1)) - &
@@ -217,12 +288,17 @@ subroutine pfsolve(iter)
 
            end if
 
-           approxsol(linindex) = pht(x,y,z+1)
+           approxsol(linindex) = 0.0d0!pht(x,y,z+1)
            vector_locator(linindex) = linindex-1
 
         end do
      end do
   end do
+
+  if (rank.eq.5) then
+     write(6,*) "Pht, I",iter,"B",B(32)
+  end if
+
 
   call VecCreate(PETSC_COMM_SELF,pht_vec,ierr)
   call VecSetSizes(pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -230,11 +306,17 @@ subroutine pfsolve(iter)
   call VecSetUp(pht_vec,ierr)
   call VecSetValues(pht_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
 
+  call VecAssemblyBegin(pht_vec,ierr)
+  call VecAssemblyEnd(pht_vec,ierr)
+
   call VecCreate(PETSC_COMM_SELF,rhs_pht_vec,ierr)
   call VecSetSizes(rhs_pht_vec,PETSC_DECIDE,psx*psy*psz,ierr)
   call VecSetFromOptions(rhs_pht_vec,ierr)
   call VecSetUp(rhs_pht_vec,ierr)
   call VecSetValues(rhs_pht_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+
+  call VecAssemblyBegin(rhs_pht_vec,ierr)
+  call VecAssemblyEnd(rhs_pht_vec,ierr)
 
   call MatCreate(PETSC_COMM_SELF,jac_pht,ierr)
   call MatSetSizes(jac_pht,PETSC_DECIDE,PETSC_DECIDE,psx*psy*psz,psx*psy*psz,ierr)
@@ -268,6 +350,45 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+
+
+
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
+
+
+
            B(linindex) =  (pyr(x,y,z+1)/dt) - &
                 & 2*M_pyr_met*(w_pyr-w_met)*(met(x,y,z+1)*met(x,y,z+1)) - &
                 & 2*M_pyr_pht*(w_pyr-w_pht)*(pht(x,y,z+1)*pht(x,y,z+1)) - &
@@ -291,12 +412,16 @@ subroutine pfsolve(iter)
 
            end if
 
-           approxsol(linindex) = pyr(x,y,z+1)
+           approxsol(linindex) = 0.0d0!pyr(x,y,z+1)
            vector_locator(linindex) = linindex-1
 
         end do
      end do
   end do
+
+  if (rank.eq.5) then
+     write(6,*) "Pyr, I",iter,"B",B(32)
+  end if
 
   call VecCreate(PETSC_COMM_SELF,pyr_vec,ierr)
   call VecSetSizes(pyr_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -304,11 +429,17 @@ subroutine pfsolve(iter)
   call VecSetUp(pyr_vec,ierr)
   call VecSetValues(pyr_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
 
+  call VecAssemblyBegin(pyr_vec,ierr)
+  call VecAssemblyEnd(pyr_vec,ierr)
+
   call VecCreate(PETSC_COMM_SELF,rhs_pyr_vec,ierr)
   call VecSetSizes(rhs_pyr_vec,PETSC_DECIDE,psx*psy*psz,ierr)
   call VecSetFromOptions(rhs_pyr_vec,ierr)
   call VecSetUp(rhs_pyr_vec,ierr)
   call VecSetValues(rhs_pyr_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+
+  call VecAssemblyBegin(rhs_pyr_vec,ierr)
+  call VecAssemblyEnd(rhs_pyr_vec,ierr)
 
   call MatCreate(PETSC_COMM_SELF,jac_pyr,ierr)
   call MatSetSizes(jac_pyr,PETSC_DECIDE,PETSC_DECIDE,psx*psy*psz,psx*psy*psz,ierr)
@@ -337,6 +468,39 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = 0.0d0*140401
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.5*cos(4*(0.185+atan(delypyr(x,y,z+1)/(delzpyr(x,y,z+1)+1E-14)))-opyr(x,y,z+1)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
+
+
+
+
+
            B(linindex) =  (env(x,y,z+1)/dt) - &
                 & 2*M_env_met*(w_env-w_met)*(met(x,y,z+1)*met(x,y,z+1)) - &
                 & 2*M_env_pyr*(w_env-w_pyr)*(pyr(x,y,z+1)*pyr(x,y,z+1)) - &
@@ -360,12 +524,16 @@ subroutine pfsolve(iter)
 
            end if
 
-           approxsol(linindex) = env(x,y,z+1)
+           approxsol(linindex) = 0.0d0!env(x,y,z+1)
            vector_locator(linindex) = linindex-1
 
         end do
      end do
   end do
+
+  if (rank.eq.5) then
+     write(6,*) "Env, I",iter,"B",B(32)
+  end if
 
   call VecCreate(PETSC_COMM_SELF,env_vec,ierr)
   call VecSetSizes(env_vec,PETSC_DECIDE,psx*psy*psz,ierr)
@@ -373,11 +541,17 @@ subroutine pfsolve(iter)
   call VecSetUp(env_vec,ierr)
   call VecSetValues(env_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
 
+  call VecAssemblyBegin(env_vec,ierr)
+  call VecAssemblyEnd(env_vec,ierr)
+
   call VecCreate(PETSC_COMM_SELF,rhs_env_vec,ierr)
   call VecSetSizes(rhs_env_vec,PETSC_DECIDE,psx*psy*psz,ierr)
   call VecSetFromOptions(rhs_env_vec,ierr)
   call VecSetUp(rhs_env_vec,ierr)
   call VecSetValues(rhs_env_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+
+  call VecAssemblyBegin(rhs_env_vec,ierr)
+  call VecAssemblyEnd(rhs_env_vec,ierr)
 
   call MatCreate(PETSC_COMM_SELF,jac_env,ierr)
   call MatSetSizes(jac_env,PETSC_DECIDE,PETSC_DECIDE,psx*psy*psz,psx*psy*psz,ierr)
@@ -425,6 +599,10 @@ subroutine pfsolve(iter)
 
 
 
+  call SNESGetSolution(snes_met,met_vec,ierr)
+  call SNESGetSolution(snes_pht,pht_vec,ierr)
+  call SNESGetSolution(snes_pyr,pyr_vec,ierr)
+  call SNESGetSolution(snes_env,env_vec,ierr)
 
 
   call VecGetArrayF90(met_vec,point_met_vec,ierr)
@@ -438,19 +616,19 @@ subroutine pfsolve(iter)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
               if (point_met_vec(linindex).eq.point_met_vec(linindex)) then
-                 newmet(x,y,z+1) =  max(min(point_met_vec(linindex),1.0d0),0.0d0)
+                 newmet(x,y,z+1) = max(min(point_met_vec(linindex),1.0d0),0.0d0)
               end if
 
               if (point_pht_vec(linindex).eq.point_pht_vec(linindex)) then
-                 newpht(x,y,z+1) =  max(min(point_pht_vec(linindex),1.0d0),0.0d0)
+                 newpht(x,y,z+1) = max(min(point_pht_vec(linindex),1.0d0),0.0d0)
               end if
 
               if (point_pyr_vec(linindex).eq.point_pyr_vec(linindex)) then
-                 newpyr(x,y,z+1) =  max(min(point_pyr_vec(linindex),1.0d0),0.0d0)
+                 newpyr(x,y,z+1) = max(min(point_pyr_vec(linindex),1.0d0),0.0d0)
               end if
 
               if (point_env_vec(linindex).eq.point_env_vec(linindex)) then
-                 newenv(x,y,z+1) =  max(min(point_env_vec(linindex),1.0d0),0.0d0)
+                 newenv(x,y,z+1) = max(min(point_env_vec(linindex),1.0d0),0.0d0)
               end if
 
         end do
@@ -488,49 +666,33 @@ subroutine pfsolve(iter)
 
 
   !! Update phase fields
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-
-           if (newenv(x,y,z).gt.0.97) then
-              newmet(x,y,z) = met(x,y,z)
-              newpht(x,y,z) = pht(x,y,z)
-              newpyr(x,y,z) = pyr(x,y,z)
-              newenv(x,y,z) = env(x,y,z)
-           end if
-           
-        end do
-     end do
-  end do
-
-
-
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+1
-           newmet(x,y,z) = newmet(x,y,z)/(newmet(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
-           newpht(x,y,z) = newpht(x,y,z)/(newmet(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
-           newenv(x,y,z) = newenv(x,y,z)/(newmet(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
-           newpyr(x,y,z) = newpyr(x,y,z)/(newmet(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
-        end do
-     end do
-  end do
-
-
-
-
   ! do x = 1,psx
   !    do y = 1,psy
   !       do z = 2,psz+1
-  !          if (env(x,y,z).gt.0.99) then
-  !             newenv(x,y,z) = 1.0d0
-  !             newmet(x,y,z) = 0.0d0
-  !             newpht(x,y,z) = 0.0d0
-  !             newpyr(x,y,z) = 0.0d0
-  !          end if
+  !          sumfields = (newmet(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
+  !          newmet(x,y,z) = newmet(x,y,z)+((1.0d0-sumfields)/4.0d0)
+  !          newpht(x,y,z) = newpht(x,y,z)+((1.0d0-sumfields)/4.0d0)
+  !          newenv(x,y,z) = newenv(x,y,z)+((1.0d0-sumfields)/4.0d0)
+  !          newpyr(x,y,z) = newpyr(x,y,z)+((1.0d0-sumfields)/4.0d0)
   !       end do
   !    end do
   ! end do
+
+
+
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+           if (env(x,y,z).gt.0.99) then
+              newenv(x,y,z) = 1.0d0
+              newmet(x,y,z) = 0.0d0
+              newpht(x,y,z) = 0.0d0
+              newpyr(x,y,z) = 0.0d0
+           end if
+        end do
+     end do
+  end do
 
 
   do x = 1,psx
@@ -541,6 +703,8 @@ subroutine pfsolve(iter)
            dmet_dt(x,y,z) = (newmet(x,y,z) - met(x,y,z))/dt
            dpyr_dt(x,y,z) = (newpyr(x,y,z) - pyr(x,y,z))/dt
         end do
+           dmet_dt(x,y,1) = 0.0d0 ; dpht_dt(x,y,1) = 0.0d0 ; dpyr_dt(x,y,1) = 0.0d0 ; denv_dt(x,y,1) = 0.0d0 
+           dmet_dt(x,y,psz+2) = 0.0d0 ; dpht_dt(x,y,psz+2) = 0.0d0 ; dpyr_dt(x,y,psz+2) = 0.0d0 ; denv_dt(x,y,psz+2) = 0.0d0 
      end do
   end do
 
