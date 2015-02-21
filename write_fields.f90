@@ -23,38 +23,49 @@ subroutine write_fields(iter)
   end do
   close(101)  
 
-  open (unit=102, file="PHT.out", status="new")
+  open (unit=102, file="MKW.out", status="new")
   write(102,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(102,*)  pht_g(x,y,z)
+           write(102,*)  mkw_g(x,y,z)
         end do
      end do
   end do
   close(102)  
 
-  open (unit=103, file="PYR.out", status="new")
+  open (unit=103, file="PHT.out", status="new")
   write(103,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(103,*)  pyr_g(x,y,z)
+           write(103,*)  pht_g(x,y,z)
         end do
      end do
   end do
   close(103)  
 
-  open (unit=104, file="ENV.out", status="new")
+  open (unit=104, file="PYR.out", status="new")
   write(104,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g
+  do x = 1,psx_g 
      do y = 1,psy_g
         do z = 1,psz_g
-           write(104,*)  env_g(x,y,z)
+           write(104,*)  pyr_g(x,y,z)
         end do
      end do
   end do
   close(104)  
+
+  open (unit=105, file="ENV.out", status="new")
+  write(105,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
+  do x = 1,psx_g
+     do y = 1,psy_g
+        do z = 1,psz_g
+           write(105,*)  env_g(x,y,z)
+        end do
+     end do
+  end do
+  close(105)  
 
 
 
