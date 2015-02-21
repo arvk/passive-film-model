@@ -23,38 +23,49 @@ subroutine read_geometry
   end do
   close(101)  
 
-  open (unit=102, file="PHT.out", status="old")
+  open (unit=102, file="MKW.out", status="old")
   read(102,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(102,*)  pht_g(x,y,z)
+           read(102,*)  mkw_g(x,y,z)
         end do
      end do
   end do
   close(102)  
 
-  open (unit=103, file="PYR.out", status="old")
+  open (unit=103, file="PHT.out", status="old")
   read(103,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(103,*)  pyr_g(x,y,z)
+           read(103,*)  pht_g(x,y,z)
         end do
      end do
   end do
   close(103)  
 
-  open (unit=104, file="ENV.out", status="old")
+  open (unit=104, file="PYR.out", status="old")
   read(104,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g
+  do x = 1,psx_g 
      do y = 1,psy_g
         do z = 1,psz_g
-           read(104,*)  env_g(x,y,z)
+           read(104,*)  pyr_g(x,y,z)
         end do
      end do
   end do
   close(104)  
+
+  open (unit=105, file="ENV.out", status="old")
+  read(105,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
+  do x = 1,psx_g
+     do y = 1,psy_g
+        do z = 1,psz_g
+           read(105,*)  env_g(x,y,z)
+        end do
+     end do
+  end do
+  close(105)  
 
 !! Read chemical-potential field; Units == 2XX
 
