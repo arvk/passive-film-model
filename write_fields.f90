@@ -8,7 +8,7 @@ subroutine write_fields(iter)
   integer :: x, y, z
   character*5 :: img_id
 
-  call system("rm -rf PHT.out ENV.out MET.out PYR.out MUS.out OPYR.out")
+  call system("rm -rf MET.out MKW.out PHT.out PYR.out ENV.out MUS.out OPYR.out")
 
 
   !! Write phase fraction fields
