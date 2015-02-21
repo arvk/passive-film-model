@@ -9,6 +9,7 @@ subroutine calc_lap_pf
 
 !!!! Initialize all variables to zero
   del2met = 0.0d0 
+  del2mkw = 0.0d0 
   del2pht = 0.0d0 
   del2pyr = 0.0d0 
   del2env = 0.0d0 
@@ -32,6 +33,20 @@ wrap(y+1,psy),z+1)+met(wrap(x+1,psx),wrap(y-1,psy),z+1)+met(wrap(x-1,psx),wrap(y
            del2met(x,y,z) = del2met(x,y,z) + 1*(met(wrap(x+1,psx),wrap(y+1,psy),z-1)+met(wrap(x-1,psx),&
 wrap(y+1,psy),z-1)+met(wrap(x+1,psx),wrap(y-1,psy),z-1)+met(wrap(x-1,psx),wrap(y-1,psy),z-1))
            del2met(x,y,z) = (del2met(x,y,z) - 128*met(x,y,z))/(30*dpf*dpf)
+
+           del2mkw(x,y,z) = 14*(mkw(wrap(x+1,psx),y,z)+mkw(wrap(x-1,psx),y,z)+mkw(x,wrap(y+1,psy),z)&
+&+mkw(x,wrap(y-1,psy),z)+mkw(x,y,z+1)+mkw(x,y,z-1))
+           del2mkw(x,y,z) = del2mkw(x,y,z) + 3*(mkw(wrap(x+1,psx),wrap(y+1,psy),z)+mkw(wrap(x-1,psx),wrap(y+1,psy),z)+&
+&mkw(wrap(x+1,psx),wrap(y-1,psy),z)+mkw(wrap(x-1,psx),wrap(y-1,psy),z))
+           del2mkw(x,y,z) = del2mkw(x,y,z) + 3*(mkw(x,wrap(y+1,psy),z+1)+mkw(x,wrap(y+1,psy),z-1)+&
+&mkw(x,wrap(y-1,psy),z+1)+mkw(x,wrap(y-1,psy),z-1))
+           del2mkw(x,y,z) = del2mkw(x,y,z) + 3*(mkw(wrap(x+1,psx),y,z+1)+mkw(wrap(x-1,psx),y,z+1)+&
+&mkw(wrap(x+1,psx),y,z-1)+mkw(wrap(x-1,psx),y,z-1))
+           del2mkw(x,y,z) = del2mkw(x,y,z) + 1*(mkw(wrap(x+1,psx),wrap(y+1,psy),z+1)+mkw(wrap(x-1,psx),&
+wrap(y+1,psy),z+1)+mkw(wrap(x+1,psx),wrap(y-1,psy),z+1)+mkw(wrap(x-1,psx),wrap(y-1,psy),z+1))
+           del2mkw(x,y,z) = del2mkw(x,y,z) + 1*(mkw(wrap(x+1,psx),wrap(y+1,psy),z-1)+mkw(wrap(x-1,psx),&
+wrap(y+1,psy),z-1)+mkw(wrap(x+1,psx),wrap(y-1,psy),z-1)+mkw(wrap(x-1,psx),wrap(y-1,psy),z-1))
+           del2mkw(x,y,z) = (del2mkw(x,y,z) - 128*mkw(x,y,z))/(30*dpf*dpf)
 
            del2pht(x,y,z) = 14*(pht(wrap(x+1,psx),y,z)+pht(wrap(x-1,psx),y,z)+pht(x,wrap(y+1,psy),z)+&
 &pht(x,wrap(y-1,psy),z)+pht(x,y,z+1)+pht(x,y,z-1))
@@ -85,6 +100,7 @@ wrap(y+1,psy),z-1)+met(wrap(x+1,psx),wrap(y-1,psy),z-1)+met(wrap(x-1,psx),wrap(y
   do x = 1,psx
      do y = 1,psy
         del2met(x,y,1) = 0.0d0 ; del2met(x,y,psz+2) = 0.0d0
+        del2mkw(x,y,1) = 0.0d0 ; del2mkw(x,y,psz+2) = 0.0d0
         del2pht(x,y,1) = 0.0d0 ; del2pht(x,y,psz+2) = 0.0d0
         del2pyr(x,y,1) = 0.0d0 ; del2pyr(x,y,psz+2) = 0.0d0
         del2env(x,y,1) = 0.0d0 ; del2env(x,y,psz+2) = 0.0d0
