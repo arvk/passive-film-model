@@ -26,11 +26,11 @@ subroutine musolve(iter)
   real*8 :: asd ! Anti-Surface-Diffusion
 
   !! Diffusivities
-  real*8 :: D_inter_met, D_inter_env, D_inter_pht, D_inter_pyr
+  real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
   real*8, dimension(psx,psy,psz+2) :: D
 
   !! Derivative of sulfur density with chemical potential
-  real*8 :: drho_dmu_pht, drho_dmu_env, drho_dmu_met, drho_dmu_pyr, Chi
+  real*8 :: drho_dmu_met, drho_dmu_mkw, drho_dmu_pht, drho_dmu_pyr, drho_dmu_env, Chi
 
   integer, dimension(psx,psy) :: interface_loc
   real*8 :: noise
@@ -66,17 +66,16 @@ subroutine musolve(iter)
 
   open(unit = 55, file = '/dev/null')
 
-  D_inter_pht = D_Fe_pht
   D_inter_met = D_Fe_met
-  D_inter_env = D_S_env
+  D_inter_mkw = D_Fe_mkw
+  D_inter_pht = D_Fe_pht
   D_inter_pyr = D_inter_pht/10
+  D_inter_env = D_S_env
 
   do x = 1,psx
      do y = 1,psy
         do z = 1,psz+2
-
-           D(x,y,z) = ((pht(x,y,z)*D_inter_pht)+(env(x,y,z)*D_inter_env)+(met(x,y,z)*D_inter_met)+(pyr(x,y,z)*D_inter_pyr))
-
+           D(x,y,z) = ((met(x,y,z)*D_inter_met)+(mkw(x,y,z)*D_inter_mkw)+(pht(x,y,z)*D_inter_pht)+(pyr(x,y,z)*D_inter_pyr)+(env(x,y,z)*D_inter_env))
         end do
      end do
   end do
@@ -92,8 +91,9 @@ subroutine musolve(iter)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            !! Calculate derivative of sulfur concentration with chemical potential
-           drho_dmu_pht = 52275.0d0/(2*250896.0d0)
            drho_dmu_met = (0.0015d0*140401)/(R*T)
+           drho_dmu_mkw = 0.95d0*48683.0d0/(2*250896.0d0)
+           drho_dmu_pht = 52275.0d0/(2*250896.0d0)
 
            if (iter.lt.nomc/100) then
               drho_dmu_env = (0.0015d0*140401)/(R*T)
@@ -105,9 +105,9 @@ subroutine musolve(iter)
            drho_dmu_pyr = (2*41667.0d0)/(2*250896.0d0)
 
            !! Calculate chemical 'specific heat'
-           Chi = (pht(x,y,z+1)*drho_dmu_pht) + (met(x,y,z+1)*drho_dmu_met) + (env(x,y,z+1)*drho_dmu_env) + (pyr(x,y,z+1)*drho_dmu_pyr)
+           Chi = (met(x,y,z+1)*drho_dmu_met)+(mkw(x,y,z+1)*drho_dmu_mkw)+(pht(x,y,z+1)*drho_dmu_pht)+(pyr(x,y,z+1)*drho_dmu_pyr)+(env(x,y,z+1)*drho_dmu_env)
 
-           B(linindex) =  (mu(x,y,z+1)/dt) - (((dpht_dt(x,y,z+1)*rho_pht) + (dmet_dt(x,y,z+1)*rho_met) + (denv_dt(x,y,z+1)*rho_env) + (dpyr_dt(x,y,z+1)*rho_pyr))/Chi)
+           B(linindex) =  (mu(x,y,z+1)/dt) - (((dpht_dt(x,y,z+1)*rho_pht) + (dmet_dt(x,y,z+1)*rho_met) + (dmkw_dt(x,y,z+1)*rho_mkw) + (denv_dt(x,y,z+1)*rho_env) + (dpyr_dt(x,y,z+1)*rho_pyr))/Chi)
 
            if (z.eq.1) then
               B(linindex) = B(linindex) + ((0.5d0*(D(x,y,z+1)+D(x,y,z+1-1))/(dpf*dpf))*mu(x,y,z+1-1))
