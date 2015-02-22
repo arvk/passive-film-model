@@ -81,8 +81,8 @@ subroutine pfsolve(iter)
 
            !! Volume per mole of Mkw = 19.130 cc assuming a density of 4.28 g/cc from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
            !! Number of moles per m^3 = 48683
-           f_mkw = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 70060)*48683.0d0
-           w_mkw = f_pht - (mu(x,y,z)*48683.0d0*0.95d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
+           f_mkw = ((mu(x,y,z)*mu(x,y,z)*(1E-6)) + 20.53*T - 70060)*48683.0d0*0.95d0
+           w_mkw = f_mkw - (mu(x,y,z)*48683.0d0*0.95d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
 
            !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
            !! Number of moles per m^3 = 52275
