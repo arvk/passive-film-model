@@ -14,13 +14,13 @@ subroutine thermo
 
   min_met_mkw = 50000.0d0; min_mkw_pht = 50000.0d0; min_pht_pyr = 50000.0d0
 
-  do i = -30000,30000
-     my_mu = R*T*(dble(i)/1000.0d0)
+  do i = -300000,300000
+     my_mu = R*T*(dble(i)/10000.0d0)
 
      my_met = 0.0d0 - (my_mu*0.0015)
-     my_mkw = (1E-6*my_mu*my_mu) + (20.53*T) - 70060 - (my_mu*0.95d0)
+     my_mkw = (1E-6*my_mu*my_mu) + (20.53*T) - 65060 - (my_mu*0.80d0)
      my_pht = (1E-6*my_mu*my_mu) + (20.53*T) - 72050 - (my_mu*1.0d0)
-     my_pyr = (1E-9*my_mu*my_mu) + (50.355*T) - 98710 - (my_mu*2)
+     my_pyr = (1E-9*my_mu*my_mu) + (50.355*T) - 98710 - (my_mu*2.0d0)
 
      if (abs(my_met-my_mkw) .lt. min_met_mkw) then
         mus_met_mkw_eqb = my_mu
@@ -42,7 +42,7 @@ subroutine thermo
 
   !! Density of sulfur in each FeS_x phase (number of moles of sulfur / m^3 of phase)
 
-  rho_mkw = 0.95d0*48683.0d0 !! Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683 
+  rho_mkw = 48683.0d0 !! Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683 
   rho_met = 0.0015d0*140401
   rho_pht = 52275.0d0
   rho_pyr = 2.0d0*41667.0d0
