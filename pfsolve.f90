@@ -206,50 +206,104 @@ subroutine pfsolve(iter)
 
 
 
+           !! Initialize updated fields
+           newmet(x,y,z) = met(x,y,z)
+           newmkw(x,y,z) = mkw(x,y,z)
+           newpht(x,y,z) = pht(x,y,z)
+           newenv(x,y,z) = env(x,y,z)
+           newpyr(x,y,z) = pyr(x,y,z)
 
 
 
 
 
 
+           !! Error correction for mkw
+
+           dF_dmet_mkw = min( ((1-newmet(x,y,z))/(M_met_mkw*dt)), max( ((0-newmet(x,y,z))/(M_met_mkw*dt)), dF_dmet_mkw))
+           newmet(x,y,z) = newmet(x,y,z) + ((M_met_mkw*dF_dmet_mkw)*dt)
+           dF_dmet_pht = min( ((1-newmet(x,y,z))/(M_met_pht*dt)), max( ((0-newmet(x,y,z))/(M_met_pht*dt)), dF_dmet_pht))
+           newmet(x,y,z) = newmet(x,y,z) + ((M_met_pht*dF_dmet_pht)*dt)
+           dF_dmet_pyr = min( ((1-newmet(x,y,z))/(M_met_pyr*dt)), max( ((0-newmet(x,y,z))/(M_met_pyr*dt)), dF_dmet_pyr))
+           newmet(x,y,z) = newmet(x,y,z) + ((M_met_pyr*dF_dmet_pyr)*dt)
+           dF_dmet_env = min( ((1-newmet(x,y,z))/(M_met_env*dt)), max( ((0-newmet(x,y,z))/(M_met_env*dt)), dF_dmet_env))
+           newmet(x,y,z) = newmet(x,y,z) + ((M_met_env*dF_dmet_env)*dt)
+
+           dF_dmkw_met = 0 - dF_dmet_mkw
+           dF_dpht_met = 0 - dF_dmet_pht
+           dF_dpyr_met = 0 - dF_dmet_pyr
+           dF_denv_met = 0 - dF_dmet_env
+
+
+           !! Error correction for mkw
+
+           dF_dmkw_met = min( ((1-newmkw(x,y,z))/(M_mkw_met*dt)), max( ((0-newmkw(x,y,z))/(M_mkw_met*dt)), dF_dmkw_met))
+           newmkw(x,y,z) = newmkw(x,y,z) + ((M_mkw_met*dF_dmkw_met)*dt)
+           dF_dmkw_pht = min( ((1-newmkw(x,y,z))/(M_mkw_pht*dt)), max( ((0-newmkw(x,y,z))/(M_mkw_pht*dt)), dF_dmkw_pht))
+           newmkw(x,y,z) = newmkw(x,y,z) + ((M_mkw_pht*dF_dmkw_pht)*dt)
+           dF_dmkw_pyr = min( ((1-newmkw(x,y,z))/(M_mkw_pyr*dt)), max( ((0-newmkw(x,y,z))/(M_mkw_pyr*dt)), dF_dmkw_pyr))
+           newmkw(x,y,z) = newmkw(x,y,z) + ((M_mkw_pyr*dF_dmkw_pyr)*dt)
+           dF_dmkw_env = min( ((1-newmkw(x,y,z))/(M_mkw_env*dt)), max( ((0-newmkw(x,y,z))/(M_mkw_env*dt)), dF_dmkw_env))
+           newmkw(x,y,z) = newmkw(x,y,z) + ((M_mkw_env*dF_dmkw_env)*dt)
+
+           dF_dmet_mkw = 0 - dF_dmkw_met
+           dF_dpht_mkw = 0 - dF_dmkw_pht
+           dF_dpyr_mkw = 0 - dF_dmkw_pyr
+           dF_denv_mkw = 0 - dF_dmkw_env
 
 
 
+           !! Error correction for pht
 
-           !! Error correction        
-           correct_rounding = 0.50d0*(dF_dmet_mkw - dF_dmkw_met)
-           dF_dmet_mkw = correct_rounding ; dF_dmkw_met = 0.0d0 - correct_rounding
+           dF_dpht_met = min( ((1-newpht(x,y,z))/(M_pht_met*dt)), max( ((0-newpht(x,y,z))/(M_pht_met*dt)), dF_dpht_met))
+           newpht(x,y,z) = newpht(x,y,z) + ((M_pht_met*dF_dpht_met)*dt)
+           dF_dpht_mkw = min( ((1-newpht(x,y,z))/(M_pht_mkw*dt)), max( ((0-newpht(x,y,z))/(M_pht_mkw*dt)), dF_dpht_mkw))
+           newpht(x,y,z) = newpht(x,y,z) + ((M_pht_mkw*dF_dpht_mkw)*dt)
+           dF_dpht_pyr = min( ((1-newpht(x,y,z))/(M_pht_pyr*dt)), max( ((0-newpht(x,y,z))/(M_pht_pyr*dt)), dF_dpht_pyr))
+           newpht(x,y,z) = newpht(x,y,z) + ((M_pht_pyr*dF_dpht_pyr)*dt)
+           dF_dpht_env = min( ((1-newpht(x,y,z))/(M_pht_env*dt)), max( ((0-newpht(x,y,z))/(M_pht_env*dt)), dF_dpht_env))
+           newpht(x,y,z) = newpht(x,y,z) + ((M_pht_env*dF_dpht_env)*dt)
 
-           correct_rounding = 0.50d0*(dF_dmet_pht - dF_dpht_met)
-           dF_dmet_pht = correct_rounding ; dF_dpht_met = 0.0d0 - correct_rounding
-
-           correct_rounding = 0.50d0*(dF_dmet_pyr - dF_dpyr_met)
-           dF_dmet_pyr = correct_rounding ; dF_dpyr_met = 0.0d0 - correct_rounding
-
-           correct_rounding = 0.50d0*(dF_dmet_env - dF_denv_met)
-           dF_dmet_env = correct_rounding ; dF_denv_met = 0.0d0 - correct_rounding
-
-           correct_rounding = 0.50d0*(dF_dmkw_pht - dF_dpht_mkw)
-           dF_dmkw_pht = correct_rounding ; dF_dpht_mkw = 0.0d0 - correct_rounding
-
-           correct_rounding = 0.50d0*(dF_dmkw_pyr - dF_dpyr_mkw)
-           dF_dmkw_pyr = correct_rounding ; dF_dpyr_mkw = 0.0d0 - correct_rounding
-
-           correct_rounding = 0.50d0*(dF_dmkw_env - dF_denv_mkw)
-           dF_dmkw_env = correct_rounding ; dF_denv_mkw = 0.0d0 - correct_rounding
-
-           correct_rounding = 0.50d0*(dF_dpht_pyr - dF_dpyr_pht)
-           dF_dpht_pyr = correct_rounding ; dF_dpyr_pht = 0.0d0 - correct_rounding
-
-           correct_rounding = 0.50d0*(dF_dpht_env - dF_denv_pht)
-           dF_dpht_env = correct_rounding ; dF_denv_pht = 0.0d0 - correct_rounding
-
-           correct_rounding = 0.50d0*(dF_dpyr_env - dF_denv_pyr)
-           dF_dpyr_env = correct_rounding ; dF_denv_pyr = 0.0d0 - correct_rounding
+           dF_dmet_pht = 0 - dF_dpht_met
+           dF_dmkw_pht = 0 - dF_dpht_mkw
+           dF_dpyr_pht = 0 - dF_dpht_pyr
+           dF_denv_pht = 0 - dF_dpht_env
 
 
 
+           !! Error correction for pyr
 
+           dF_dpyr_met = min( ((1-newpyr(x,y,z))/(M_pyr_met*dt)), max( ((0-newpyr(x,y,z))/(M_pyr_met*dt)), dF_dpyr_met))
+           newpyr(x,y,z) = newpyr(x,y,z) + ((M_pyr_met*dF_dpyr_met)*dt)
+           dF_dpyr_mkw = min( ((1-newpyr(x,y,z))/(M_pyr_mkw*dt)), max( ((0-newpyr(x,y,z))/(M_pyr_mkw*dt)), dF_dpyr_mkw))
+           newpyr(x,y,z) = newpyr(x,y,z) + ((M_pyr_mkw*dF_dpyr_mkw)*dt)
+           dF_dpyr_pht = min( ((1-newpyr(x,y,z))/(M_pyr_pht*dt)), max( ((0-newpyr(x,y,z))/(M_pyr_pht*dt)), dF_dpyr_pht))
+           newpyr(x,y,z) = newpyr(x,y,z) + ((M_pyr_pht*dF_dpyr_pht)*dt)
+           dF_dpyr_env = min( ((1-newpyr(x,y,z))/(M_pyr_env*dt)), max( ((0-newpyr(x,y,z))/(M_pyr_env*dt)), dF_dpyr_env))
+           newpyr(x,y,z) = newpyr(x,y,z) + ((M_pyr_env*dF_dpyr_env)*dt)
+
+           dF_dmet_pyr = 0 - dF_dpyr_met
+           dF_dmkw_pyr = 0 - dF_dpyr_mkw
+           dF_dpht_pyr = 0 - dF_dpyr_pht
+           dF_denv_pyr = 0 - dF_dpyr_env
+
+
+
+           !! Error correction for env
+
+           dF_denv_met = min( ((1-newenv(x,y,z))/(M_env_met*dt)), max( ((0-newenv(x,y,z))/(M_env_met*dt)), dF_denv_met))
+           newenv(x,y,z) = newenv(x,y,z) + ((M_env_met*dF_denv_met)*dt)
+           dF_denv_mkw = min( ((1-newenv(x,y,z))/(M_env_mkw*dt)), max( ((0-newenv(x,y,z))/(M_env_mkw*dt)), dF_denv_mkw))
+           newenv(x,y,z) = newenv(x,y,z) + ((M_env_mkw*dF_denv_mkw)*dt)
+           dF_denv_pht = min( ((1-newenv(x,y,z))/(M_env_pht*dt)), max( ((0-newenv(x,y,z))/(M_env_pht*dt)), dF_denv_pht))
+           newenv(x,y,z) = newenv(x,y,z) + ((M_env_pht*dF_denv_pht)*dt)
+           dF_denv_pyr = min( ((1-newenv(x,y,z))/(M_env_pyr*dt)), max( ((0-newenv(x,y,z))/(M_env_pyr*dt)), dF_denv_pyr))
+           newenv(x,y,z) = newenv(x,y,z) + ((M_env_pyr*dF_denv_pyr)*dt)
+
+           dF_dmet_env = 0 - dF_denv_met
+           dF_dmkw_env = 0 - dF_denv_mkw
+           dF_dpht_env = 0 - dF_denv_pht
+           dF_dpyr_env = 0 - dF_denv_pyr
 
 
 
@@ -294,11 +348,11 @@ subroutine pfsolve(iter)
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+1
-           newmet(x,y,z) = max(min((met(x,y,z) + (dt*dmet_dt(x,y,z))),1.0d0),0.0d0)
-           newmkw(x,y,z) = max(min((mkw(x,y,z) + (dt*dmkw_dt(x,y,z))),1.0d0),0.0d0)
-           newpht(x,y,z) = max(min((pht(x,y,z) + (dt*dpht_dt(x,y,z))),1.0d0),0.0d0)
-           newenv(x,y,z) = max(min((env(x,y,z) + (dt*denv_dt(x,y,z))),1.0d0),0.0d0)
-           newpyr(x,y,z) = max(min((pyr(x,y,z) + (dt*dpyr_dt(x,y,z))),1.0d0),0.0d0)
+           newmet(x,y,z) = met(x,y,z) + (dt*dmet_dt(x,y,z))
+           newmkw(x,y,z) = mkw(x,y,z) + (dt*dmkw_dt(x,y,z))
+           newpht(x,y,z) = pht(x,y,z) + (dt*dpht_dt(x,y,z))
+           newenv(x,y,z) = env(x,y,z) + (dt*denv_dt(x,y,z))
+           newpyr(x,y,z) = pyr(x,y,z) + (dt*dpyr_dt(x,y,z))
 
            correct_rounding = (newmet(x,y,z)+newmkw(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
 
