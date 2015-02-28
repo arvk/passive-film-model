@@ -5,11 +5,21 @@ subroutine pfsolve(iter)
   use gradients
   use thermo_constants
   implicit none
-  include 'mpif.h'
+
+#include <finclude/petscsys.h>
+#include <finclude/petscvec.h>
+#include <finclude/petscvec.h90>
+#include <finclude/petscmat.h>
+#include <finclude/petscpc.h>
+#include <finclude/petscksp.h>
+
+
+
+
 
   integer :: x, y, z   ! Loop variables
   real*8 :: correct_rounding     ! Error correction variable used while updating fields
-  integer :: ierr,status(MPI_STATUS_SIZE)
+  integer :: status(MPI_STATUS_SIZE)
   integer, intent(in) :: iter
 
   !!---------------PF evolution-----------------!!
@@ -28,7 +38,7 @@ subroutine pfsolve(iter)
   integer, parameter :: ipyr = 4
   integer, parameter :: ienv = 5
 
-  real*8, parameter :: no_fields = 5
+  integer, parameter :: no_fields = 5
 
   real*8, dimension(psx,psy,psz+2) :: D_met, D_mkw, D_pht, D_pyr, D_env
 
@@ -51,6 +61,23 @@ subroutine pfsolve(iter)
   logical :: is_sorted
   integer :: rowindex, JAleft, JAright, JAswap
   real*8 :: Aswap
+
+
+
+  PetscErrorCode ierr
+  Vec pf_vec,rhs_vec
+  Mat lhs_mat
+  KSP ksp_pf
+  PetscScalar, pointer :: point_pf_vec(:)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -127,6 +154,48 @@ subroutine pfsolve(iter)
            end do
         end do
      end do
+
+
+
+
+
+  call VecCreate(PETSC_COMM_SELF,pf_vec,ierr)
+  call VecSetSizes(pf_vec,PETSC_DECIDE,psx*psy*psz*no_fields,ierr)
+  call VecSetFromOptions(pf_vec,ierr)
+  call VecSetUp(pf_vec,ierr)
+
+
+  call VecCreate(PETSC_COMM_SELF,rhs_vec,ierr)
+  call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*psz*no_fields,ierr)
+  call VecSetFromOptions(rhs_vec,ierr)
+  call VecSetUp(rhs_vec,ierr)
+  call VecSetValues(rhs_vec,psx*psy*psz*no_fields,vector_locator,B,INSERT_VALUES,ierr)
+
+
+  !! Calculate the LHS (A matrix in Ax=B)
+  allocate(A((((7*psx*psy*psz)-(2*psx*psy))*no_fields)))
+  allocate(JA((((7*psx*psy*psz)-(2*psx*psy))*no_fields)))
+  allocate(LU((((7*psx*psy*psz)-(2*psx*psy))*no_fields)))
+  allocate(IA(((psx*psy*psz)+1)*no_fields))
+
+
+  IA=0 ; JA=0 ; A=0
+  contindex = 0
+  linindex = 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 end subroutine pfsolve
