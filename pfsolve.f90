@@ -5,6 +5,7 @@ subroutine pfsolve(iter)
   use gradients
   use thermo_constants
   implicit none
+  external pfFunction, pfJacobian
 
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
@@ -170,8 +171,8 @@ subroutine pfsolve(iter)
 
 
   call SNESCreate(PETSC_COMM_SELF,snes_pf,ierr)
-  call SNESSetFunction(snes_pf,ret_vec,MetFunction,PETSC_NULL_OBJECT,ierr)
-  call SNESSetJacobian(snes_pf,jac,jac,MetJacobian,PETSC_NULL_OBJECT,ierr)
+  call SNESSetFunction(snes_pf,ret_vec,pfFunction,PETSC_NULL_OBJECT,ierr)
+  call SNESSetJacobian(snes_pf,jac,jac,pfJacobian,PETSC_NULL_OBJECT,ierr)
   call SNESSetFromOptions(snes_pf,ierr)
   call SNESSolve(snes_pf,rhs_vec,pf_vec,ierr)
 
