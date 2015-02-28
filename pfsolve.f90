@@ -12,7 +12,7 @@ subroutine pfsolve(iter)
 #include <finclude/petscmat.h>
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
-
+#include <finclude/petscsnes.h>
 
 
 
@@ -50,26 +50,15 @@ subroutine pfsolve(iter)
   real*8, dimension(psx*psy*psz*no_fields) :: vecread
   real*8, dimension(psx*psy*psz*no_fields) :: scratch1,scratch2,scratch3
 
-  real*8, dimension(:), allocatable :: A, LU
-  integer, dimension(:), allocatable :: JA, IA
-
   integer :: linindex, contindex
   integer :: iterations, solver_info
 
 
-  ! Sorting for A/B/JA
-  logical :: is_sorted
-  integer :: rowindex, JAleft, JAright, JAswap
-  real*8 :: Aswap
-
-
-
   PetscErrorCode ierr
-  Vec pf_vec,rhs_vec
-  Mat lhs_mat
-  KSP ksp_pf
+  Vec pf_vec,rhs_vec,ret_vec
   PetscScalar, pointer :: point_pf_vec(:)
-
+  Mat jac
+  SNES snes_pf
 
 
 
@@ -110,6 +99,15 @@ subroutine pfsolve(iter)
         end do
      end do
      
+
+
+  call VecCreate(PETSC_COMM_SELF,ret_vec,ierr)
+  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetFromOptions(ret_vec,ierr)
+  call VecSetUp(ret_vec,ierr)
+
+
+
 
 
 
@@ -157,8 +155,6 @@ subroutine pfsolve(iter)
 
 
 
-
-
   call VecCreate(PETSC_COMM_SELF,pf_vec,ierr)
   call VecSetSizes(pf_vec,PETSC_DECIDE,psx*psy*psz*no_fields,ierr)
   call VecSetFromOptions(pf_vec,ierr)
@@ -172,18 +168,12 @@ subroutine pfsolve(iter)
   call VecSetValues(rhs_vec,psx*psy*psz*no_fields,vector_locator,B,INSERT_VALUES,ierr)
 
 
-  !! Calculate the LHS (A matrix in Ax=B)
-  allocate(A((((7*psx*psy*psz)-(2*psx*psy))*no_fields)))
-  allocate(JA((((7*psx*psy*psz)-(2*psx*psy))*no_fields)))
-  allocate(LU((((7*psx*psy*psz)-(2*psx*psy))*no_fields)))
-  allocate(IA(((psx*psy*psz)+1)*no_fields))
 
-
-  IA=0 ; JA=0 ; A=0
-  contindex = 0
-  linindex = 0
-
-
+  call SNESCreate(PETSC_COMM_SELF,snes_pf,ierr)
+  call SNESSetFunction(snes_pf,ret_vec,MetFunction,PETSC_NULL_OBJECT,ierr)
+  call SNESSetJacobian(snes_pf,jac,jac,MetJacobian,PETSC_NULL_OBJECT,ierr)
+  call SNESSetFromOptions(snes_pf,ierr)
+  call SNESSolve(snes_pf,rhs_vec,pf_vec,ierr)
 
 
 
