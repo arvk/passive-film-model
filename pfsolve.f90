@@ -184,12 +184,34 @@ subroutine pfsolve(iter)
   call SNESSetFromOptions(snes_pf,ierr)
   call SNESSolve(snes_pf,rhs_vec,pf_vec,ierr)
 
+
+
+
+
+
+  call VecGetArrayF90(pf_vec,point_pf_vec,ierr)
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+
+           newmet(x,y,z+1) = point_pf_vec(linindex+((imet-1)*psx*psy*psz))
+           newmkw(x,y,z+1) = point_pf_vec(linindex+((imkw-1)*psx*psy*psz))
+           newpht(x,y,z+1) = point_pf_vec(linindex+((ipht-1)*psx*psy*psz))
+           newpyr(x,y,z+1) = point_pf_vec(linindex+((ipyr-1)*psx*psy*psz))
+           newenv(x,y,z+1) = point_pf_vec(linindex+((ienv-1)*psx*psy*psz))
+
+        end do
+     end do
+  end do
+  call VecRestoreArrayF90(pf_vec,point_pf_vec,ierr)
+
   call VecDestroy(pf_vec,ierr)
   call VecDestroy(rhs_vec,ierr)
   call VecDestroy(ret_vec,ierr)
   call MatDestroy(jac,ierr)
   call SNESDestroy(snes_pf,ierr)
-
 
 end subroutine pfsolve
 
