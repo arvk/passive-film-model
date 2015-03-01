@@ -1324,77 +1324,165 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
      end do
   end do
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   IA((psx*psy*psz*no_fields)+1)= IA(psx*psy*psz*no_fields)+6
 
 
+  do linindex = 1,psx*psy*psz*no_fields
+     is_sorted = .FALSE.
+
+     do while (is_sorted .eqv. .FALSE.)
+
+        do rowindex = IA(linindex),IA(linindex+1)-2
+
+           is_sorted = .TRUE.
+
+           JAleft = JA(rowindex)
+           JAright = JA(rowindex+1)
+
+           if (JAleft .gt. JAright) then
+
+              JAswap = JA(rowindex)
+              JA(rowindex) = JA(rowindex+1)
+              JA(rowindex+1) = JAswap
+
+              Aswap = A(rowindex)
+              A(rowindex) = A(rowindex+1)
+              A(rowindex+1) = Aswap
+
+              is_sorted = .FALSE.
+              exit
+           end if
+
+        end do
+
+
+     end do
+
+  end do
+
+  IA = IA - 1
+  JA = JA - 1
+
+  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*psz*no_fields,psx*psy*psz*no_fields,IA,JA,A,lhs_mat,ierr)
+  call MatMult(lhs_mat,pf_vec,ret_vec,ierr)
+
+
+
+  lnr = 0.0d0
+  sqr = 0.0d0
+
+
+
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
+
+!!! FOR MET           
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*psz)
+
+           lnr(linindex) = (2*M_met_mkw*hill_met_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_met-w_mkw)*loc_mkw(x,y,z+1)*M_met_mkw) + &
+                         & (2*M_met_pht*hill_met_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_met-w_pht)*loc_pht(x,y,z+1)*M_met_pht) + &
+                         & (2*M_met_pyr*hill_met_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_met-w_pyr)*loc_pyr(x,y,z+1)*M_met_pyr) + &
+                         & (2*M_met_env*hill_met_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (4*(w_met-w_env)*loc_env(x,y,z+1)*M_met_env) 
+
+           lnr(linindex) = lnr(linindex)*loc_met(x,y,z+1)
+
+           sqr(linindex) = (2*M_met_mkw*(w_met-w_mkw)) - (M_met_mkw*2*hill_met_mkw*loc_mkw(x,y,z+1)) + &
+                         & (2*M_met_pht*(w_met-w_pht)) - (M_met_pht*2*hill_met_pht*loc_pht(x,y,z+1)) + &
+                         & (2*M_met_pyr*(w_met-w_pyr)) - (M_met_pyr*2*hill_met_pyr*loc_pyr(x,y,z+1)) + &
+                         & (2*M_met_env*(w_met-w_env)) - (M_met_env*2*hill_met_env*loc_env(x,y,z+1)) 
+
+           sqr(linindex) = sqr(linindex)*loc_met(x,y,z+1)*loc_met(x,y,z+1)
+
+
+!!! FOR MKW           
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*psz)
+
+           lnr(linindex) = (2*M_mkw_met*hill_mkw_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_mkw-w_met)*loc_met(x,y,z+1)*M_mkw_met) + &
+                         & (2*M_mkw_pht*hill_mkw_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_mkw-w_pht)*loc_pht(x,y,z+1)*M_mkw_pht) + &
+                         & (2*M_mkw_pyr*hill_mkw_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_mkw-w_pyr)*loc_pyr(x,y,z+1)*M_mkw_pyr) + &
+                         & (2*M_mkw_env*hill_mkw_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (4*(w_mkw-w_env)*loc_env(x,y,z+1)*M_mkw_env) 
+
+           lnr(linindex) = lnr(linindex)*loc_mkw(x,y,z+1)
+
+           sqr(linindex) = (2*M_mkw_met*(w_mkw-w_met)) - (M_mkw_met*2*hill_mkw_met*loc_met(x,y,z+1)) + &
+                         & (2*M_mkw_pht*(w_mkw-w_pht)) - (M_mkw_pht*2*hill_mkw_pht*loc_pht(x,y,z+1)) + &
+                         & (2*M_mkw_pyr*(w_mkw-w_pyr)) - (M_mkw_pyr*2*hill_mkw_pyr*loc_pyr(x,y,z+1)) + &
+                         & (2*M_mkw_env*(w_mkw-w_env)) - (M_mkw_env*2*hill_mkw_env*loc_env(x,y,z+1)) 
+
+           sqr(linindex) = sqr(linindex)*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)
+
+
+!!! FOR PHT           
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*psz)
+
+           lnr(linindex) = (2*M_pht_met*hill_pht_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_pht-w_met)*loc_met(x,y,z+1)*M_pht_met) + &
+                         & (2*M_pht_mkw*hill_pht_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_pht-w_mkw)*loc_mkw(x,y,z+1)*M_pht_mkw) + &
+                         & (2*M_pht_pyr*hill_pht_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_pht-w_pyr)*loc_pyr(x,y,z+1)*M_pht_pyr) + &
+                         & (2*M_pht_env*hill_pht_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (4*(w_pht-w_env)*loc_env(x,y,z+1)*M_pht_env) 
+
+           lnr(linindex) = lnr(linindex)*loc_pht(x,y,z+1)
+
+           sqr(linindex) = (2*M_pht_met*(w_pht-w_met)) - (M_pht_met*2*hill_pht_met*loc_met(x,y,z+1)) + &
+                         & (2*M_pht_mkw*(w_pht-w_mkw)) - (M_pht_mkw*2*hill_pht_mkw*loc_mkw(x,y,z+1)) + &
+                         & (2*M_pht_pyr*(w_pht-w_pyr)) - (M_pht_pyr*2*hill_pht_pyr*loc_pyr(x,y,z+1)) + &
+                         & (2*M_pht_env*(w_pht-w_env)) - (M_pht_env*2*hill_pht_env*loc_env(x,y,z+1)) 
+
+           sqr(linindex) = sqr(linindex)*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)
 
 
 
 
+!!! FOR PYR           
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*psz)
 
+           lnr(linindex) = (2*M_pyr_met*hill_pyr_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_pyr-w_met)*loc_met(x,y,z+1)*M_pyr_met) + &
+                         & (2*M_pyr_mkw*hill_pyr_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_pyr-w_mkw)*loc_mkw(x,y,z+1)*M_pyr_mkw) + &
+                         & (2*M_pyr_pht*hill_pyr_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_pyr-w_pht)*loc_pht(x,y,z+1)*M_pyr_pht) + &
+                         & (2*M_pyr_env*hill_pyr_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (4*(w_pyr-w_env)*loc_env(x,y,z+1)*M_pyr_env) 
+
+           lnr(linindex) = lnr(linindex)*loc_pyr(x,y,z+1)
+
+           sqr(linindex) = (2*M_pyr_met*(w_pyr-w_met)) - (M_pyr_met*2*hill_pyr_met*loc_met(x,y,z+1)) + &
+                         & (2*M_pyr_mkw*(w_pyr-w_mkw)) - (M_pyr_mkw*2*hill_pyr_mkw*loc_mkw(x,y,z+1)) + &
+                         & (2*M_pyr_pht*(w_pyr-w_pht)) - (M_pyr_pht*2*hill_pyr_pht*loc_pht(x,y,z+1)) + &
+                         & (2*M_pyr_env*(w_pyr-w_env)) - (M_pyr_env*2*hill_pyr_env*loc_env(x,y,z+1)) 
+
+           sqr(linindex) = sqr(linindex)*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)
+
+
+
+!!! FOR ENV           
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*psz)
+
+           lnr(linindex) = (2*M_env_met*hill_env_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_env-w_met)*loc_met(x,y,z+1)*M_env_met) + &
+                         & (2*M_env_mkw*hill_env_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_env-w_mkw)*loc_mkw(x,y,z+1)*M_env_mkw) + &
+                         & (2*M_env_pht*hill_env_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_env-w_pht)*loc_pht(x,y,z+1)*M_env_pht) + &
+                         & (2*M_env_pyr*hill_env_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_env-w_pyr)*loc_pyr(x,y,z+1)*M_env_pyr)
+
+           lnr(linindex) = lnr(linindex)*loc_env(x,y,z+1)
+
+           sqr(linindex) = (2*M_env_met*(w_env-w_met)) - (M_env_met*2*hill_env_met*loc_met(x,y,z+1)) + &
+                         & (2*M_env_mkw*(w_env-w_mkw)) - (M_env_mkw*2*hill_env_mkw*loc_mkw(x,y,z+1)) + &
+                         & (2*M_env_pht*(w_env-w_pht)) - (M_env_pht*2*hill_env_pht*loc_pht(x,y,z+1)) + &
+                         & (2*M_env_pyr*(w_env-w_pyr)) - (M_env_pyr*2*hill_env_pyr*loc_pyr(x,y,z+1))
+
+           sqr(linindex) = sqr(linindex)*loc_env(x,y,z+1)*loc_env(x,y,z+1)
+
+
+        end do
+     end do
+  end do
+  
+
+
+  call VecSetValues(ret_vec,psx*psy*psz*no_fields,vector_locator,lnr,ADD_VALUES,ierr)
+  call VecSetValues(ret_vec,psx*psy*psz*no_fields,vector_locator,sqr,ADD_VALUES,ierr)
+
+  call VecAssemblyBegin(ret_vec,ierr)
+  call VecAssemblyEnd(ret_vec,ierr)
+
+  call MatDestroy(lhs_mat,ierr)
 
 
 end subroutine pfFunction
