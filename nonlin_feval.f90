@@ -31,7 +31,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
   ! A/B/JA matrices for implicit solver
   integer, dimension(psx*psy*psz*no_fields) :: vector_locator
-  real*8, dimension(psx*psy*psz*no_fields) :: lnr,sqr
+  real*8, dimension(psx*psy*psz*no_fields) :: const,lnr,sqr
 
   real*8, dimension(:), allocatable :: A
   integer, dimension(:), allocatable :: JA, IA
@@ -1506,6 +1506,11 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 !!! FOR MET           
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*psz)
 
+           const(linindex) = (2*M_met_mkw*(w_met-w_mkw)*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + &
+                           & (2*M_met_pht*(w_met-w_pht)*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + &
+                           & (2*M_met_pyr*(w_met-w_pyr)*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + &
+                           & (2*M_met_env*(w_met-w_env)*loc_env(x,y,z+1)*loc_env(x,y,z+1)) 
+
            lnr(linindex) = (2*M_met_mkw*hill_met_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_met-w_mkw)*loc_mkw(x,y,z+1)*M_met_mkw) + &
                          & (2*M_met_pht*hill_met_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_met-w_pht)*loc_pht(x,y,z+1)*M_met_pht) + &
                          & (2*M_met_pyr*hill_met_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_met-w_pyr)*loc_pyr(x,y,z+1)*M_met_pyr) + &
@@ -1524,6 +1529,11 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 !!! FOR MKW           
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*psz)
 
+           const(linindex) = (2*M_mkw_met*(w_mkw-w_met)*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + &
+                           & (2*M_mkw_pht*(w_mkw-w_pht)*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + &
+                           & (2*M_mkw_pyr*(w_mkw-w_pyr)*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + &
+                           & (2*M_mkw_env*(w_mkw-w_env)*loc_env(x,y,z+1)*loc_env(x,y,z+1)) 
+
            lnr(linindex) = (2*M_mkw_met*hill_mkw_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_mkw-w_met)*loc_met(x,y,z+1)*M_mkw_met) + &
                          & (2*M_mkw_pht*hill_mkw_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_mkw-w_pht)*loc_pht(x,y,z+1)*M_mkw_pht) + &
                          & (2*M_mkw_pyr*hill_mkw_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_mkw-w_pyr)*loc_pyr(x,y,z+1)*M_mkw_pyr) + &
@@ -1541,6 +1551,11 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
 !!! FOR PHT           
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*psz)
+
+           const(linindex) = (2*M_pht_met*(w_pht-w_met)*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + &
+                           & (2*M_pht_mkw*(w_pht-w_mkw)*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + &
+                           & (2*M_pht_pyr*(w_pht-w_pyr)*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + &
+                           & (2*M_pht_env*(w_pht-w_env)*loc_env(x,y,z+1)*loc_env(x,y,z+1)) 
 
            lnr(linindex) = (2*M_pht_met*hill_pht_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_pht-w_met)*loc_met(x,y,z+1)*M_pht_met) + &
                          & (2*M_pht_mkw*hill_pht_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_pht-w_mkw)*loc_mkw(x,y,z+1)*M_pht_mkw) + &
@@ -1562,6 +1577,11 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 !!! FOR PYR           
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*psz)
 
+           const(linindex) = (2*M_pyr_met*(w_pyr-w_met)*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + &
+                           & (2*M_pyr_mkw*(w_pyr-w_mkw)*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + &
+                           & (2*M_pyr_pht*(w_pyr-w_pht)*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + &
+                           & (2*M_pyr_env*(w_pyr-w_env)*loc_env(x,y,z+1)*loc_env(x,y,z+1)) 
+
            lnr(linindex) = (2*M_pyr_met*hill_pyr_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_pyr-w_met)*loc_met(x,y,z+1)*M_pyr_met) + &
                          & (2*M_pyr_mkw*hill_pyr_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_pyr-w_mkw)*loc_mkw(x,y,z+1)*M_pyr_mkw) + &
                          & (2*M_pyr_pht*hill_pyr_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_pyr-w_pht)*loc_pht(x,y,z+1)*M_pyr_pht) + &
@@ -1580,6 +1600,11 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
 !!! FOR ENV           
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*psz)
+
+           const(linindex) = (2*M_env_met*(w_env-w_met)*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + &
+                           & (2*M_env_mkw*(w_env-w_mkw)*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + &
+                           & (2*M_env_pht*(w_env-w_pht)*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + &
+                           & (2*M_env_pyr*(w_env-w_pyr)*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
 
            lnr(linindex) = (2*M_env_met*hill_env_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_env-w_met)*loc_met(x,y,z+1)*M_env_met) + &
                          & (2*M_env_mkw*hill_env_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_env-w_mkw)*loc_mkw(x,y,z+1)*M_env_mkw) + &
@@ -1601,7 +1626,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
   end do
   
 
-
+  call VecSetValues(ret_vec,psx*psy*psz*no_fields,vector_locator,const,ADD_VALUES,ierr)
   call VecSetValues(ret_vec,psx*psy*psz*no_fields,vector_locator,lnr,ADD_VALUES,ierr)
   call VecSetValues(ret_vec,psx*psy*psz*no_fields,vector_locator,sqr,ADD_VALUES,ierr)
 
