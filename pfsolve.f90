@@ -250,15 +250,16 @@ subroutine pfsolve(iter)
 
 
 
-!  Update phase fields
+!!! Update phase fields
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+1
-           sumfields = (newmet(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
+           sumfields = (newmet(x,y,z)+newmkw(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
            newmet(x,y,z) = newmet(x,y,z)/sumfields
+           newmkw(x,y,z) = newmkw(x,y,z)/sumfields
            newpht(x,y,z) = newpht(x,y,z)/sumfields
-           newenv(x,y,z) = newenv(x,y,z)/sumfields
            newpyr(x,y,z) = newpyr(x,y,z)/sumfields
+           newenv(x,y,z) = newenv(x,y,z)/sumfields
         end do
      end do
   end do
