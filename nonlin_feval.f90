@@ -21,9 +21,17 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
   PetscErrorCode ierr
   PetscScalar, pointer :: point_pf_vec(:)
 
+  integer, parameter :: imet = 1
+  integer, parameter :: imkw = 2
+  integer, parameter :: ipht = 3
+  integer, parameter :: ipyr = 4
+  integer, parameter :: ienv = 5
+
+  integer, parameter :: no_fields = 5
+
   ! A/B/JA matrices for implicit solver
-  integer, dimension(psx*psy*psz) :: vector_locator
-  real*8, dimension(psx*psy*psz) :: lnr,sqr
+  integer, dimension(psx*psy*psz*no_fields) :: vector_locator
+  real*8, dimension(psx*psy*psz*no_fields) :: lnr,sqr
 
   real*8, dimension(:), allocatable :: A
   integer, dimension(:), allocatable :: JA, IA
@@ -53,14 +61,6 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
   real*8, dimension(psx,psy,psz+2) :: loc_met, loc_mkw, loc_pht, loc_pyr, loc_env
 
-
-  integer, parameter :: imet = 1
-  integer, parameter :: imkw = 2
-  integer, parameter :: ipht = 3
-  integer, parameter :: ipyr = 4
-  integer, parameter :: ienv = 5
-
-  integer, parameter :: no_fields = 5
 
 
 
@@ -150,13 +150,12 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
   end do
 
 
-  allocate(A(((7*psx*psy*psz)-(2*psx*psy))*no_fields))
-  allocate(JA(((7*psx*psy*psz)-(2*psx*psy))*no_fields))
+  allocate(A(((7*psx*psy*psz)-(2*psx*psy))*no_fields*no_fields))
+  allocate(JA(((7*psx*psy*psz)-(2*psx*psy))*no_fields*no_fields))
   allocate(IA((no_fields*psx*psy*psz)+1))
 
   IA=0 ; JA=0 ; A=0
   contindex = 0; linindex = 0
-
 
 !!!! FOR MET
   do z = 1,psz
@@ -407,14 +406,6 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
         end do
      end do
   end do
-
-
-
-
-
-
-
-
 
 
 
@@ -684,11 +675,6 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
 
 
-
-
-
-
-
 !!!! FOR PHT
   do z = 1,psz
      do y = 1,psy
@@ -937,8 +923,6 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
         end do
      end do
   end do
-
-
 
 
 
@@ -1226,10 +1210,6 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
 
 
-
-
-
-
 !!!! FOR ENV
   do z = 1,psz
      do y = 1,psy
@@ -1474,7 +1454,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
      end do
   end do
 
-  IA((psx*psy*psz*no_fields)+1)= IA(psx*psy*psz*no_fields)+6
+  IA((psx*psy*psz*no_fields)+1)= IA(psx*psy*psz*no_fields)+(6*no_fields)
 
 
   do linindex = 1,psx*psy*psz*no_fields
@@ -1516,12 +1496,8 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
   call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*psz*no_fields,psx*psy*psz*no_fields,IA,JA,A,lhs_mat,ierr)
   call MatMult(lhs_mat,pf_vec,ret_vec,ierr)
 
-
-
   lnr = 0.0d0
   sqr = 0.0d0
-
-
 
   do z = 1,psz
      do y = 1,psy
@@ -1634,5 +1610,6 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
   call MatDestroy(lhs_mat,ierr)
 
+  return
 
 end subroutine pfFunction

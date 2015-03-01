@@ -24,8 +24,16 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
   PetscInt rowval,colval
   PetscScalar val
 
+  integer, parameter :: imet = 1
+  integer, parameter :: imkw = 2
+  integer, parameter :: ipht = 3
+  integer, parameter :: ipyr = 4
+  integer, parameter :: ienv = 5
+
+  integer, parameter :: no_fields = 5
+
   ! A/B/JA matrices for implicit solver
-  integer, dimension(psx*psy*psz) :: vector_locator
+  integer, dimension(psx*psy*psz*no_fields) :: vector_locator
   real*8 :: lnr,sqr
 
   integer :: io,jo
@@ -59,18 +67,6 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
   real*8, dimension(psx,psy,psz+2) :: loc_met, loc_mkw, loc_pht, loc_pyr, loc_env
 
 
-  integer, parameter :: imet = 1
-  integer, parameter :: imkw = 2
-  integer, parameter :: ipht = 3
-  integer, parameter :: ipyr = 4
-  integer, parameter :: ienv = 5
-
-  integer, parameter :: no_fields = 5
-
-
-
-
-
 
      sigma_pyr_met = sigma_pyr_met_0
      sigma_pyr_mkw = sigma_pyr_mkw_0
@@ -81,9 +77,6 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
      sigma_mkw_pyr = sigma_pyr_mkw
      sigma_pht_pyr = sigma_pyr_pht
      sigma_env_pyr = sigma_pyr_env
-
-
-
 
 
   call VecGetArrayF90(pf_vec,point_pf_vec,ierr)
@@ -107,11 +100,11 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
   do y = 1,psy
      do x = 1,psx
-        loc_met(x,y,1) = loc_met(x,y,1) ; loc_met(x,y,psz+2) = loc_met(x,y,psz+1) 
-        loc_mkw(x,y,1) = loc_mkw(x,y,1) ; loc_mkw(x,y,psz+2) = loc_mkw(x,y,psz+1) 
-        loc_pht(x,y,1) = loc_pht(x,y,1) ; loc_pht(x,y,psz+2) = loc_pht(x,y,psz+1) 
-        loc_pyr(x,y,1) = loc_pyr(x,y,1) ; loc_pyr(x,y,psz+2) = loc_pyr(x,y,psz+1) 
-        loc_env(x,y,1) = loc_env(x,y,1) ; loc_env(x,y,psz+2) = loc_env(x,y,psz+1) 
+        loc_met(x,y,1) = loc_met(x,y,2) ; loc_met(x,y,psz+2) = loc_met(x,y,psz+1) 
+        loc_mkw(x,y,1) = loc_mkw(x,y,2) ; loc_mkw(x,y,psz+2) = loc_mkw(x,y,psz+1) 
+        loc_pht(x,y,1) = loc_pht(x,y,2) ; loc_pht(x,y,psz+2) = loc_pht(x,y,psz+1) 
+        loc_pyr(x,y,1) = loc_pyr(x,y,2) ; loc_pyr(x,y,psz+2) = loc_pyr(x,y,psz+1) 
+        loc_env(x,y,1) = loc_env(x,y,2) ; loc_env(x,y,psz+2) = loc_env(x,y,psz+1) 
      end do
   end do
 
@@ -155,8 +148,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
   end do
 
 
-  allocate(A(((7*psx*psy*psz)-(2*psx*psy))*no_fields))
-  allocate(JA(((7*psx*psy*psz)-(2*psx*psy))*no_fields))
+  allocate(A(((7*psx*psy*psz)-(2*psx*psy))*no_fields*no_fields))
+  allocate(JA(((7*psx*psy*psz)-(2*psx*psy))*no_fields*no_fields))
   allocate(IA((no_fields*psx*psy*psz)+1))
 
   IA=0 ; JA=0 ; A=0
@@ -1621,7 +1614,7 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
      end do
   end do
 
-  IA((psx*psy*psz*no_fields)+1)= IA(psx*psy*psz*no_fields)+6
+  IA((psx*psy*psz*no_fields)+1)= IA(psx*psy*psz*no_fields)+(6*no_fields)
 
 
   do linindex = 1,psx*psy*psz*no_fields
@@ -1660,9 +1653,7 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
   IA = IA - 1
   JA = JA - 1
 
-
-
-  do io = 1,psx*psy*psz*no_fields ! Nrows
+  do io = 1,psx*psy*psz*no_fields! Nrows
 
      rowval = io-1
 
@@ -1670,6 +1661,7 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
         colval = JA(IA(io) + jo)
         val = A(IA(io) + jo)
+
         call MatSetValue(pf_precond,rowval,colval,val,INSERT_VALUES,ierr)
 
      end do

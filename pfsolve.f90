@@ -103,7 +103,7 @@ subroutine pfsolve(iter)
 
 
   call VecCreate(PETSC_COMM_SELF,ret_vec,ierr)
-  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*psz*no_fields,ierr)
   call VecSetFromOptions(ret_vec,ierr)
   call VecSetUp(ret_vec,ierr)
 
@@ -112,47 +112,47 @@ subroutine pfsolve(iter)
 
 
 
-     do z = 1,psz
-        do y = 1,psy
-           do x = 1,psx
+  do z = 1,psz
+     do y = 1,psy
+        do x = 1,psx
 
-              linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-              B(linindex+((imet-1)*psx*psy*psz)) =  (met(x,y,z+1)/dt)
-              B(linindex+((imkw-1)*psx*psy*psz)) =  (mkw(x,y,z+1)/dt)
-              B(linindex+((ipht-1)*psx*psy*psz)) =  (pht(x,y,z+1)/dt)
-              B(linindex+((ipyr-1)*psx*psy*psz)) =  (pyr(x,y,z+1)/dt)
-              B(linindex+((ienv-1)*psx*psy*psz)) =  (env(x,y,z+1)/dt)
+           B(linindex+((imet-1)*psx*psy*psz)) =  (met(x,y,z+1)/dt)
+           B(linindex+((imkw-1)*psx*psy*psz)) =  (mkw(x,y,z+1)/dt)
+           B(linindex+((ipht-1)*psx*psy*psz)) =  (pht(x,y,z+1)/dt)
+           B(linindex+((ipyr-1)*psx*psy*psz)) =  (pyr(x,y,z+1)/dt)
+           B(linindex+((ienv-1)*psx*psy*psz)) =  (env(x,y,z+1)/dt)
 
-              if (z.eq.1) then
-                 B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_met(x,y,z+1)+D_met(x,y,z+1-1))/(dpf*dpf))*met(x,y,z+1-1))
-                 B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_mkw(x,y,z+1)+D_mkw(x,y,z+1-1))/(dpf*dpf))*mkw(x,y,z+1-1))
-                 B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pht(x,y,z+1)+D_pht(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
-                 B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1)+D_pyr(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
-                 B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1)+D_env(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
-              elseif (z.eq.psz) then
-                 B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_met(x,y,z+1+1)+D_met(x,y,z+1))/(dpf*dpf))*met(x,y,z+1-1))
-                 B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_mkw(x,y,z+1+1)+D_mkw(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1-1))
-                 B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pht(x,y,z+1+1)+D_pht(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1-1))
-                 B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1+1)+D_pyr(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1-1))
-                 B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1+1)+D_env(x,y,z+1))/(dpf*dpf))*env(x,y,z+1-1))
-              end if
+           if (z.eq.1) then
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_met(x,y,z+1)+D_met(x,y,z+1-1))/(dpf*dpf))*met(x,y,z+1-1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_mkw(x,y,z+1)+D_mkw(x,y,z+1-1))/(dpf*dpf))*mkw(x,y,z+1-1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pht(x,y,z+1)+D_pht(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1)+D_pyr(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1)+D_env(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
+           elseif (z.eq.psz) then
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_met(x,y,z+1+1)+D_met(x,y,z+1))/(dpf*dpf))*met(x,y,z+1-1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_mkw(x,y,z+1+1)+D_mkw(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1-1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pht(x,y,z+1+1)+D_pht(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1-1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1+1)+D_pyr(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1-1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1+1)+D_env(x,y,z+1))/(dpf*dpf))*env(x,y,z+1-1))
+           end if
 
-              approxsol(linindex+((imet-1)*psx*psy*psz)) = met(x,y,z+1)
-              approxsol(linindex+((imkw-1)*psx*psy*psz)) = mkw(x,y,z+1)
-              approxsol(linindex+((ipht-1)*psx*psy*psz)) = pht(x,y,z+1)
-              approxsol(linindex+((ipyr-1)*psx*psy*psz)) = pyr(x,y,z+1)
-              approxsol(linindex+((ienv-1)*psx*psy*psz)) = env(x,y,z+1)
+           approxsol(linindex+((imet-1)*psx*psy*psz)) = met(x,y,z+1)
+           approxsol(linindex+((imkw-1)*psx*psy*psz)) = mkw(x,y,z+1)
+           approxsol(linindex+((ipht-1)*psx*psy*psz)) = pht(x,y,z+1)
+           approxsol(linindex+((ipyr-1)*psx*psy*psz)) = pyr(x,y,z+1)
+           approxsol(linindex+((ienv-1)*psx*psy*psz)) = env(x,y,z+1)
 
-              vector_locator(linindex+((imet-1)*psx*psy*psz)) = linindex+((imet-1)*psx*psy*psz)-1
-              vector_locator(linindex+((imkw-1)*psx*psy*psz)) = linindex+((imkw-1)*psx*psy*psz)-1
-              vector_locator(linindex+((ipht-1)*psx*psy*psz)) = linindex+((ipht-1)*psx*psy*psz)-1
-              vector_locator(linindex+((ipyr-1)*psx*psy*psz)) = linindex+((ipyr-1)*psx*psy*psz)-1
-              vector_locator(linindex+((ienv-1)*psx*psy*psz)) = linindex+((ienv-1)*psx*psy*psz)-1
+           vector_locator(linindex+((imet-1)*psx*psy*psz)) = linindex+((imet-1)*psx*psy*psz)-1
+           vector_locator(linindex+((imkw-1)*psx*psy*psz)) = linindex+((imkw-1)*psx*psy*psz)-1
+           vector_locator(linindex+((ipht-1)*psx*psy*psz)) = linindex+((ipht-1)*psx*psy*psz)-1
+           vector_locator(linindex+((ipyr-1)*psx*psy*psz)) = linindex+((ipyr-1)*psx*psy*psz)-1
+           vector_locator(linindex+((ienv-1)*psx*psy*psz)) = linindex+((ienv-1)*psx*psy*psz)-1
 
-           end do
         end do
      end do
+  end do
 
 
 
@@ -160,7 +160,10 @@ subroutine pfsolve(iter)
   call VecSetSizes(pf_vec,PETSC_DECIDE,psx*psy*psz*no_fields,ierr)
   call VecSetFromOptions(pf_vec,ierr)
   call VecSetUp(pf_vec,ierr)
+  call VecSetValues(pf_vec,psx*psy*psz*no_fields,vector_locator,approxsol,INSERT_VALUES,ierr)
 
+  call VecAssemblyBegin(pf_vec,ierr)
+  call VecAssemblyEnd(pf_vec,ierr)
 
   call VecCreate(PETSC_COMM_SELF,rhs_vec,ierr)
   call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*psz*no_fields,ierr)
@@ -168,7 +171,12 @@ subroutine pfsolve(iter)
   call VecSetUp(rhs_vec,ierr)
   call VecSetValues(rhs_vec,psx*psy*psz*no_fields,vector_locator,B,INSERT_VALUES,ierr)
 
+  call VecAssemblyBegin(rhs_vec,ierr)
+  call VecAssemblyEnd(rhs_vec,ierr)
 
+  call MatCreate(PETSC_COMM_SELF,jac,ierr)
+  call MatSetSizes(jac,PETSC_DECIDE,PETSC_DECIDE,psx*psy*psz*no_fields,psx*psy*psz*no_fields,ierr)
+  call MatSetUp(jac,ierr)
 
   call SNESCreate(PETSC_COMM_SELF,snes_pf,ierr)
   call SNESSetFunction(snes_pf,ret_vec,pfFunction,PETSC_NULL_OBJECT,ierr)
@@ -176,17 +184,11 @@ subroutine pfsolve(iter)
   call SNESSetFromOptions(snes_pf,ierr)
   call SNESSolve(snes_pf,rhs_vec,pf_vec,ierr)
 
-
-
-
-
-
-
-
-
-
-
-
+  call VecDestroy(pf_vec,ierr)
+  call VecDestroy(rhs_vec,ierr)
+  call VecDestroy(ret_vec,ierr)
+  call MatDestroy(jac,ierr)
+  call SNESDestroy(snes_pf,ierr)
 
 
 end subroutine pfsolve
