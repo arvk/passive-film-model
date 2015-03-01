@@ -52,8 +52,8 @@ module fields
   real*8 :: sigma_pht_pyr_0 = 2.5E-8
   real*8 :: sigma_pyr_pht_0 = 2.5E-8
 
-  real*8 :: sigma_met_env= 1E-5
-  real*8 :: sigma_env_met= 1E-5
+  real*8 :: sigma_met_env= 1E-6
+  real*8 :: sigma_env_met= 1E-6
 
   real*8 :: sigma_met_pyr_0 = 1E-6
   real*8 :: sigma_pyr_met_0 = 1E-6
@@ -72,11 +72,11 @@ module fields
   real*8 :: M_met_pyr = 1.7E-09
   real*8 :: M_pyr_met = 1.7E-09
 
-  real*8 :: M_pht_env = 1.7E-12
-  real*8 :: M_env_pht = 1.7E-12
+  real*8 :: M_pht_env = 1.7E-26
+  real*8 :: M_env_pht = 1.7E-26
 
-  real*8 :: M_mkw_env = 1.7E-12
-  real*8 :: M_env_mkw = 1.7E-12
+  real*8 :: M_mkw_env = 1.7E-26
+  real*8 :: M_env_mkw = 1.7E-26
 
   real*8 :: M_env_pyr = 8.7E-09
   real*8 :: M_pyr_env = 8.7E-09
@@ -110,20 +110,20 @@ module fields
   real*8 :: hill_mkw_env = 5E11
   real*8 :: hill_env_mkw = 5E11
 
-  real*8 :: hill_env_pyr = 5E7
-  real*8 :: hill_pyr_env = 5E7
+  real*8 :: hill_env_pyr = 5E11
+  real*8 :: hill_pyr_env = 5E11
 
-  real*8 :: hill_met_env = 2E14
-  real*8 :: hill_env_met = 2E14
+  real*8 :: hill_met_env = 5E11
+  real*8 :: hill_env_met = 5E11
 
   real*8 :: hill_pht_pyr = 5E7
   real*8 :: hill_pyr_pht = 5E7
 
-  real*8 :: hill_mkw_pyr = 5E7
-  real*8 :: hill_pyr_mkw = 5E7
+  real*8 :: hill_mkw_pyr = 5E8
+  real*8 :: hill_pyr_mkw = 5E8
 
-  real*8 :: hill_pht_mkw = 5E7
-  real*8 :: hill_mkw_pht = 5E7
+  real*8 :: hill_pht_mkw = 5E8
+  real*8 :: hill_mkw_pht = 5E8
 
 
 
