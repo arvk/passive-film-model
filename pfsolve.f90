@@ -32,6 +32,7 @@ subroutine pfsolve(iter)
   real*8 :: sigma_pyr_met, sigma_pyr_mkw, sigma_pyr_pht, sigma_pyr_env
   real*8 :: sigma_met_pyr, sigma_mkw_pyr, sigma_pht_pyr, sigma_env_pyr
 
+  real*8 :: sumfields
 
   integer, parameter :: imet = 1
   integer, parameter :: imkw = 2
@@ -185,10 +186,6 @@ subroutine pfsolve(iter)
   call SNESSolve(snes_pf,rhs_vec,pf_vec,ierr)
 
 
-
-
-
-
   call VecGetArrayF90(pf_vec,point_pf_vec,ierr)
   do z = 1,psz
      do y = 1,psy
@@ -196,16 +193,125 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-           newmet(x,y,z+1) = point_pf_vec(linindex+((imet-1)*psx*psy*psz))
-           newmkw(x,y,z+1) = point_pf_vec(linindex+((imkw-1)*psx*psy*psz))
-           newpht(x,y,z+1) = point_pf_vec(linindex+((ipht-1)*psx*psy*psz))
-           newpyr(x,y,z+1) = point_pf_vec(linindex+((ipyr-1)*psx*psy*psz))
-           newenv(x,y,z+1) = point_pf_vec(linindex+((ienv-1)*psx*psy*psz))
+           newmet(x,y,z+1) = max(min(point_pf_vec(linindex+((imet-1)*psx*psy*psz)),1.0d0),0.0d0)
+           newmkw(x,y,z+1) = max(min(point_pf_vec(linindex+((imkw-1)*psx*psy*psz)),1.0d0),0.0d0)
+           newpht(x,y,z+1) = max(min(point_pf_vec(linindex+((ipht-1)*psx*psy*psz)),1.0d0),0.0d0)
+           newpyr(x,y,z+1) = max(min(point_pf_vec(linindex+((ipyr-1)*psx*psy*psz)),1.0d0),0.0d0)
+           newenv(x,y,z+1) = max(min(point_pf_vec(linindex+((ienv-1)*psx*psy*psz)),1.0d0),0.0d0)
 
         end do
      end do
   end do
   call VecRestoreArrayF90(pf_vec,point_pf_vec,ierr)
+
+
+  !! Apply boundary conditions to phase field(s) update
+  if (rank.eq.0) then
+     do x = 1,psx
+        do y = 1,psy
+           newmet(x,y,2) = met(x,y,2)
+           newmkw(x,y,2) = mkw(x,y,2)
+           newpht(x,y,2) = pht(x,y,2) 
+           newpyr(x,y,2) = pyr(x,y,2)
+           newenv(x,y,2) = env(x,y,2)
+        end do
+     end do
+  elseif(rank.eq.procs-1) then
+     do x = 1,psx
+        do y = 1,psy
+           newmet(x,y,psz+1) = met(x,y,psz+1)
+           newmkw(x,y,psz+1) = mkw(x,y,psz+1)
+           newpht(x,y,psz+1) = pht(x,y,psz+1) 
+           newpyr(x,y,psz+1) = pyr(x,y,psz+1)
+           newenv(x,y,psz+1) = env(x,y,psz+1)
+        end do
+     end do
+  end if
+
+
+  !! Apply boundary conditions to the environment
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+           if (env(x,y,z).gt.0.99) then
+              newmet(x,y,z) = 0.0d0
+              newmkw(x,y,z) = 0.0d0
+              newpht(x,y,z) = 0.0d0
+              newpyr(x,y,z) = 0.0d0
+              newenv(x,y,z) = 1.0d0
+           end if
+        end do
+     end do
+  end do
+
+
+
+
+
+
+
+!  Update phase fields
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+           sumfields = (newmet(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
+           newmet(x,y,z) = newmet(x,y,z)/sumfields
+           newpht(x,y,z) = newpht(x,y,z)/sumfields
+           newenv(x,y,z) = newenv(x,y,z)/sumfields
+           newpyr(x,y,z) = newpyr(x,y,z)/sumfields
+        end do
+     end do
+  end do
+  
+
+
+
+
+
+
+
+
+
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+           dmet_dt(x,y,z) = (newmet(x,y,z) - met(x,y,z))/dt
+           dmkw_dt(x,y,z) = (newmkw(x,y,z) - mkw(x,y,z))/dt
+           dpht_dt(x,y,z) = (newpht(x,y,z) - pht(x,y,z))/dt
+           dpyr_dt(x,y,z) = (newpyr(x,y,z) - pyr(x,y,z))/dt
+           denv_dt(x,y,z) = (newenv(x,y,z) - env(x,y,z))/dt
+        end do
+           dmet_dt(x,y,1) = 0.0d0 ; dmkw_dt(x,y,1) = 0.0d0 ; dpht_dt(x,y,1) = 0.0d0 ; dpyr_dt(x,y,1) = 0.0d0 ; denv_dt(x,y,1) = 0.0d0 
+           dmet_dt(x,y,psz+2) = 0.0d0 ; dmkw_dt(x,y,psz+2) = 0.0d0 ; dpht_dt(x,y,psz+2) = 0.0d0 ; dpyr_dt(x,y,psz+2) = 0.0d0 ; denv_dt(x,y,psz+2) = 0.0d0 
+     end do
+  end do
+
+
+  dmet_dt = 0.0d0
+  dmkw_dt = 0.0d0
+  dpht_dt = 0.0d0
+  dpyr_dt = 0.0d0
+  denv_dt = 0.0d0
+
+
+
+  !###########################################################
+  !##################--UPDATE ALL FIELDS--####################
+  !###########################################################
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+1
+           met(x,y,z) = newmet(x,y,z)
+           mkw(x,y,z) = newmkw(x,y,z)
+           pht(x,y,z) = newpht(x,y,z)
+           pyr(x,y,z) = newpyr(x,y,z)
+           env(x,y,z) = newenv(x,y,z)
+        end do
+     end do
+  end do
+
 
   call VecDestroy(pf_vec,ierr)
   call VecDestroy(rhs_vec,ierr)
