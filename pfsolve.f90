@@ -74,9 +74,7 @@ subroutine pfsolve(iter)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-     if (mod(iter,swap_freq_pf).eq.1) then
         call swap_pf()
-     end if
 
      sigma_pyr_met = sigma_pyr_met_0
      sigma_pyr_mkw = sigma_pyr_mkw_0
@@ -132,11 +130,11 @@ subroutine pfsolve(iter)
               B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1)+D_pyr(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
               B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1)+D_env(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
            elseif (z.eq.psz) then
-              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_met(x,y,z+1+1)+D_met(x,y,z+1))/(dpf*dpf))*met(x,y,z+1-1))
-              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_mkw(x,y,z+1+1)+D_mkw(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1-1))
-              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pht(x,y,z+1+1)+D_pht(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1-1))
-              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1+1)+D_pyr(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1-1))
-              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1+1)+D_env(x,y,z+1))/(dpf*dpf))*env(x,y,z+1-1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_met(x,y,z+1+1)+D_met(x,y,z+1))/(dpf*dpf))*met(x,y,z+1+1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_mkw(x,y,z+1+1)+D_mkw(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1+1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pht(x,y,z+1+1)+D_pht(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1+1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1+1)+D_pyr(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1+1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1+1)+D_env(x,y,z+1))/(dpf*dpf))*env(x,y,z+1+1))
            end if
 
            approxsol(linindex+((imet-1)*psx*psy*psz)) = met(x,y,z+1)
