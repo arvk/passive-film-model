@@ -42,7 +42,11 @@ subroutine pfsolve(iter)
 
   integer, parameter :: no_fields = 5
 
-  real*8, dimension(psx,psy,psz+2) :: D_met, D_mkw, D_pht, D_pyr, D_env
+  real*8, dimension(psx,psy,psz+2) :: D_met, D_met_mkw, D_met_pht, D_met_pyr, D_met_env
+  real*8, dimension(psx,psy,psz+2) :: D_mkw_met, D_mkw, D_mkw_pht, D_mkw_pyr, D_mkw_env
+  real*8, dimension(psx,psy,psz+2) :: D_pht_met, D_pht_mkw, D_pht, D_pht_pyr, D_pht_env
+  real*8, dimension(psx,psy,psz+2) :: D_pyr_met, D_pyr_mkw, D_pyr_pht, D_pyr, D_pyr_env
+  real*8, dimension(psx,psy,psz+2) :: D_env_met, D_env_mkw, D_env_pht, D_env_pyr, D_env
 
 
   ! A/B/JA matrices for implicit solver
@@ -87,17 +91,47 @@ subroutine pfsolve(iter)
      sigma_env_pyr = sigma_pyr_env
 
 
-     do z = 1,psz+2
-        do y = 1,psy
-           do x = 1,psx
-              D_met(x,y,z) = (M_met_mkw*sigma_met_mkw*mkw(x,y,z))+(M_met_pht*sigma_met_pht*pht(x,y,z))+(M_met_pyr*sigma_met_pyr*pyr(x,y,z))+(M_met_env*sigma_met_env*env(x,y,z))
-              D_mkw(x,y,z) = (M_mkw_met*sigma_mkw_met*met(x,y,z))+(M_mkw_pht*sigma_mkw_pht*pht(x,y,z))+(M_mkw_pyr*sigma_mkw_pyr*pyr(x,y,z))+(M_mkw_env*sigma_mkw_env*env(x,y,z))
-              D_pht(x,y,z) = (M_pht_met*sigma_pht_met*met(x,y,z))+(M_pht_mkw*sigma_pht_mkw*mkw(x,y,z))+(M_pht_pyr*sigma_pht_pyr*pyr(x,y,z))+(M_pht_env*sigma_pht_env*env(x,y,z))
-              D_pyr(x,y,z) = (M_pyr_met*sigma_pyr_met*met(x,y,z))+(M_pyr_mkw*sigma_pyr_mkw*mkw(x,y,z))+(M_pyr_pht*sigma_pyr_pht*pht(x,y,z))+(M_pyr_env*sigma_pyr_env*env(x,y,z))
-              D_env(x,y,z) = (M_env_met*sigma_env_met*met(x,y,z))+(M_env_mkw*sigma_env_mkw*mkw(x,y,z))+(M_env_pht*sigma_env_pht*pht(x,y,z))+(M_env_pyr*sigma_env_pyr*pyr(x,y,z))
-           end do
+  do z = 1,psz+2
+     do y = 1,psy
+        do x = 1,psx
+
+           D_met_mkw(x,y,z) = 0.0d0 - (M_met_mkw*sigma_met_mkw*mkw(x,y,z))
+           D_met_pht(x,y,z) = 0.0d0 - (M_met_pht*sigma_met_pht*pht(x,y,z))
+           D_met_pyr(x,y,z) = 0.0d0 - (M_met_pyr*sigma_met_pyr*pyr(x,y,z))
+           D_met_env(x,y,z) = 0.0d0 - (M_met_env*sigma_met_env*env(x,y,z))
+           D_met(x,y,z) = 0.0d0 - (D_met_mkw(x,y,z)+D_met_pht(x,y,z)+D_met_pyr(x,y,z)+D_met_env(x,y,z))
+
+           D_mkw_met(x,y,z) = 0.0d0 - (M_mkw_met*sigma_mkw_met*met(x,y,z))
+           D_mkw_pht(x,y,z) = 0.0d0 - (M_mkw_pht*sigma_mkw_pht*pht(x,y,z))
+           D_mkw_pyr(x,y,z) = 0.0d0 - (M_mkw_pyr*sigma_mkw_pyr*pyr(x,y,z))
+           D_mkw_env(x,y,z) = 0.0d0 - (M_mkw_env*sigma_mkw_env*env(x,y,z))
+           D_mkw(x,y,z) = 0.0d0 - (D_mkw_met(x,y,z)+D_mkw_pht(x,y,z)+D_mkw_pyr(x,y,z)+D_mkw_env(x,y,z))
+
+           D_pht_met(x,y,z) = 0.0d0 - (M_pht_met*sigma_pht_met*met(x,y,z))
+           D_pht_mkw(x,y,z) = 0.0d0 - (M_pht_mkw*sigma_pht_mkw*mkw(x,y,z))
+           D_pht_pyr(x,y,z) = 0.0d0 - (M_pht_pyr*sigma_pht_pyr*pyr(x,y,z))
+           D_pht_env(x,y,z) = 0.0d0 - (M_pht_env*sigma_pht_env*env(x,y,z))
+           D_pht(x,y,z) = 0.0d0 - (D_pht_met(x,y,z)+D_pht_mkw(x,y,z)+D_pht_pyr(x,y,z)+D_pht_env(x,y,z))
+
+           D_pyr_met(x,y,z) = 0.0d0 - (M_pyr_met*sigma_pyr_met*met(x,y,z))
+           D_pyr_mkw(x,y,z) = 0.0d0 - (M_pyr_mkw*sigma_pyr_mkw*mkw(x,y,z))
+           D_pyr_pht(x,y,z) = 0.0d0 - (M_pyr_pht*sigma_pyr_pht*pht(x,y,z))
+           D_pyr_env(x,y,z) = 0.0d0 - (M_pyr_env*sigma_pyr_env*env(x,y,z))
+           D_pyr(x,y,z) = 0.0d0 - (D_pyr_met(x,y,z)+D_pyr_mkw(x,y,z)+D_pyr_pht(x,y,z)+D_pyr_env(x,y,z))
+
+           D_env_met(x,y,z) = 0.0d0 - (M_env_met*sigma_env_met*met(x,y,z))
+           D_env_mkw(x,y,z) = 0.0d0 - (M_env_mkw*sigma_env_mkw*mkw(x,y,z))
+           D_env_pht(x,y,z) = 0.0d0 - (M_env_pht*sigma_env_pht*pht(x,y,z))
+           D_env_pyr(x,y,z) = 0.0d0 - (M_env_pyr*sigma_env_pyr*pyr(x,y,z))
+           D_env(x,y,z) = 0.0d0 - (D_env_met(x,y,z)+D_env_mkw(x,y,z)+D_env_pht(x,y,z)+D_env_pyr(x,y,z))
+
         end do
      end do
+  end do
+
+
+
+
      
 
 
@@ -124,17 +158,69 @@ subroutine pfsolve(iter)
            B(linindex+((ienv-1)*psx*psy*psz)) =  (env(x,y,z+1)/dt)
 
            if (z.eq.1) then
+
               B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_met(x,y,z+1)+D_met(x,y,z+1-1))/(dpf*dpf))*met(x,y,z+1-1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_mkw_met(x,y,z+1)+D_mkw_met(x,y,z+1-1))/(dpf*dpf))*mkw(x,y,z+1-1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_pht_met(x,y,z+1)+D_pht_met(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_pyr_met(x,y,z+1)+D_pyr_met(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_env_met(x,y,z+1)+D_env_met(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
+
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_met_mkw(x,y,z+1)+D_met_mkw(x,y,z+1-1))/(dpf*dpf))*met(x,y,z+1-1))
               B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_mkw(x,y,z+1)+D_mkw(x,y,z+1-1))/(dpf*dpf))*mkw(x,y,z+1-1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_pht_mkw(x,y,z+1)+D_pht_mkw(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_pyr_mkw(x,y,z+1)+D_pyr_mkw(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_env_mkw(x,y,z+1)+D_env_mkw(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
+              
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_met_pht(x,y,z+1)+D_met_pht(x,y,z+1-1))/(dpf*dpf))*met(x,y,z+1-1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_mkw_pht(x,y,z+1)+D_mkw_pht(x,y,z+1-1))/(dpf*dpf))*mkw(x,y,z+1-1))
               B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pht(x,y,z+1)+D_pht(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pyr_pht(x,y,z+1)+D_pyr_pht(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_env_pht(x,y,z+1)+D_env_pht(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
+
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_met_pyr(x,y,z+1)+D_met_pyr(x,y,z+1-1))/(dpf*dpf))*met(x,y,z+1-1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_mkw_pyr(x,y,z+1)+D_mkw_pyr(x,y,z+1-1))/(dpf*dpf))*mkw(x,y,z+1-1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pht_pyr(x,y,z+1)+D_pht_pyr(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
               B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1)+D_pyr(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_env_pyr(x,y,z+1)+D_env_pyr(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
+
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_met_env(x,y,z+1)+D_met_env(x,y,z+1-1))/(dpf*dpf))*met(x,y,z+1-1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_mkw_env(x,y,z+1)+D_mkw_env(x,y,z+1-1))/(dpf*dpf))*mkw(x,y,z+1-1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_pht_env(x,y,z+1)+D_pht_env(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_pyr_env(x,y,z+1)+D_pyr_env(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
               B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1)+D_env(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
+
            elseif (z.eq.psz) then
+
               B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_met(x,y,z+1+1)+D_met(x,y,z+1))/(dpf*dpf))*met(x,y,z+1+1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_mkw_met(x,y,z+1+1)+D_mkw_met(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1+1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_pht_met(x,y,z+1+1)+D_pht_met(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1+1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_pyr_met(x,y,z+1+1)+D_pyr_met(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1+1))
+              B(linindex+((imet-1)*psx*psy*psz)) = B(linindex+((imet-1)*psx*psy*psz)) + ((0.5d0*(D_env_met(x,y,z+1+1)+D_env_met(x,y,z+1))/(dpf*dpf))*env(x,y,z+1+1))
+
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_met_mkw(x,y,z+1+1)+D_met_mkw(x,y,z+1))/(dpf*dpf))*met(x,y,z+1+1))
               B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_mkw(x,y,z+1+1)+D_mkw(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1+1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_pht_mkw(x,y,z+1+1)+D_pht_mkw(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1+1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_pyr_mkw(x,y,z+1+1)+D_pyr_mkw(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1+1))
+              B(linindex+((imkw-1)*psx*psy*psz)) = B(linindex+((imkw-1)*psx*psy*psz)) + ((0.5d0*(D_env_mkw(x,y,z+1+1)+D_env_mkw(x,y,z+1))/(dpf*dpf))*env(x,y,z+1+1))
+
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_met_pht(x,y,z+1+1)+D_met_pht(x,y,z+1))/(dpf*dpf))*met(x,y,z+1+1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_mkw_pht(x,y,z+1+1)+D_mkw_pht(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1+1))
               B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pht(x,y,z+1+1)+D_pht(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1+1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_pyr_pht(x,y,z+1+1)+D_pyr_pht(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1+1))
+              B(linindex+((ipht-1)*psx*psy*psz)) = B(linindex+((ipht-1)*psx*psy*psz)) + ((0.5d0*(D_env_pht(x,y,z+1+1)+D_env_pht(x,y,z+1))/(dpf*dpf))*env(x,y,z+1+1))
+
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_met_pyr(x,y,z+1+1)+D_met_pyr(x,y,z+1))/(dpf*dpf))*met(x,y,z+1+1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_mkw_pyr(x,y,z+1+1)+D_mkw_pyr(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1+1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pht_pyr(x,y,z+1+1)+D_pht_pyr(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1+1))
               B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_pyr(x,y,z+1+1)+D_pyr(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1+1))
+              B(linindex+((ipyr-1)*psx*psy*psz)) = B(linindex+((ipyr-1)*psx*psy*psz)) + ((0.5d0*(D_env_pyr(x,y,z+1+1)+D_env_pyr(x,y,z+1))/(dpf*dpf))*env(x,y,z+1+1))
+
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_met_env(x,y,z+1+1)+D_met_env(x,y,z+1))/(dpf*dpf))*met(x,y,z+1+1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_mkw_env(x,y,z+1+1)+D_mkw_env(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1+1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_pht_env(x,y,z+1+1)+D_pht_env(x,y,z+1))/(dpf*dpf))*pht(x,y,z+1+1))
+              B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_pyr_env(x,y,z+1+1)+D_pyr_env(x,y,z+1))/(dpf*dpf))*pyr(x,y,z+1+1))
               B(linindex+((ienv-1)*psx*psy*psz)) = B(linindex+((ienv-1)*psx*psy*psz)) + ((0.5d0*(D_env(x,y,z+1+1)+D_env(x,y,z+1))/(dpf*dpf))*env(x,y,z+1+1))
+
            end if
 
            approxsol(linindex+((imet-1)*psx*psy*psz)) = met(x,y,z+1)
