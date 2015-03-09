@@ -115,34 +115,34 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
      do y = 1,psy
         do x = 1,psx
 
-           D_met_mkw(x,y,z) = 0.0d0 - (M_met_mkw*sigma_met_mkw*loc_mkw(x,y,z))
-           D_met_pht(x,y,z) = 0.0d0 - (M_met_pht*sigma_met_pht*loc_pht(x,y,z))
-           D_met_pyr(x,y,z) = 0.0d0 - (M_met_pyr*sigma_met_pyr*loc_pyr(x,y,z))
-           D_met_env(x,y,z) = 0.0d0 - (M_met_env*sigma_met_env*loc_env(x,y,z))
+           D_met_mkw(x,y,z) = 0.0d0 - (M_met_mkw*sigma_met_mkw*abs(loc_mkw(x,y,z)))
+           D_met_pht(x,y,z) = 0.0d0 - (M_met_pht*sigma_met_pht*abs(loc_pht(x,y,z)))
+           D_met_pyr(x,y,z) = 0.0d0 - (M_met_pyr*sigma_met_pyr*abs(loc_pyr(x,y,z)))
+           D_met_env(x,y,z) = 0.0d0 - (M_met_env*sigma_met_env*abs(loc_env(x,y,z)))
            D_met(x,y,z) = 0.0d0 - (D_met_mkw(x,y,z)+D_met_pht(x,y,z)+D_met_pyr(x,y,z)+D_met_env(x,y,z))
 
-           D_mkw_met(x,y,z) = 0.0d0 - (M_mkw_met*sigma_mkw_met*loc_met(x,y,z))
-           D_mkw_pht(x,y,z) = 0.0d0 - (M_mkw_pht*sigma_mkw_pht*loc_pht(x,y,z))
-           D_mkw_pyr(x,y,z) = 0.0d0 - (M_mkw_pyr*sigma_mkw_pyr*loc_pyr(x,y,z))
-           D_mkw_env(x,y,z) = 0.0d0 - (M_mkw_env*sigma_mkw_env*loc_env(x,y,z))
+           D_mkw_met(x,y,z) = 0.0d0 - (M_mkw_met*sigma_mkw_met*abs(loc_met(x,y,z)))
+           D_mkw_pht(x,y,z) = 0.0d0 - (M_mkw_pht*sigma_mkw_pht*abs(loc_pht(x,y,z)))
+           D_mkw_pyr(x,y,z) = 0.0d0 - (M_mkw_pyr*sigma_mkw_pyr*abs(loc_pyr(x,y,z)))
+           D_mkw_env(x,y,z) = 0.0d0 - (M_mkw_env*sigma_mkw_env*abs(loc_env(x,y,z)))
            D_mkw(x,y,z) = 0.0d0 - (D_mkw_met(x,y,z)+D_mkw_pht(x,y,z)+D_mkw_pyr(x,y,z)+D_mkw_env(x,y,z))
 
-           D_pht_met(x,y,z) = 0.0d0 - (M_pht_met*sigma_pht_met*loc_met(x,y,z))
-           D_pht_mkw(x,y,z) = 0.0d0 - (M_pht_mkw*sigma_pht_mkw*loc_mkw(x,y,z))
-           D_pht_pyr(x,y,z) = 0.0d0 - (M_pht_pyr*sigma_pht_pyr*loc_pyr(x,y,z))
-           D_pht_env(x,y,z) = 0.0d0 - (M_pht_env*sigma_pht_env*loc_env(x,y,z))
+           D_pht_met(x,y,z) = 0.0d0 - (M_pht_met*sigma_pht_met*abs(loc_met(x,y,z)))
+           D_pht_mkw(x,y,z) = 0.0d0 - (M_pht_mkw*sigma_pht_mkw*abs(loc_mkw(x,y,z)))
+           D_pht_pyr(x,y,z) = 0.0d0 - (M_pht_pyr*sigma_pht_pyr*abs(loc_pyr(x,y,z)))
+           D_pht_env(x,y,z) = 0.0d0 - (M_pht_env*sigma_pht_env*abs(loc_env(x,y,z)))
            D_pht(x,y,z) = 0.0d0 - (D_pht_met(x,y,z)+D_pht_mkw(x,y,z)+D_pht_pyr(x,y,z)+D_pht_env(x,y,z))
 
-           D_pyr_met(x,y,z) = 0.0d0 - (M_pyr_met*sigma_pyr_met*loc_met(x,y,z))
-           D_pyr_mkw(x,y,z) = 0.0d0 - (M_pyr_mkw*sigma_pyr_mkw*loc_mkw(x,y,z))
-           D_pyr_pht(x,y,z) = 0.0d0 - (M_pyr_pht*sigma_pyr_pht*loc_pht(x,y,z))
-           D_pyr_env(x,y,z) = 0.0d0 - (M_pyr_env*sigma_pyr_env*loc_env(x,y,z))
+           D_pyr_met(x,y,z) = 0.0d0 - (M_pyr_met*sigma_pyr_met*abs(loc_met(x,y,z)))
+           D_pyr_mkw(x,y,z) = 0.0d0 - (M_pyr_mkw*sigma_pyr_mkw*abs(loc_mkw(x,y,z)))
+           D_pyr_pht(x,y,z) = 0.0d0 - (M_pyr_pht*sigma_pyr_pht*abs(loc_pht(x,y,z)))
+           D_pyr_env(x,y,z) = 0.0d0 - (M_pyr_env*sigma_pyr_env*abs(loc_env(x,y,z)))
            D_pyr(x,y,z) = 0.0d0 - (D_pyr_met(x,y,z)+D_pyr_mkw(x,y,z)+D_pyr_pht(x,y,z)+D_pyr_env(x,y,z))
 
-           D_env_met(x,y,z) = 0.0d0 - (M_env_met*sigma_env_met*loc_met(x,y,z))
-           D_env_mkw(x,y,z) = 0.0d0 - (M_env_mkw*sigma_env_mkw*loc_mkw(x,y,z))
-           D_env_pht(x,y,z) = 0.0d0 - (M_env_pht*sigma_env_pht*loc_pht(x,y,z))
-           D_env_pyr(x,y,z) = 0.0d0 - (M_env_pyr*sigma_env_pyr*loc_pyr(x,y,z))
+           D_env_met(x,y,z) = 0.0d0 - (M_env_met*sigma_env_met*abs(loc_met(x,y,z)))
+           D_env_mkw(x,y,z) = 0.0d0 - (M_env_mkw*sigma_env_mkw*abs(loc_mkw(x,y,z)))
+           D_env_pht(x,y,z) = 0.0d0 - (M_env_pht*sigma_env_pht*abs(loc_pht(x,y,z)))
+           D_env_pyr(x,y,z) = 0.0d0 - (M_env_pyr*sigma_env_pyr*abs(loc_pyr(x,y,z)))
            D_env(x,y,z) = 0.0d0 - (D_env_met(x,y,z)+D_env_mkw(x,y,z)+D_env_pht(x,y,z)+D_env_pyr(x,y,z))
 
         end do
@@ -1502,6 +1502,48 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
   do z = 1,psz
      do y = 1,psy
         do x = 1,psx
+
+
+           !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
+           !! Number of moles per m^3 = 140401
+           f_met = 0.0d0*140401
+           w_met = f_met - (mu(x,y,z+1)*140401*0.0015d0)
+
+           !! Volume per mole of Mkw = 19.130 cc assuming a density of 4.28 g/cc from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
+           !! Number of moles per m^3 = 48683
+           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)*48683.0d0
+           w_mkw = f_mkw - (mu(x,y,z+1)*48683.0d0*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
+
+           !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
+           !! Number of moles per m^3 = 52275
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
+           w_pht = f_pht - (mu(x,y,z+1)*52275)
+
+           !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
+           !! Number of moles per m^3 = 41667
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
+           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+
+           !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
+           !! Number of moles per m^3 = 13303/T
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           w_env = 0.0d0
+
+
+           hill_met_mkw = 32.0d0*abs(w_met-w_mkw); hill_mkw_met = 32.0d0*abs(w_mkw-w_met)
+           hill_met_pht = 32.0d0*abs(w_met-w_pht); hill_pht_met = 32.0d0*abs(w_pht-w_met)
+           hill_met_pyr = 32.0d0*abs(w_met-w_pyr); hill_pyr_met = 32.0d0*abs(w_pyr-w_met)
+           hill_met_env = 32.0d0*abs(w_met-w_env); hill_env_met = 32.0d0*abs(w_env-w_met)
+
+           hill_mkw_pht = 32.0d0*abs(w_mkw-w_pht); hill_pht_mkw = 32.0d0*abs(w_pht-w_mkw)
+           hill_mkw_pyr = 32.0d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 32.0d0*abs(w_pyr-w_mkw)
+           hill_mkw_env = 32.0d0*abs(w_mkw-w_env); hill_env_mkw = 32.0d0*abs(w_env-w_mkw)
+
+           hill_pht_pyr = 32.0d0*abs(w_pht-w_pyr); hill_pyr_pht = 32.0d0*abs(w_pyr-w_pht)
+           hill_pht_env = 32.0d0*abs(w_pht-w_env); hill_env_pht = 32.0d0*abs(w_env-w_pht)
+
+           hill_pyr_env = 32.0d0*abs(w_pyr-w_env); hill_env_pyr = 32.0d0*abs(w_env-w_pyr)
+
 
 !!! FOR MET           
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*psz)
