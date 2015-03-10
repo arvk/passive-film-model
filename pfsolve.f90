@@ -34,6 +34,8 @@ subroutine pfsolve(iter)
 
   real*8 :: sumfields
 
+  integer :: int_count
+
   integer, parameter :: imet = 1
   integer, parameter :: imkw = 2
   integer, parameter :: ipht = 3
@@ -353,11 +355,6 @@ subroutine pfsolve(iter)
 
 
 
-
-
-
-
-
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+1
@@ -394,6 +391,40 @@ subroutine pfsolve(iter)
   call VecDestroy(ret_vec,ierr)
   call MatDestroy(jac,ierr)
   call SNESDestroy(snes_pf,ierr)
+
+
+
+
+
+
+
+
+
+!!!!! CALCULATE SULFIDATION RATE
+
+  sulfidation_rate = 0.0d0
+  int_count = 1
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = psz+1,2,-1
+           if ((env(x,y,z) .lt. 9.9E-1).and.(env(x,y,z+1) .gt. 9.9E-1)) then
+              int_count = int_count + 1
+              sulfidation_rate = sulfidation_rate + 0.04356E-9*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
+           end if
+        end do
+     end do
+  end do
+
+  sulfidation_rate = max((sulfidation_rate/int_count) + 0.01372E-9,0.0d0) ! This sulfidation rate is passed on to the musolve subroutine
+
+
+
+
+
+
+
+
 
 end subroutine pfsolve
 
