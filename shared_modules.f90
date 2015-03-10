@@ -31,67 +31,68 @@ module fields
 
 
   !! Thermodynamic parameters
-  real*8 :: sigma_mkw_env= 1E-6
-  real*8 :: sigma_env_mkw= 1E-6
+  real*8 :: sigma_mkw_env= 1E-7
+  real*8 :: sigma_env_mkw= 1E-7
 
-  real*8 :: sigma_mkw_met= 1E-6
-  real*8 :: sigma_met_mkw= 1E-6
+  real*8 :: sigma_mkw_met= 1E-7
+  real*8 :: sigma_met_mkw= 1E-7
 
-  real*8 :: sigma_mkw_pht= 1E-6
-  real*8 :: sigma_pht_mkw= 1E-6
+  real*8 :: sigma_mkw_pht= 1E-7
+  real*8 :: sigma_pht_mkw= 1E-7
 
-  real*8 :: sigma_mkw_pyr_0 = 2.5E-8
-  real*8 :: sigma_pyr_mkw_0 = 2.5E-8
+  real*8 :: sigma_mkw_pyr_0 = 1E-7
+  real*8 :: sigma_pyr_mkw_0 = 1E-7
 
-  real*8 :: sigma_pht_env= 1E-6
-  real*8 :: sigma_env_pht= 1E-6
+  real*8 :: sigma_pht_env= 1E-7
+  real*8 :: sigma_env_pht= 1E-7
 
-  real*8 :: sigma_pht_met= 1E-6
-  real*8 :: sigma_met_pht= 1E-6
+  real*8 :: sigma_pht_met= 1E-7
+  real*8 :: sigma_met_pht= 1E-7
 
-  real*8 :: sigma_pht_pyr_0 = 2.5E-8
-  real*8 :: sigma_pyr_pht_0 = 2.5E-8
+  real*8 :: sigma_pht_pyr_0 = 1E-7
+  real*8 :: sigma_pyr_pht_0 = 1E-7
 
-  real*8 :: sigma_met_env= 1E-6
-  real*8 :: sigma_env_met= 1E-6
+  real*8 :: sigma_met_env= 1E-7
+  real*8 :: sigma_env_met= 1E-7
 
-  real*8 :: sigma_met_pyr_0 = 1E-6
-  real*8 :: sigma_pyr_met_0 = 1E-6
+  real*8 :: sigma_met_pyr_0 = 1E-7
+  real*8 :: sigma_pyr_met_0 = 1E-7
 
-  real*8 :: sigma_env_pyr_0 = 2.5E-8
-  real*8 :: sigma_pyr_env_0 = 2.5E-8
+  real*8 :: sigma_env_pyr_0 = 1E-7
+  real*8 :: sigma_pyr_env_0 = 1E-7
 
 
 
-  real*8 :: M_pht_met = 1.7E-09
-  real*8 :: M_met_pht = 1.7E-09
+  real*8 :: M_pht_met = 1.0E-10
+  real*8 :: M_met_pht = 1.0E-10
 
-  real*8 :: M_mkw_met = 1.7E-09
-  real*8 :: M_met_mkw = 1.7E-09
+  real*8 :: M_mkw_met = 1.0E-10
+  real*8 :: M_met_mkw = 1.0E-10
 
-  real*8 :: M_met_pyr = 1.7E-09
-  real*8 :: M_pyr_met = 1.7E-09
+  real*8 :: M_met_pyr = 1.0E-10
+  real*8 :: M_pyr_met = 1.0E-10
 
-  real*8 :: M_pht_env = 1.7E-26
-  real*8 :: M_env_pht = 1.7E-26
+  real*8 :: M_pht_pyr = 1.0E-10
+  real*8 :: M_pyr_pht = 1.0E-10
 
-  real*8 :: M_mkw_env = 1.7E-26
-  real*8 :: M_env_mkw = 1.7E-26
+  real*8 :: M_mkw_pyr = 1.0E-10
+  real*8 :: M_pyr_mkw = 1.0E-10
 
-  real*8 :: M_env_pyr = 8.7E-09
-  real*8 :: M_pyr_env = 8.7E-09
+  real*8 :: M_pht_mkw = 1.0E-10
+  real*8 :: M_mkw_pht = 1.0E-10
 
-  real*8 :: M_met_env = 1.7E-26
-  real*8 :: M_env_met = 1.7E-26
+  real*8 :: M_pht_env = 1.0E-13
+  real*8 :: M_env_pht = 1.0E-13
 
-  real*8 :: M_pht_pyr = 8.7E-09
-  real*8 :: M_pyr_pht = 8.7E-09
+  real*8 :: M_mkw_env = 1.0E-13
+  real*8 :: M_env_mkw = 1.0E-13
 
-  real*8 :: M_mkw_pyr = 8.7E-09
-  real*8 :: M_pyr_mkw = 8.7E-09
+  real*8 :: M_met_env = 1.0E-13
+  real*8 :: M_env_met = 1.0E-13
 
-  real*8 :: M_pht_mkw = 8.7E-09
-  real*8 :: M_mkw_pht = 8.7E-09
+  real*8 :: M_env_pyr = 1.0E-13
+  real*8 :: M_pyr_env = 1.0E-13
+
 
 
 
@@ -104,26 +105,26 @@ module fields
   real*8 :: hill_met_pyr = 8E10
   real*8 :: hill_pyr_met = 8E10
 
-  real*8 :: hill_pht_env = 5E11
-  real*8 :: hill_env_pht = 5E11
+  real*8 :: hill_pht_env = 8E10
+  real*8 :: hill_env_pht = 8E10
 
-  real*8 :: hill_mkw_env = 5E11
-  real*8 :: hill_env_mkw = 5E11
+  real*8 :: hill_mkw_env = 8E10
+  real*8 :: hill_env_mkw = 8E10
 
-  real*8 :: hill_env_pyr = 5E11
-  real*8 :: hill_pyr_env = 5E11
+  real*8 :: hill_env_pyr = 8E10
+  real*8 :: hill_pyr_env = 8E10
 
-  real*8 :: hill_met_env = 5E11
-  real*8 :: hill_env_met = 5E11
+  real*8 :: hill_met_env = 8E10
+  real*8 :: hill_env_met = 8E10
 
-  real*8 :: hill_pht_pyr = 5E7
-  real*8 :: hill_pyr_pht = 5E7
+  real*8 :: hill_pht_pyr = 8E10
+  real*8 :: hill_pyr_pht = 8E10
 
-  real*8 :: hill_mkw_pyr = 5E8
-  real*8 :: hill_pyr_mkw = 5E8
+  real*8 :: hill_mkw_pyr = 8E10
+  real*8 :: hill_pyr_mkw = 8E10
 
-  real*8 :: hill_pht_mkw = 5E8
-  real*8 :: hill_mkw_pht = 5E8
+  real*8 :: hill_pht_mkw = 8E10
+  real*8 :: hill_mkw_pht = 8E10
 
 
 
@@ -148,7 +149,7 @@ module commondata
   integer :: nomc              ! Number of kMC steps
 
 
-  integer :: noimg = 20                   ! Number of output files
+  integer :: noimg = 100                  ! Number of output files
   integer :: freq_scale = 1750000000      ! KMC information is transferred every freq_scale steps
   integer :: kg_scale = 5                 ! Number of KMC grid points per PF grid
   integer :: swap_freq_pf = 5             ! Frequency with which MPI swaps are conducted for PF solving
