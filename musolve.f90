@@ -66,11 +66,11 @@ subroutine musolve(iter)
 
   open(unit = 55, file = '/dev/null')
 
-  D_inter_met = D_Fe_met
-  D_inter_mkw = D_Fe_mkw
-  D_inter_pht = D_Fe_pht
-  D_inter_pyr = D_inter_pht/10
-  D_inter_env = D_S_env
+  D_inter_met = max(D_Fe_met,D_S_met)
+  D_inter_mkw = max(D_Fe_mkw,D_S_mkw)
+  D_inter_pht = max(D_Fe_pht,D_S_pht)
+  D_inter_pyr = max(D_Fe_pyr,D_S_pyr)
+  D_inter_env = max(D_Fe_env,D_S_env)
 
   do x = 1,psx
      do y = 1,psy
@@ -333,10 +333,7 @@ subroutine musolve(iter)
            do z = psz+1,2,-1
               if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
                  interface_loc(x,y) = z
-                 call random_seed(put=seed)
-                 call random_number(noise)
-                 seed = seed + (int(noise*10.0d0)-5)
-                 newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*2.0d0*noise*sulfidation_rate*dt)/(dpf))
+                 newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
                  newmu(x,y,interface_loc(x,y)) = min(newmu(x,y,interface_loc(x,y)),max_mu)
                  newmu(x,y,interface_loc(x,y)+1) = newmu(x,y,interface_loc(x,y)-1)
                  exit
