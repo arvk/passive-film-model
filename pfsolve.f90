@@ -340,12 +340,11 @@ subroutine pfsolve(iter)
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+1
-           sumfields = (newmet(x,y,z)+newmkw(x,y,z)+newpht(x,y,z)+newenv(x,y,z)+newpyr(x,y,z))
-           newmet(x,y,z) = newmet(x,y,z)/sumfields
-           newmkw(x,y,z) = newmkw(x,y,z)/sumfields
-           newpht(x,y,z) = newpht(x,y,z)/sumfields
-           newpyr(x,y,z) = newpyr(x,y,z)/sumfields
-           newenv(x,y,z) = newenv(x,y,z)/sumfields
+           sumfields = (newmet(x,y,z)+newmkw(x,y,z)+newpht(x,y,z)+newpyr(x,y,z))+(1E-10)
+           newmet(x,y,z) = (newmet(x,y,z)/sumfields)*(1.0d0-newenv(x,y,z))
+           newmkw(x,y,z) = (newmkw(x,y,z)/sumfields)*(1.0d0-newenv(x,y,z))
+           newpht(x,y,z) = (newpht(x,y,z)/sumfields)*(1.0d0-newenv(x,y,z))
+           newpyr(x,y,z) = (newpyr(x,y,z)/sumfields)*(1.0d0-newenv(x,y,z))
         end do
      end do
   end do
