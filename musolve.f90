@@ -66,16 +66,35 @@ subroutine musolve(iter)
 
   open(unit = 55, file = '/dev/null')
 
-  D_inter_met = max(D_Fe_met,D_S_met)
-  D_inter_mkw = max(D_Fe_mkw,D_S_mkw)
-  D_inter_pht = max(D_Fe_pht,D_S_pht)
-  D_inter_pyr = max(D_Fe_pyr,D_S_pyr)
-  D_inter_env = max(D_Fe_env,D_S_env)
+  D_inter_met = max(D_Fe_met,D_S_met)*1E7
+  D_inter_mkw = max(D_Fe_mkw,D_S_mkw)*1E11
+  D_inter_pht = max(D_Fe_pht,D_S_pht)*3E11
+  D_inter_pyr = max(D_Fe_pyr,D_S_pyr)*1E14
+  D_inter_env = max(D_Fe_env,D_S_env)*1E7
+
+  !! Calculate derivative of sulfur concentration with chemical potential
+  drho_dmu_met = (0.0015d0*140401)/(R*T)
+  drho_dmu_mkw = 0.95d0*48683.0d0/(2*250896.0d0)
+  drho_dmu_pht = 52275.0d0/(2*250896.0d0)
+
+  if (iter.lt.nomc/100) then
+     drho_dmu_env = (0.0015d0*140401)/(R*T)
+  else
+     drho_dmu_env = (0.0015d0*(13303/T))/(R*T)
+  end if
+
+  drho_dmu_pyr = (2*41667.0d0)/(2*250896.0d0)
+
 
   do x = 1,psx
      do y = 1,psy
         do z = 1,psz+2
+           !! Calculate chemical 'specific heat'
+           Chi = (met(x,y,z)*drho_dmu_met)+(mkw(x,y,z)*drho_dmu_mkw)+(pht(x,y,z)*drho_dmu_pht)+(pyr(x,y,z)*drho_dmu_pyr)+(env(x,y,z)*drho_dmu_env)
+
            D(x,y,z) = ((met(x,y,z)*D_inter_met)+(mkw(x,y,z)*D_inter_mkw)+(pht(x,y,z)*D_inter_pht)+(pyr(x,y,z)*D_inter_pyr)+(env(x,y,z)*D_inter_env))
+           D(x,y,z) = D(x,y,z)/Chi
+
         end do
      end do
   end do
@@ -89,20 +108,6 @@ subroutine musolve(iter)
         do x = 1,psx
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
-
-           !! Calculate derivative of sulfur concentration with chemical potential
-           drho_dmu_met = (0.0015d0*140401)/(R*T)
-           drho_dmu_mkw = 0.95d0*48683.0d0/(2*250896.0d0)
-           drho_dmu_pht = 52275.0d0/(2*250896.0d0)
-
-           if (iter.lt.nomc/100) then
-              drho_dmu_env = (0.0015d0*140401)/(R*T)
-           else
-              drho_dmu_env = (0.0015d0*(13303/T))/(R*T)
-           end if
-
-!           drho_dmu_pyr = 2*41667.0d0/(2*25089600.0d0)
-           drho_dmu_pyr = (2*41667.0d0)/(2*250896.0d0)
 
            !! Calculate chemical 'specific heat'
            Chi = (met(x,y,z+1)*drho_dmu_met)+(mkw(x,y,z+1)*drho_dmu_mkw)+(pht(x,y,z+1)*drho_dmu_pht)+(pyr(x,y,z+1)*drho_dmu_pyr)+(env(x,y,z+1)*drho_dmu_env)
