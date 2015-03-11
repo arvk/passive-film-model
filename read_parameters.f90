@@ -5,6 +5,7 @@ subroutine read_parameters()
   implicit none
 
   integer :: error_temp, error_nomc, error_ph
+  character*1 :: isdissolve
 
   !! Is the simulation being started from scratch?
   call system("cat param.in | grep ^RESTART | sed 's/RESTART//g'| sed 's/=//g' > .isrestart.readin")
@@ -87,6 +88,26 @@ subroutine read_parameters()
      write(6,*) "WARNING: Error in reading SIMLEN. Simulation will run for 10^6 steps."
      write(6,*) "---------------------------------------------------------------------"   
   end if
+
+
+
+  !! Should dissolution be included in the simulation?
+  call system("cat param.in | grep ^DISSOLVE | sed 's/DISSOLVE//g'| sed 's/=//g' > .isdissolve.readin")
+  open(unit = 7000, file = ".isdissolve.readin", status = 'old') ; read(7000,*) isdissolve ; close(7000)
+  call system ("rm .isdissolve.readin")
+
+
+  !! If dissolution SHOULD be included in the simulation
+  if ((isdissolve .eq. 'Y') .or. (isdissolve .eq. 'y')) then
+     include_dissolve = .TRUE.
+     write (6,*) 'Liquid environment. Film dissolution included.'
+
+  !! If dissolution SHOULD NOT be included in the simulation
+  else
+     include_dissolve = .FALSE.
+     write(6,*) 'Gaseous environment. No film dissolution.'
+
+  end if  !! End of isdissolve loop
 
 
 end subroutine read_parameters
