@@ -82,7 +82,7 @@ program passive_film_model
      call orsolve(iter)
 
      if (include_dissolve) then
-        call dissolve_film(5)
+        call dissolve_film()
      end if
   
   
