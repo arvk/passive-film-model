@@ -20,15 +20,15 @@ subroutine orsolve(iter)
   integer, intent(in) :: iter
 
   real*8, dimension(psx,psy,psz) :: M_opyr
-  real*8 :: M_opyr_max = 1.5E-10
-  real*8 :: M_opyr_min = 1.5E-13
+  real*8 :: M_opyr_max = 7.5E-9
+  real*8 :: M_opyr_min = 7.5E-12
 
   real*8, dimension(psx,psy,psz) :: D_opyr
   real*8, dimension(psx,psy,psz) :: del_opyr
-  real*8 :: D_opyr_max = 1E-6   !! Truncation for the orientation field
+  real*8 :: D_opyr_max = 1E6   !! Truncation for the orientation field
 
   real*8 :: delx,dely,delz
-  real*8 :: epsilon = 1E-18
+  real*8 :: epsilon = 1E-15
 
   real*8 :: odiff
   integer :: wrap
@@ -63,7 +63,7 @@ subroutine orsolve(iter)
      do y = 1,psy
         do z = 1,psz
 
-           M_opyr(x,y,z) = min(M_opyr_min/((pyr(x,y,z+1)+0.01d0)**10),M_opyr_max)
+           M_opyr(x,y,z) = min(M_opyr_min/(((pyr(x,y,z+1))**2)+epsilon),M_opyr_max)
 
            delx = odiff(opyr(wrap(x+1,psx),y,z+1),opyr(wrap(x-1,psx),y,z+1))
            dely = odiff(opyr(x,wrap(y+1,psy),z+1),opyr(x,wrap(y-1,psy),z+1))
@@ -259,13 +259,11 @@ subroutine orsolve(iter)
      do y = 1,psy
         do x = 1,psx
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
-           if (pyr(x,y,z+1).gt.0.1d0) then
 
               if (point_or_vec(linindex).eq.point_or_vec(linindex)) then
                  opyr(x,y,z+1) = point_or_vec(linindex)
               end if
 
-           end if
         end do
      end do
   end do
