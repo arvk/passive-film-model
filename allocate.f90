@@ -33,7 +33,8 @@ subroutine allocate_matrices()
   allocate(met(psx,psy,psz+2)); allocate(mkw(psx,psy,psz+2)) ; allocate(pht(psx,psy,psz+2)); allocate(pyr(psx,psy,psz+2)); allocate(env(psx,psy,psz+2)) 
   allocate(mu(psx,psy,psz+2)) 
   allocate(opyr(psx,psy,psz+2)) 
-
+  allocate(voids(psx,psy,psz+2)) 
+  voids = 0.0d0
   
 !! Allocate Laplacian matrices
   allocate(del2met(psx,psy,psz+2)); allocate(del2mkw(psx,psy,psz+2)); allocate(del2pht(psx,psy,psz+2)); allocate(del2pyr(psx,psy,psz+2)); allocate(del2env(psx,psy,psz+2))
