@@ -283,7 +283,7 @@ subroutine pfsolve(iter)
            newmkw(x,y,z+1) = max(min(point_pf_vec(linindex+((imkw-1)*psx*psy*psz)),1.0d0),0.0d0)
            newpht(x,y,z+1) = max(min(point_pf_vec(linindex+((ipht-1)*psx*psy*psz)),1.0d0),0.0d0)
            newpyr(x,y,z+1) = max(min(point_pf_vec(linindex+((ipyr-1)*psx*psy*psz)),1.0d0),0.0d0)
-           newenv(x,y,z+1) = max(min(point_pf_vec(linindex+((ienv-1)*psx*psy*psz)),1.0d0),0.0d0)
+           newenv(x,y,z+1) = env(x,y,z+1) !max(min(point_pf_vec(linindex+((ienv-1)*psx*psy*psz)),1.0d0),0.0d0)
 
         end do
      end do
