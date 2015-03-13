@@ -94,6 +94,7 @@ subroutine musolve(iter)
 
            D(x,y,z) = ((met(x,y,z)*D_inter_met)+(mkw(x,y,z)*D_inter_mkw)+(pht(x,y,z)*D_inter_pht)+(pyr(x,y,z)*D_inter_pyr)+(env(x,y,z)*D_inter_env))
            D(x,y,z) = D(x,y,z)/Chi
+           D(x,y,z) = D(x,y,z)*(1.0d0-voids(x,y,z))
 
         end do
      end do
