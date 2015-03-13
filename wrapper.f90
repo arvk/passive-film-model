@@ -84,6 +84,11 @@ program passive_film_model
      if (include_dissolve) then
         call dissolve_film()
      end if
+
+
+     if (iter.eq.nomc/10) then
+        call voids_create()
+     end if
   
   
      if (mod(iter,freq_scale).eq.0) then
