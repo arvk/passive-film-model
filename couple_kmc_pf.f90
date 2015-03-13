@@ -11,6 +11,7 @@ subroutine couple_kmc_pf
   real*8 :: pht_bc, env_bc ! Local phase fractions at (x,y,z) before coupling. This is read from pht(x,y,z) and env(x,y,z)
   real*8 :: pht_ac, env_ac ! Local phase fractions at (x,y,z) after coupling. This is written to pht(x,y,z) and env(x,y,z)
   real*8 :: coupling_const
+  real*8 :: avg_mu_pht
   integer, dimension(psx_g,psy_g) :: interface_loc
 
   interface_loc = 0
