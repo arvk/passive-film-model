@@ -11,25 +11,24 @@ subroutine calc_grad_pf
   delypyr = 0.0d0 
   delzpyr = 0.0d0 
 
-!!!!! Calculating laplacian in the bulk
+!!!!! Calculating y-gradient in the bulk
 
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+1
-
-           delypyr(x,y,z) = (pyr(x,wrap(y+1,psy),z)-pyr(x,wrap(y-1,psy),z))/(2*dpf)
-           delzpyr(x,y,z) = (pyr(x,y,z+1)-pyr(x,y,z-1))/(2*dpf)
-
+        do z = 1,psz+2
+           delypyr(x,y,z) = (pyr(x,wrap(y+1,psy),z)-pyr(x,wrap(y-1,psy),z))/2.0d0
         end do
      end do
   end do
 
-
-!!! Impose boundary conditions on the Laplacian
-
+!!!!! Calculating z-gradient in the bulk
   do x = 1,psx
      do y = 1,psy
-        delypyr(x,y,1) = 0.0d0 ; delypyr(x,y,psz+2) = 0.0d0
+        delzpyr(x,y,1) = (pyr(x,y,2)-pyr(x,y,1))
+        do z = 2,psz+1
+           delzpyr(x,y,z) = (pyr(x,y,z+1)-pyr(x,y,z-1))/2.0d0
+        end do
+        delzpyr(x,y,psz+2) = (pyr(x,y,psz+2)-pyr(x,y,psz+1))
      end do
   end do
 
