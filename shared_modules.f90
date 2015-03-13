@@ -13,6 +13,7 @@ module fields
   real*8, dimension(:,:,:), allocatable :: met,mkw,pht,pyr,env ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
   real*8, dimension(:,:,:), allocatable :: mu  ! Local mu_S grid
   real*8, dimension(:,:,:), allocatable :: opyr  ! Local orientation field for pyrite
+  real*8, dimension(:,:,:), allocatable :: voids ! Local void fraction
 
   !! Define global phase fields
   real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
