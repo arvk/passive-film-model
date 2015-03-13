@@ -9,16 +9,15 @@ subroutine initialize_geometry()
   integer :: x,y,z
   integer :: met_z_end
   integer :: rank_loop
+  real*8 :: avg_mu_met
 
   met_z_end = 15*(psz_g/16)
 
-  avg_mu_met = mus_met_mkw_eqb - (R*T*1.5d0) 
-  avg_mu_mkw = mus_mkw_pht_eqb - (R*T*0.1d0) 
-  avg_mu_env = mus_pht_pyr_eqb + (R*T*4.5d0) 
-  avg_mu_pht = mus_mkw_pht_eqb + (R*T*1.5d0) 
+  avg_mu_met = mus_met_mkw_eqb - (R*T*0.5d0) 
+  avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0) 
 
   min_mu = R*T*(0-50.0d0)
-  max_mu = avg_mu_env+(R*T*10.4)
+  max_mu = avg_mu_env+(R*T*0.5)
 
 !! Initialize global phase-fraction fields
   do x = 1,psx_g

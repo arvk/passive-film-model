@@ -42,9 +42,6 @@ subroutine distrib_pf()
 
   call mpi_bcast(min_mu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(max_mu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-  call mpi_bcast(avg_mu_met,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-  call mpi_bcast(avg_mu_mkw,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-  call mpi_bcast(avg_mu_pht,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(avg_mu_env,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
 end subroutine distrib_pf
