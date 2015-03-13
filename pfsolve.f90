@@ -357,11 +357,11 @@ subroutine pfsolve(iter)
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+1
-           dmet_dt(x,y,z) = (newmet(x,y,z) - met(x,y,z))/dt
-           dmkw_dt(x,y,z) = (newmkw(x,y,z) - mkw(x,y,z))/dt
-           dpht_dt(x,y,z) = (newpht(x,y,z) - pht(x,y,z))/dt
-           dpyr_dt(x,y,z) = (newpyr(x,y,z) - pyr(x,y,z))/dt
-           denv_dt(x,y,z) = (newenv(x,y,z) - env(x,y,z))/dt
+           dmet_dt(x,y,z) = ((newmet(x,y,z) - met(x,y,z))/dt)*(1.0d0-voids(x,y,z))
+           dmkw_dt(x,y,z) = ((newmkw(x,y,z) - mkw(x,y,z))/dt)*(1.0d0-voids(x,y,z))
+           dpht_dt(x,y,z) = ((newpht(x,y,z) - pht(x,y,z))/dt)*(1.0d0-voids(x,y,z))
+           dpyr_dt(x,y,z) = ((newpyr(x,y,z) - pyr(x,y,z))/dt)*(1.0d0-voids(x,y,z))
+           denv_dt(x,y,z) = ((newenv(x,y,z) - env(x,y,z))/dt)*(1.0d0-voids(x,y,z))
         end do
            dmet_dt(x,y,1) = 0.0d0 ; dmkw_dt(x,y,1) = 0.0d0 ; dpht_dt(x,y,1) = 0.0d0 ; dpyr_dt(x,y,1) = 0.0d0 ; denv_dt(x,y,1) = 0.0d0 
            dmet_dt(x,y,psz+2) = 0.0d0 ; dmkw_dt(x,y,psz+2) = 0.0d0 ; dpht_dt(x,y,psz+2) = 0.0d0 ; dpyr_dt(x,y,psz+2) = 0.0d0 ; denv_dt(x,y,psz+2) = 0.0d0 
