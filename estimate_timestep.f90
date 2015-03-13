@@ -18,7 +18,7 @@ subroutine estimate_timestep
   dt_stable_phase_field = (dpf*dpf)/max_M_sigma
   !! The prefactor before the laplacian for PF evolution is the sum of M*sigma for each phase.
 
-  dt = min(dt_stable_phase_field,dt_stable_diffusion)/2.5d0
+  dt = min(dt_stable_phase_field,dt_stable_diffusion)/0.95d0
 
   if (isroot) then
      write(6,'(A,E19.12,A)') "Timestep for phase-field integration is ",dt, " seconds."
