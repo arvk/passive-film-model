@@ -36,6 +36,25 @@ subroutine dissolve_film()
      end do
 
 
+!! Void filling
+     do x = 1,psx
+        do y = 1,psy
+           do z = psz+1,2,-1
+              if ((voids(x,y,z).gt.0.0d0).and.(env(x,y,z+1).eq.1.0d0)) then
+                 met(x,y,z) = 0.0d0
+                 met(x,y,z) = 0.0d0
+                 met(x,y,z) = 0.0d0
+                 met(x,y,z) = 0.0d0
+                 env(x,y,z) = 1.0d0
+                 mu(x,y,z) = avg_mu_env
+                 voids(x,y,z) = 0.0d0
+              end if
+           end do
+        end do
+     end do
+
+
+
 
 
 end subroutine dissolve_film
