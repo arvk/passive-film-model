@@ -148,6 +148,8 @@ module commondata
   real*8 :: pH_in              ! Scalar pH input
   integer :: nomc              ! Number of kMC steps
 
+  logical :: include_dissolve  ! Include film dissolution
+
 
   integer :: noimg = 100                  ! Number of output files
   integer :: freq_scale = 1750000000      ! KMC information is transferred every freq_scale steps

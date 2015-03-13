@@ -81,6 +81,11 @@ program passive_film_model
      call musolve(iter)
      call orsolve(iter)
 
+     if (include_dissolve) then
+        call dissolve_film()
+     end if
+  
+  
      if (mod(iter,freq_scale).eq.0) then
 
         if (isroot) then
