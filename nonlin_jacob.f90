@@ -67,17 +67,7 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
   real*8, dimension(psx,psy,psz+2) :: loc_met, loc_mkw, loc_pht, loc_pyr, loc_env
 
 
-
-     sigma_pyr_met = sigma_pyr_met_0
-     sigma_pyr_mkw = sigma_pyr_mkw_0
-     sigma_pyr_pht = sigma_pyr_pht_0
-     sigma_pyr_env = sigma_pyr_env_0
-
-     sigma_met_pyr = sigma_pyr_met
-     sigma_mkw_pyr = sigma_pyr_mkw
-     sigma_pht_pyr = sigma_pyr_pht
-     sigma_env_pyr = sigma_pyr_env
-
+  call calc_grad_pf()
 
   call VecGetArrayF90(pf_vec,point_pf_vec,ierr)
   do z = 1,psz
@@ -112,6 +102,16 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
   do z = 1,psz+2
      do y = 1,psy
         do x = 1,psx
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.85d0*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_mkw = sigma_pyr_mkw_0*(1+0.85d0*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.85d0*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.85d0*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_mkw_pyr = sigma_pyr_mkw
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
 
            D_met_mkw(x,y,z) = 0.0d0 - (M_met_mkw*sigma_met_mkw*abs(loc_mkw(x,y,z)))
            D_met_pht(x,y,z) = 0.0d0 - (M_met_pht*sigma_met_pht*abs(loc_pht(x,y,z)))

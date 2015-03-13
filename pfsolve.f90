@@ -50,7 +50,6 @@ subroutine pfsolve(iter)
   real*8, dimension(psx,psy,psz+2) :: D_pyr_met, D_pyr_mkw, D_pyr_pht, D_pyr, D_pyr_env
   real*8, dimension(psx,psy,psz+2) :: D_env_met, D_env_mkw, D_env_pht, D_env_pyr, D_env
 
-
   ! A/B/JA matrices for implicit solver
   real*8, dimension(psx*psy*psz*no_fields) :: B
   real*8, dimension(psx*psy*psz*no_fields) :: approxsol
@@ -80,22 +79,23 @@ subroutine pfsolve(iter)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        call swap_pf()
+  call swap_pf()
 
-     sigma_pyr_met = sigma_pyr_met_0
-     sigma_pyr_mkw = sigma_pyr_mkw_0
-     sigma_pyr_pht = sigma_pyr_pht_0
-     sigma_pyr_env = sigma_pyr_env_0
-
-     sigma_met_pyr = sigma_pyr_met
-     sigma_mkw_pyr = sigma_pyr_mkw
-     sigma_pht_pyr = sigma_pyr_pht
-     sigma_env_pyr = sigma_pyr_env
-
+  call calc_grad_pf()
 
   do z = 1,psz+2
      do y = 1,psy
         do x = 1,psx
+
+           sigma_pyr_met = sigma_pyr_met_0*(1+0.85d0*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_mkw = sigma_pyr_mkw_0*(1+0.85d0*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_pht = sigma_pyr_pht_0*(1+0.85d0*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+           sigma_pyr_env = sigma_pyr_env_0*(1+0.85d0*cos(4*(0.185+atan(delypyr(x,y,z)/(delzpyr(x,y,z)+1E-14)))-opyr(x,y,z)))
+
+           sigma_met_pyr = sigma_pyr_met
+           sigma_mkw_pyr = sigma_pyr_mkw
+           sigma_pht_pyr = sigma_pyr_pht
+           sigma_env_pyr = sigma_pyr_env
 
            D_met_mkw(x,y,z) = 0.0d0 - (M_met_mkw*sigma_met_mkw*mkw(x,y,z))
            D_met_pht(x,y,z) = 0.0d0 - (M_met_pht*sigma_met_pht*pht(x,y,z))
