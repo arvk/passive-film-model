@@ -10,11 +10,12 @@ subroutine dissolve_film()
 
 
 !!!! Define dissolution rates (in nm/s)
-  diss_rate_met = 1.5d0
-  diss_rate_mkw = 0.1d0
-  diss_rate_pht = 0.1d0
-  diss_rate_pyr = 0.1d0
-  diss_rate_env = 0.1d0
+  diss_rate_met = 0.257d0 !!! REF = Electrodissolution Kinetics of Iron in Chloride Solutions by Robert J. Chin* and Ken Nobe, JECS Vol 119, No. 11, Nov. 1972
+                          !!! Full explression is diss_rate_met = 0.257d0*((0.0d0-log10(14-pH))**0.6)*exp((0.85*F/RT)*(V+0.45))
+  diss_rate_mkw = 0.015d0 !!! REF = CORROSION MECHANISMS AND MATERIAL PERFORMANCE IN ENVIRONMENTS CONTAINING HYDROGEN SULFIDE AND ELEMENTAL SULFUR, Liane Smith* and Bruce Craig, SACNUC Workshop 22nd and 23rd October, 2008, Brussels and References therein
+  diss_rate_pht = 0.015d0
+  diss_rate_pyr = 0.015d0
+  diss_rate_env = 0.015d0
 
 
 

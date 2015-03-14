@@ -64,35 +64,35 @@ module fields
 
 
 
-  real*8 :: M_pht_met = 1.0E-10
-  real*8 :: M_met_pht = 1.0E-10
+  real*8 :: M_pht_met = 1.0E-12
+  real*8 :: M_met_pht = 1.0E-12
 
-  real*8 :: M_mkw_met = 1.0E-10
-  real*8 :: M_met_mkw = 1.0E-10
+  real*8 :: M_mkw_met = 1.0E-12
+  real*8 :: M_met_mkw = 1.0E-12
 
-  real*8 :: M_met_pyr = 1.0E-10
-  real*8 :: M_pyr_met = 1.0E-10
+  real*8 :: M_met_pyr = 1.0E-12
+  real*8 :: M_pyr_met = 1.0E-12
 
-  real*8 :: M_pht_pyr = 1.0E-10
-  real*8 :: M_pyr_pht = 1.0E-10
+  real*8 :: M_pht_pyr = 1.0E-12
+  real*8 :: M_pyr_pht = 1.0E-12
 
-  real*8 :: M_mkw_pyr = 1.0E-10
-  real*8 :: M_pyr_mkw = 1.0E-10
+  real*8 :: M_mkw_pyr = 1.0E-12
+  real*8 :: M_pyr_mkw = 1.0E-12
 
-  real*8 :: M_pht_mkw = 1.0E-10
-  real*8 :: M_mkw_pht = 1.0E-10
+  real*8 :: M_pht_mkw = 1.0E-12
+  real*8 :: M_mkw_pht = 1.0E-12
 
-  real*8 :: M_pht_env = 1.0E-13
-  real*8 :: M_env_pht = 1.0E-13
+  real*8 :: M_pht_env = 1.0E-15
+  real*8 :: M_env_pht = 1.0E-15
 
-  real*8 :: M_mkw_env = 1.0E-13
-  real*8 :: M_env_mkw = 1.0E-13
+  real*8 :: M_mkw_env = 1.0E-15
+  real*8 :: M_env_mkw = 1.0E-15
 
-  real*8 :: M_met_env = 1.0E-13
-  real*8 :: M_env_met = 1.0E-13
+  real*8 :: M_met_env = 1.0E-15
+  real*8 :: M_env_met = 1.0E-15
 
-  real*8 :: M_env_pyr = 1.0E-13
-  real*8 :: M_pyr_env = 1.0E-13
+  real*8 :: M_env_pyr = 1.0E-15
+  real*8 :: M_pyr_env = 1.0E-15
 
 
 
