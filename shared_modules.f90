@@ -14,11 +14,13 @@ module fields
   real*8, dimension(:,:,:), allocatable :: mu  ! Local mu_S grid
   real*8, dimension(:,:,:), allocatable :: opyr  ! Local orientation field for pyrite
   real*8, dimension(:,:,:), allocatable :: voids ! Local void fraction
+  real*8, dimension(:,:,:), allocatable :: elpot ! Local electrical potential
 
   !! Define global phase fields
   real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
   real*8, dimension(:,:,:), allocatable :: mu_g ! Local mu_S grid
   real*8, dimension(:,:,:), allocatable :: opyr_g  ! Global orientation field for pyrite
+  real*8, dimension(:,:,:), allocatable :: elpot_g ! Global electrical potential
 
   real*8 :: avg_mu_env
   real*8 :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
