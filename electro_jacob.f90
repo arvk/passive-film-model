@@ -109,7 +109,7 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
            vector_locator(linindex) = linindex-1
 
            exponent = (loc_elpot(x,y,z+1)*96485)/(R*T)
-           nonlin(linindex) = c0*el_charg*(exp(0.0d0-exponent)-exp(0.0d0+exponent))
+           nonlin(linindex) = c0*el_charg*(exp(0.0d0-exponent)+exp(0.0d0+exponent))
            nonlin(linindex) = 0.0d0 - (nonlin(linindex)*(96485/(R*T)))
 
            IA(linindex) = contindex + 1
