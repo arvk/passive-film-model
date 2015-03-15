@@ -52,6 +52,23 @@ subroutine initialize_geometry()
   end do
 
 
+
+!! Initialize global electrical potential
+  do x = 1,psx_g
+     do y = 1,psy_g
+
+        do z = 1,met_z_end
+           elpot_g(x,y,z) = -0.50d0
+        end do
+
+        do z = met_z_end+1,psz_g
+           elpot_g(x,y,z) = 0.0d0
+        end do
+
+     end do
+  end do
+
+
 !! Initialize global pyrite orientation field
 
 !! Populate the global orientation field with random numbers
