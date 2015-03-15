@@ -19,6 +19,9 @@ subroutine distrib_pf()
   !! Broadcast global chemical-potential fields
   call mpi_bcast(mu_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
+  !! Broadcast global electrical potential
+  call mpi_bcast(elpot_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
   !! Broadcast global pyrite orientation field
   call mpi_bcast(opyr_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
@@ -36,6 +39,8 @@ subroutine distrib_pf()
            mu(x,y,z) = mu_g(x,y,z-1+(rank*psz_g/procs))
 
            opyr(x,y,z) = opyr_g(x,y,z-1+(rank*psz_g/procs))
+
+           elpot(x,y,z) = elpot_g(x,y,z-1+(rank*psz_g/procs))
         end do
      end do
   end do
