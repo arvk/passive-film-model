@@ -116,16 +116,16 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
 
            if (z .gt. 1) then
               contindex = contindex + 1
-              A(contindex) = 0.0d0 - (0.5d0*(epsilonr(x,y,(z+1)-1)+epsilonr(x,y,z+1)))/(dpf*dpf)
+              A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)-1)+epsilonr(x,y,z+1)))/(dpf*dpf)
               JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x 
            end if
 
            contindex = contindex + 1
-           A(contindex) = 0.0d0 - (0.5d0*(epsilonr(x,wrap(y-1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
+           A(contindex) = (0.5d0*(epsilonr(x,wrap(y-1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x 
 
            contindex = contindex + 1
-           A(contindex) = 0.0d0 - (0.5d0*(epsilonr(wrap(x-1,psx),y,z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
+           A(contindex) = (0.5d0*(epsilonr(wrap(x-1,psx),y,z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx) 
 
            contindex = contindex + 1
@@ -133,21 +133,21 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
                 &epsilonr(x,wrap(y+1,psy),z+1)+epsilonr(x,wrap(y-1,psy),z+1)+&
                 &epsilonr(wrap(x+1,psx),y,z+1)+epsilonr(wrap(x-1,psx),y,z+1)
            A(contindex) = A(contindex) + 6*epsilonr(x,y,z+1)
-           A(contindex) = A(contindex)*0.5d0/(dpf*dpf)
-           A(contindex) = A(contindex) + (1.0d0/dt) + nonlin(linindex)
+           A(contindex) = A(contindex)*(-0.5d0)/(dpf*dpf)
+           A(contindex) = A(contindex) + nonlin(linindex)
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x 
 
            contindex = contindex + 1
-           A(contindex) = 0.0d0 - (0.5d0*(epsilonr(wrap(x+1,psx),y,z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
+           A(contindex) = (0.5d0*(epsilonr(wrap(x+1,psx),y,z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx) 
 
            contindex = contindex + 1
-           A(contindex) = 0.0d0 - (0.5d0*(epsilonr(x,wrap(y+1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
+           A(contindex) = (0.5d0*(epsilonr(x,wrap(y+1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x 
 
            if (z .lt. psz) then
               contindex = contindex + 1
-              A(contindex) = 0.0d0 - (0.5d0*(epsilonr(x,y,(z+1)+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
+              A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
               JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x 
            end if
 

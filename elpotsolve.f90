@@ -92,12 +92,12 @@ subroutine elpotsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-           B(linindex) =  (elpot(x,y,z+1)/dt)
+           B(linindex) =  0.0d0
 
            if (z.eq.1) then
-              B(linindex) = B(linindex) + ((0.5d0*(epsilonr(x,y,z+1)+epsilonr(x,y,z+1-1))/(dpf*dpf))*elpot(x,y,z+1-1))
+              B(linindex) = B(linindex) - ((0.5d0*(epsilonr(x,y,z+1)+epsilonr(x,y,z+1-1))/(dpf*dpf))*elpot(x,y,z+1-1))
            elseif (z.eq.psz) then
-              B(linindex) = B(linindex) + ((0.5d0*(epsilonr(x,y,z+1+1)+epsilonr(x,y,z+1))/(dpf*dpf))*elpot(x,y,z+1+1))
+              B(linindex) = B(linindex) - ((0.5d0*(epsilonr(x,y,z+1+1)+epsilonr(x,y,z+1))/(dpf*dpf))*elpot(x,y,z+1+1))
            end if
 
            approxsol(linindex) = elpot(x,y,z+1)
