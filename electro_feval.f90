@@ -40,6 +40,15 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   real*8 :: c0
   real*8 :: el_charg = 1.60217657E-19
 
+  real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
+
+  real*8, dimension(psx,psy,psz+2) :: loc_elpot
+
+  real*8, dimension(psx,psy,psz+2) :: epsilonr
+
+  real*8 :: exponent
+  real*8, dimension(psx*psy*psz) :: nonlin
+
   call VecGetArrayF90(elpot_vec,point_elpot_vec,ierr)
   do z = 1,psz
      do y = 1,psy

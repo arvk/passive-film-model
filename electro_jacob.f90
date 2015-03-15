@@ -1,4 +1,4 @@
-subroutine pfJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
+subroutine electroJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
   use commondata
   use fields
   use laplacians
@@ -25,7 +25,7 @@ subroutine pfJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
   PetscScalar val
 
   ! A/B/JA matrices for implicit solver
-  integer, dimension(psx*psy*psz*no_fields) :: vector_locator
+  integer, dimension(psx*psy*psz) :: vector_locator
   real*8 :: lnr,sqr
 
   integer :: io,jo
@@ -46,6 +46,11 @@ subroutine pfJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
   real*8 :: c0
   real*8 :: el_charg = 1.60217657E-19
 
+  real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
+  real*8, dimension(psx,psy,psz+2) :: loc_elpot
+  real*8, dimension(psx,psy,psz+2) :: epsilonr
+  real*8 :: exponent
+  real*8, dimension(psx*psy*psz) :: nonlin
 
 
   call VecGetArrayF90(elpot_vec,point_elpot_vec,ierr)
@@ -209,5 +214,5 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
 
   return
 
-end subroutine pfJacobian
+end subroutine electroJacobian
 

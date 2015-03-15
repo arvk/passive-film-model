@@ -25,6 +25,8 @@ subroutine elpotsolve(iter)
 
   real*8, dimension(psx,psy,psz+2) :: epsilonr
 
+  real*8, dimension(psx,psy,psz+2) :: newelpot
+
   ! A/B/JA matrices for implicit solver
   real*8, dimension(psx*psy*psz) :: B
   real*8, dimension(psx*psy*psz) :: approxsol
@@ -35,6 +37,8 @@ subroutine elpotsolve(iter)
   integer :: linindex, contindex
   integer :: iterations, solver_info
 
+  real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
+  
 
   PetscErrorCode ierr
   Vec elpot_vec,rhs_vec,ret_vec
@@ -47,15 +51,13 @@ subroutine elpotsolve(iter)
 
   call swap_electro()
 
-
-
   epsilon_met = 500.0d0
   epsilon_mkw = 500.0d0
   epsilon_pht = 2.0d0
   epsilon_pyr = 11.0d0
   epsilon_env = 80.0d0
 
-epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
+  epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
 
   do z = 1,psz+2
      do y = 1,psy
@@ -75,7 +77,7 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
 
 
   call VecCreate(PETSC_COMM_SELF,ret_vec,ierr)
-  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*psz*no_fields,ierr)
+  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*psz,ierr)
   call VecSetFromOptions(ret_vec,ierr)
   call VecSetUp(ret_vec,ierr)
 
@@ -131,8 +133,8 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
   call MatSetUp(jac,ierr)
 
   call SNESCreate(PETSC_COMM_SELF,snes_elpot,ierr)
-  call SNESSetFunction(snes_elpot,ret_vec,pfFunction,PETSC_NULL_OBJECT,ierr)
-  call SNESSetJacobian(snes_elpot,jac,jac,pfJacobian,PETSC_NULL_OBJECT,ierr)
+  call SNESSetFunction(snes_elpot,ret_vec,electroFunction,PETSC_NULL_OBJECT,ierr)
+  call SNESSetJacobian(snes_elpot,jac,jac,electroJacobian,PETSC_NULL_OBJECT,ierr)
   call SNESSetFromOptions(snes_elpot,ierr)
   call SNESSolve(snes_elpot,rhs_vec,elpot_vec,ierr)
 
