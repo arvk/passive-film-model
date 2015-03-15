@@ -8,7 +8,7 @@ subroutine write_fields(iter)
   integer :: x, y, z
   character*5 :: img_id
 
-  call system("rm -rf MET.out MKW.out PHT.out PYR.out ENV.out MUS.out OPYR.out")
+  call system("rm -rf MET.out MKW.out PHT.out PYR.out ENV.out MUS.out OPYR.out POT.out")
 
 
   !! Write phase fraction fields
@@ -97,6 +97,20 @@ subroutine write_fields(iter)
 
 
 
+  !! Write electrical potential field
+  open (unit=401, file="POT.out", status="new")
+  write(401,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
+  do x = 1,psx_g 
+     do y = 1,psy_g
+        do z = 1,psz_g
+           write(401,*)  elpot_g(x,y,z)
+        end do
+     end do
+  end do
+  close(401)  
+
+
+
 
   write(img_id,'(I5.5)') iter/((nomc/noimg)-1)
   call system("cp MET.out MET_"//img_id//".out")
@@ -108,6 +122,8 @@ subroutine write_fields(iter)
   call system("cp MUS.out MUS_"//img_id//".out")
 
   call system("cp OPYR.out OPYR_"//img_id//".out")
+
+  call system("cp POT.out POT_"//img_id//".out")
 
 end subroutine write_fields
 
