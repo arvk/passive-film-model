@@ -37,7 +37,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   integer :: rowindex, JAleft, JAright, JAswap
   real*8 :: Aswap
 
-  real*8 :: c0
+  real*8 :: c0 = 1000.0d0 !! Moles/m^3
   real*8 :: el_charg = 1.60217657E-19
 
   real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
