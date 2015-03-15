@@ -150,6 +150,7 @@ module commondata
   integer :: nomc              ! Number of kMC steps
 
   logical :: include_dissolve  ! Include film dissolution
+  logical :: include_electro   ! Include potential distribution
 
 
   integer :: noimg = 100                  ! Number of output files
