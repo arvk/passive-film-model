@@ -6,6 +6,7 @@ subroutine read_parameters()
 
   integer :: error_temp, error_nomc, error_ph
   character*1 :: isdissolve
+  character*1 :: useelectro
 
   !! Is the simulation being started from scratch?
   call system("cat param.in | grep ^RESTART | sed 's/RESTART//g'| sed 's/=//g' > .isrestart.readin")
@@ -108,6 +109,31 @@ subroutine read_parameters()
      write(6,*) 'Gaseous environment. No film dissolution.'
 
   end if  !! End of isdissolve loop
+
+
+
+
+
+
+
+  !! Should the electrochemistry module be included?
+  call system("cat param.in | grep ^ELECTRO | sed 's/ELECTRO//g'| sed 's/=//g' > .useelectro.readin")
+  open(unit = 7000, file = ".useelectro.readin", status = 'old') ; read(7000,*) useelectro ; close(7000)
+  call system ("rm .useelectro.readin")
+
+
+  !! If dissolution SHOULD be included in the simulation
+  if ((useelectro .eq. 'Y') .or. (useelectro .eq. 'y')) then
+     include_electro = .TRUE.
+     write (6,*) 'Electrochemistry module included.'
+
+  !! If dissolution SHOULD NOT be included in the simulation
+  else
+     include_electro = .FALSE.
+     write(6,*) 'Electrochemistry module not included.'
+
+  end if  !! End of useelectro loop
+
 
 
 end subroutine read_parameters
