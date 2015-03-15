@@ -21,5 +21,6 @@ subroutine distrib_params()
   call mpi_bcast(pH_in,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(nomc,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(include_dissolve,1,MPI_LOGICAL,0,MPI_COMM_WORLD,ierr)
+  call mpi_bcast(include_electro,1,MPI_LOGICAL,0,MPI_COMM_WORLD,ierr)
      
 end subroutine distrib_params
