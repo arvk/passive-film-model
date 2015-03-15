@@ -27,6 +27,7 @@ subroutine allocate_matrices()
   allocate(met_g(psx_g,psy_g,psz_g)); allocate(mkw_g(psx_g,psy_g,psz_g)); allocate(pht_g(psx_g,psy_g,psz_g)); allocate(pyr_g(psx_g,psy_g,psz_g)); allocate(env_g(psx_g,psy_g,psz_g))
   allocate(mu_g(psx_g,psy_g,psz_g))
   allocate(opyr_g(psx_g,psy_g,psz_g))
+  allocate(elpot_g(psx_g,psy_g,psz_g))
 
 
 !! Allocate local matrices
@@ -35,6 +36,7 @@ subroutine allocate_matrices()
   allocate(opyr(psx,psy,psz+2)) 
   allocate(voids(psx,psy,psz+2)) 
   voids = 0.0d0
+  allocate(elpot(psx,psy,psz+2)) 
   
 !! Allocate Laplacian matrices
   allocate(del2met(psx,psy,psz+2)); allocate(del2mkw(psx,psy,psz+2)); allocate(del2pht(psx,psy,psz+2)); allocate(del2pyr(psx,psy,psz+2)); allocate(del2env(psx,psy,psz+2))
