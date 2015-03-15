@@ -85,6 +85,7 @@ program passive_film_model
         call dissolve_film()
      end if
 
+     call elpotsolve(iter)
 
      if (iter.eq.nomc/10) then
         call voids_create()
@@ -122,6 +123,7 @@ program passive_film_model
         call gather_pf()
         call gather_mu()
         call gather_opyr()
+        call gather_electro()
 
         if(isroot)then
            call write_fields(iter)
