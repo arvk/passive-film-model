@@ -4,7 +4,7 @@ subroutine read_parameters()
   use kmc_data
   implicit none
 
-  integer :: error_temp, error_nomc, error_ph
+  integer :: error_temp, error_nomc, error_ph, error_electro
   character*1 :: isdissolve
   character*1 :: useelectro
 
@@ -118,22 +118,30 @@ subroutine read_parameters()
 
   !! Should the electrochemistry module be included?
   call system("cat param.in | grep ^ELECTRO | sed 's/ELECTRO//g'| sed 's/=//g' > .useelectro.readin")
-  open(unit = 7000, file = ".useelectro.readin", status = 'old') ; read(7000,*) useelectro ; close(7000)
+  open(unit = 7000, file = ".useelectro.readin", status = 'old') ; read(7000,*,IOSTAT=error_electro) useelectro ; close(7000)
   call system ("rm .useelectro.readin")
 
 
-  !! If dissolution SHOULD be included in the simulation
-  if ((useelectro .eq. 'Y') .or. (useelectro .eq. 'y')) then
-     include_electro = .TRUE.
-     write (6,*) 'Electrochemistry module included.'
-
-  !! If dissolution SHOULD NOT be included in the simulation
-  else
+  if (error_electro .lt. 0) then
      include_electro = .FALSE.
-     write(6,*) 'Electrochemistry module not included.'
+     write(6,*) "--------------------------------------------------------------------------------"
+     write(6,*) "WARNING: Electrochemistry flag is not set. Electrochemistry module not included."
+     write(6,*) "--------------------------------------------------------------------------------"
 
-  end if  !! End of useelectro loop
+  else
 
+     !! If dissolution SHOULD be included in the simulation
+     if ((useelectro .eq. 'Y') .or. (useelectro .eq. 'y')) then
+        include_electro = .TRUE.
+        write (6,*) 'Electrochemistry module included.'
 
+        !! If dissolution SHOULD NOT be included in the simulation
+     else
+        include_electro = .FALSE.
+        write(6,*) 'Electrochemistry module not included.'
+
+     end if  !! End of useelectro loop
+
+  end if
 
 end subroutine read_parameters
