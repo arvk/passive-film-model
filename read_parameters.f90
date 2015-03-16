@@ -4,7 +4,7 @@ subroutine read_parameters()
   use kmc_data
   implicit none
 
-  integer :: error_temp, error_nomc, error_ph, error_electro
+  integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro
   character*1 :: isdissolve
   character*1 :: useelectro
 
@@ -94,25 +94,32 @@ subroutine read_parameters()
 
   !! Should dissolution be included in the simulation?
   call system("cat param.in | grep ^DISSOLVE | sed 's/DISSOLVE//g'| sed 's/=//g' > .isdissolve.readin")
-  open(unit = 7000, file = ".isdissolve.readin", status = 'old') ; read(7000,*) isdissolve ; close(7000)
+  open(unit = 7000, file = ".isdissolve.readin", status = 'old') ; read(7000,IOSTAT=error_dissolve) isdissolve ; close(7000)
   call system ("rm .isdissolve.readin")
 
 
-  !! If dissolution SHOULD be included in the simulation
-  if ((isdissolve .eq. 'Y') .or. (isdissolve .eq. 'y')) then
-     include_dissolve = .TRUE.
-     write (6,*) 'Liquid environment. Film dissolution included.'
-
-  !! If dissolution SHOULD NOT be included in the simulation
-  else
+  if (error_dissolve .lt. 0) then
      include_dissolve = .FALSE.
-     write(6,*) 'Gaseous environment. No film dissolution.'
+     write(6,*) "-----------------------------------------------------"
+     write(6,*) "WARNING: No dissolution flag set.No film dissolution."
+     write(6,*) "-----------------------------------------------------"
 
-  end if  !! End of isdissolve loop
+  else
+
+     !! If dissolution SHOULD be included in the simulation
+     if ((isdissolve .eq. 'Y') .or. (isdissolve .eq. 'y')) then
+        include_dissolve = .TRUE.
+        write (6,*) 'Liquid environment. Film dissolution included.'
+
+        !! If dissolution SHOULD NOT be included in the simulation
+     else
+        include_dissolve = .FALSE.
+        write(6,*) 'Gaseous environment. No film dissolution.'
+
+     end if  !! End of isdissolve loop
 
 
-
-
+  end if
 
 
 
@@ -124,9 +131,9 @@ subroutine read_parameters()
 
   if (error_electro .lt. 0) then
      include_electro = .FALSE.
-     write(6,*) "--------------------------------------------------------------------------------"
-     write(6,*) "WARNING: Electrochemistry flag is not set. Electrochemistry module not included."
-     write(6,*) "--------------------------------------------------------------------------------"
+     write(6,*) "-----------------------------------------------------------------------------"
+     write(6,*) "WARNING: Electrochemistry flag not set. Electrochemistry module not included."
+     write(6,*) "-----------------------------------------------------------------------------"
 
   else
 
