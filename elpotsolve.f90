@@ -154,17 +154,11 @@ subroutine elpotsolve(iter)
   call VecRestoreArrayF90(elpot_vec,point_elpot_vec,ierr)
 
 
-  !! Apply boundary conditions to phase field(s) update
+  !! Apply boundary conditions to potential update
   if (rank.eq.0) then
      do x = 1,psx
         do y = 1,psy
            newelpot(x,y,2) = elpot(x,y,2)
-        end do
-     end do
-  elseif(rank.eq.procs-1) then
-     do x = 1,psx
-        do y = 1,psy
-           newelpot(x,y,psz+1) = elpot(x,y,psz+1)
         end do
      end do
   end if
@@ -174,7 +168,7 @@ subroutine elpotsolve(iter)
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+1
-           if (met(x,y,z).gt.0.25) then
+           if (env(x,y,z).lt.0.15) then
               newelpot(x,y,z) = -0.50d0
            end if
         end do

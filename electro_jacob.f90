@@ -43,8 +43,8 @@ subroutine electroJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
   integer :: rowindex, JAleft, JAright, JAswap
   real*8 :: Aswap
 
-  real*8 :: c0 = 1000.0d0 !! Moles/m^3
-  real*8 :: el_charg = 1.60217657E-19
+  real*8 :: c0 = 1.0d0 !! Moles/m^3
+  real*8 :: el_charg = 1.60217657E-19*6.022E23
 
   real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
   real*8, dimension(psx,psy,psz+2) :: loc_elpot
@@ -109,7 +109,7 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
            vector_locator(linindex) = linindex-1
 
            exponent = (loc_elpot(x,y,z+1)*96485)/(R*T)
-           nonlin(linindex) = c0*el_charg*(exp(0.0d0-exponent)+exp(0.0d0+exponent))
+           nonlin(linindex) = c0*el_charg*(exp(0.0d0-exponent)+exp(0.0d0+exponent))*env(x,y,z+1)
            nonlin(linindex) = 0.0d0 - (nonlin(linindex)*(96485/(R*T)))
 
            IA(linindex) = contindex + 1

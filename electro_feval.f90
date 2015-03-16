@@ -37,8 +37,8 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   integer :: rowindex, JAleft, JAright, JAswap
   real*8 :: Aswap
 
-  real*8 :: c0 = 1000.0d0 !! Moles/m^3
-  real*8 :: el_charg = 1.60217657E-19
+  real*8 :: c0 = 1.0d0 !! Moles/m^3
+  real*8 :: el_charg = 1.60217657E-19*6.022E23
 
   real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
 
@@ -198,7 +198,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x 
 
            exponent = (loc_elpot(x,y,z+1)*96485)/(R*T)
-           nonlin(linindex) = c0*el_charg*(exp(0.0d0-exponent)-exp(0.0d0+exponent))
+           nonlin(linindex) = c0*el_charg*(exp(0.0d0-exponent)-exp(0.0d0+exponent))*env(x,y,z+1)
 
         end do
      end do

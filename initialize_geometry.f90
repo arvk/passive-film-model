@@ -62,7 +62,7 @@ subroutine initialize_geometry()
         end do
 
         do z = met_z_end+1,psz_g
-           elpot_g(x,y,z) = 0.0d0
+           elpot_g(x,y,z) = -0.20d0
         end do
 
      end do
