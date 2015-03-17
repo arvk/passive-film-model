@@ -24,6 +24,7 @@ module fields
 
   real*8 :: avg_mu_env
   real*8 :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
+  real*8 :: metal_potential      ! Electric potential of the metal
 
   real*8 :: dpf = 5E-9  ! Phase-field grid size
   real*8 :: dt          ! Timestep for PF evolution

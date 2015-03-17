@@ -169,7 +169,7 @@ subroutine elpotsolve(iter)
      do y = 1,psy
         do z = 2,psz+1
            if (env(x,y,z).lt.0.15) then
-              newelpot(x,y,z) = -0.50d0
+              newelpot(x,y,z) = metal_potential
            end if
         end do
      end do

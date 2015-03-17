@@ -4,7 +4,7 @@ subroutine read_parameters()
   use kmc_data
   implicit none
 
-  integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro
+  integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl
   character*1 :: isdissolve
   character*1 :: useelectro
 
@@ -94,11 +94,11 @@ subroutine read_parameters()
 
   !! Should dissolution be included in the simulation?
   call system("cat param.in | grep ^DISSOLVE | sed 's/DISSOLVE//g'| sed 's/=//g' > .isdissolve.readin")
-  open(unit = 7000, file = ".isdissolve.readin", status = 'old') ; read(7000,IOSTAT=error_dissolve) isdissolve ; close(7000)
+  open(unit = 7000, file = ".isdissolve.readin", status = 'old') ; read(7000,*,IOSTAT=error_dissolve) isdissolve ; close(7000)
   call system ("rm .isdissolve.readin")
 
-
   if (error_dissolve .lt. 0) then
+
      include_dissolve = .FALSE.
      write(6,*) "-----------------------------------------------------"
      write(6,*) "WARNING: No dissolution flag set.No film dissolution."
@@ -110,7 +110,6 @@ subroutine read_parameters()
      if ((isdissolve .eq. 'Y') .or. (isdissolve .eq. 'y')) then
         include_dissolve = .TRUE.
         write (6,*) 'Liquid environment. Film dissolution included.'
-
         !! If dissolution SHOULD NOT be included in the simulation
      else
         include_dissolve = .FALSE.
@@ -141,6 +140,19 @@ subroutine read_parameters()
      if ((useelectro .eq. 'Y') .or. (useelectro .eq. 'y')) then
         include_electro = .TRUE.
         write (6,*) 'Electrochemistry module included.'
+
+
+        call system("cat param.in | grep ^METPOTL | sed 's/METPOTL//g'| sed 's/=//g' > .metpotl.readin")
+        open(unit = 7000, file = ".metpotl.readin", status = 'old') ; read(7000,*,IOSTAT=error_metpotl) metal_potential ; close(7000)
+        call system ("rm .metpotl.readin")
+
+        if (error_metpotl .lt. 0) then
+           metal_potential = -0.50d0
+           write(6,*) "----------------------------------------------------"
+           write(6,*) "WARNING: Metal potential not set. -0.5V SHE assumed."
+           write(6,*) "----------------------------------------------------"
+        end if
+
 
         !! If dissolution SHOULD NOT be included in the simulation
      else

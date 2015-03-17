@@ -58,11 +58,11 @@ subroutine initialize_geometry()
      do y = 1,psy_g
 
         do z = 1,met_z_end
-           elpot_g(x,y,z) = -0.50d0
+           elpot_g(x,y,z) = metal_potential
         end do
 
         do z = met_z_end+1,psz_g
-           elpot_g(x,y,z) = -0.20d0
+           elpot_g(x,y,z) = metal_potential
         end do
 
      end do
