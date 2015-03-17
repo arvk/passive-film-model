@@ -85,7 +85,9 @@ program passive_film_model
         call dissolve_film()
      end if
 
-     call elpotsolve(iter)
+     if (include_electro) then
+        call elpotsolve(iter)
+     end if
 
      if (iter.eq.nomc/10) then
         call voids_create()
