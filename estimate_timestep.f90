@@ -1,5 +1,5 @@
 subroutine estimate_timestep
-  use fields
+  use thermo_constants
   use commondata
   use diffusion_constants
   implicit none
