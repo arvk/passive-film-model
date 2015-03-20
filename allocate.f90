@@ -1,7 +1,6 @@
 subroutine allocate_matrices()
   use commondata
   use fields
-  use laplacians
   use gradients
   use thermo_constants
   use kmc_data
@@ -38,9 +37,6 @@ subroutine allocate_matrices()
   voids = 0.0d0
   allocate(elpot(psx,psy,psz+2)) 
   
-!! Allocate Laplacian matrices
-  allocate(del2met(psx,psy,psz+2)); allocate(del2mkw(psx,psy,psz+2)); allocate(del2pht(psx,psy,psz+2)); allocate(del2pyr(psx,psy,psz+2)); allocate(del2env(psx,psy,psz+2))
-  allocate(del2mu(psx,psy,psz+2))
 
 !! Allocate gradient matrices
   allocate(delypyr(psx,psy,psz+2)); allocate(delzpyr(psx,psy,psz+2))

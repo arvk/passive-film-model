@@ -142,23 +142,6 @@ end module commondata
 !=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
 
 
-module laplacians
-  implicit none
-  save
-
-  real*8, dimension(:,:,:), allocatable :: del2met
-  real*8, dimension(:,:,:), allocatable :: del2mkw
-  real*8, dimension(:,:,:), allocatable :: del2pht
-  real*8, dimension(:,:,:), allocatable :: del2pyr
-  real*8, dimension(:,:,:), allocatable :: del2env
-  real*8, dimension(:,:,:), allocatable :: del2mu
-
-end module laplacians
-
-
-!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
-
-
 module thermo_constants
   implicit none
   save

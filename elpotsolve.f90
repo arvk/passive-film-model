@@ -1,7 +1,6 @@
 subroutine elpotsolve(iter)
   use commondata
   use fields
-  use laplacians
   use gradients
   use thermo_constants
   implicit none

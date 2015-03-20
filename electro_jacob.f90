@@ -1,7 +1,6 @@
 subroutine electroJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
   use commondata
   use fields
-  use laplacians
   use gradients
   use thermo_constants
   implicit none

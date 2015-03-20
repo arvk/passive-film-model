@@ -3,7 +3,6 @@ subroutine read_geometry
   use fields
   use kmc_data
   use thermo_constants
-  use laplacians
 
   implicit none
 

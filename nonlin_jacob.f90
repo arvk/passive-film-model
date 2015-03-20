@@ -1,7 +1,6 @@
 subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
   use commondata
   use fields
-  use laplacians
   use gradients
   use thermo_constants
   implicit none

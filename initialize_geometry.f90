@@ -1,7 +1,6 @@
 subroutine initialize_geometry()
   use commondata
   use fields
-  use laplacians
   use thermo_constants
   use kmc_data
   implicit none

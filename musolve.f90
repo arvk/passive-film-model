@@ -1,7 +1,6 @@
 subroutine musolve(iter)
   use commondata
   use fields
-  use laplacians
   use thermo_constants
   use diffusion_constants
   implicit none

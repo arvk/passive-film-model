@@ -1,7 +1,6 @@
 subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   use commondata
   use fields
-  use laplacians
   use gradients
   use thermo_constants
   implicit none
