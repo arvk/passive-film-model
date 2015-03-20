@@ -83,11 +83,11 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
   do y = 1,psy
      do x = 1,psx
-        loc_met(x,y,1) = loc_met(x,y,1) ; loc_met(x,y,psz+2) = loc_met(x,y,psz+1) 
-        loc_mkw(x,y,1) = loc_mkw(x,y,1) ; loc_mkw(x,y,psz+2) = loc_mkw(x,y,psz+1) 
-        loc_pht(x,y,1) = loc_pht(x,y,1) ; loc_pht(x,y,psz+2) = loc_pht(x,y,psz+1) 
-        loc_pyr(x,y,1) = loc_pyr(x,y,1) ; loc_pyr(x,y,psz+2) = loc_pyr(x,y,psz+1) 
-        loc_env(x,y,1) = loc_env(x,y,1) ; loc_env(x,y,psz+2) = loc_env(x,y,psz+1) 
+        loc_met(x,y,1) = loc_met(x,y,2) ; loc_met(x,y,psz+2) = loc_met(x,y,psz+1) 
+        loc_mkw(x,y,1) = loc_mkw(x,y,2) ; loc_mkw(x,y,psz+2) = loc_mkw(x,y,psz+1) 
+        loc_pht(x,y,1) = loc_pht(x,y,2) ; loc_pht(x,y,psz+2) = loc_pht(x,y,psz+1) 
+        loc_pyr(x,y,1) = loc_pyr(x,y,2) ; loc_pyr(x,y,psz+2) = loc_pyr(x,y,psz+1) 
+        loc_env(x,y,1) = loc_env(x,y,2) ; loc_env(x,y,psz+2) = loc_env(x,y,psz+1) 
      end do
   end do
 
