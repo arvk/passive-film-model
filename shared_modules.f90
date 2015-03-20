@@ -98,38 +98,11 @@ module fields
   real*8 :: M_pyr_env = 1.0E-15
 
 
-
-
-  real*8 :: hill_pht_met = 8E10
-  real*8 :: hill_met_pht = 8E10
-
-  real*8 :: hill_mkw_met = 8E10
-  real*8 :: hill_met_mkw = 8E10
-
-  real*8 :: hill_met_pyr = 8E10
-  real*8 :: hill_pyr_met = 8E10
-
-  real*8 :: hill_pht_env = 8E10
-  real*8 :: hill_env_pht = 8E10
-
-  real*8 :: hill_mkw_env = 8E10
-  real*8 :: hill_env_mkw = 8E10
-
-  real*8 :: hill_env_pyr = 8E10
-  real*8 :: hill_pyr_env = 8E10
-
-  real*8 :: hill_met_env = 8E10
-  real*8 :: hill_env_met = 8E10
-
-  real*8 :: hill_pht_pyr = 8E10
-  real*8 :: hill_pyr_pht = 8E10
-
-  real*8 :: hill_mkw_pyr = 8E10
-  real*8 :: hill_pyr_mkw = 8E10
-
-  real*8 :: hill_pht_mkw = 8E10
-  real*8 :: hill_mkw_pht = 8E10
-
+  real*8 :: hill_met_mkw, hill_met_pht, hill_met_pyr, hill_met_env
+  real*8 :: hill_mkw_met, hill_mkw_pht, hill_mkw_pyr, hill_mkw_env
+  real*8 :: hill_pht_met, hill_pht_mkw, hill_pht_pyr, hill_pht_env
+  real*8 :: hill_pyr_met, hill_pyr_mkw, hill_pyr_pht, hill_pyr_env
+  real*8 :: hill_env_met, hill_env_mkw, hill_env_pht, hill_env_pyr
 
 
 end module fields
