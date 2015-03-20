@@ -4,7 +4,7 @@ subroutine read_parameters()
   use kmc_data
   implicit none
 
-  integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl
+  integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl, error_snapshots
   character*1 :: isdissolve
   character*1 :: useelectro
 
@@ -162,5 +162,30 @@ subroutine read_parameters()
      end if  !! End of useelectro loop
 
   end if
+
+
+
+  !! How many output snapshots?
+  call system("cat param.in | sed 's/!.*//g' | grep '^ *SNAPSHOTS' | sed 's/SNAPSHOTS//g'| sed 's/=//g' > .nosnapshots.readin")
+  open(unit = 7109, file = ".nosnapshots.readin", status = 'old');   read(7109,*,IOSTAT=error_snapshots) noimg ; close(7109)
+  call system ("rm .nosnapshots.readin")
+
+  if (error_snapshots .lt. 0) then
+     noimg = min(nomc,100)
+     write(6,*) "------------------------------------------------------------------"
+     write(6,*) "WARNING: No SNAPSHOTS specified. 100 output files will be created."    
+     write(6,*) "------------------------------------------------------------------"
+  end if
+
+  if (noimg .le. 0) then
+     noimg = min(nomc,100)
+     write(6,*) "----------------------------------------------------------------------"
+     write(6,*) "WARNING: Error in reading SNAPSHOTS. 100 output files will be created."    
+     write(6,*) "----------------------------------------------------------------------"   
+  end if
+
+
+
+
 
 end subroutine read_parameters

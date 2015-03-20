@@ -58,7 +58,7 @@ module commondata
   logical :: include_electro   ! Include potential distribution
 
 
-  integer :: noimg = 100                  ! Number of output files
+  integer :: noimg                        ! Number of output files
   integer :: freq_scale = 1750000000      ! KMC information is transferred every freq_scale steps
   integer :: kg_scale = 5                 ! Number of KMC grid points per PF grid
   integer :: swap_freq_pf = 5             ! Frequency with which MPI swaps are conducted for PF solving
