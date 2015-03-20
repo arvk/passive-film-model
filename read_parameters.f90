@@ -9,7 +9,7 @@ subroutine read_parameters()
   character*1 :: useelectro
 
   !! Is the simulation being started from scratch?
-  call system("cat param.in | grep ^RESTART | sed 's/RESTART//g'| sed 's/=//g' > .isrestart.readin")
+  call system("cat param.in | sed 's/!.*//g' | grep '^ *RESTART' | sed 's/RESTART//g'| sed 's/=//g' > .isrestart.readin")
   open(unit = 7000, file = ".isrestart.readin", status = 'old') ; read(7000,*) isrestart ; close(7000)
   call system ("rm .isrestart.readin")
 
@@ -27,7 +27,7 @@ subroutine read_parameters()
   end if  !! End of isrestart loop
 
   !! What is the size of the phase-field simulation box?
-  call system("cat param.in | grep ^PFSIZE | sed 's/PFSIZE//g'| sed 's/=//g' > .pfsize.readin")
+  call system("cat param.in | sed 's/!.*//g' | grep '^ *PFSIZE' | sed 's/PFSIZE//g'| sed 's/=//g' > .pfsize.readin")
   open(unit = 7101, file = ".pfsize.readin", status = 'old') ; read(7101,*) psx_g, psy_g, psz_g ; close(7101)
   call system ("rm .pfsize.readin")
 
@@ -40,7 +40,7 @@ subroutine read_parameters()
   ksx = ksx_g ; ksy = ksy_g/procs
 
   !! What is the temperature of the simulation box?
-  call system("cat param.in | grep ^TEMP | sed 's/TEMP//g'| sed 's/=//g' > .temp.readin")
+  call system("cat param.in | sed 's/!.*//g' | grep '^ *TEMP' | sed 's/TEMP//g'| sed 's/=//g' > .temp.readin")
   open(unit = 7102, file = ".temp.readin", status = 'old');   read(7102,*,IOSTAT=error_temp) T ; close(7102)
   call system ("rm .temp.readin")
 
@@ -59,7 +59,7 @@ subroutine read_parameters()
 
 
   !! What is the pH of the simulation box?
-  call system("cat param.in | grep ^PH | sed 's/PH//g'| sed 's/=//g' > .ph.readin")
+  call system("cat param.in | sed 's/!.*//g' | grep '^ *PH' | sed 's/PH//g'| sed 's/=//g' > .ph.readin")
   open(unit = 7102, file = ".ph.readin", status = 'old');   read(7102,*,IOSTAT=error_ph) pH_in ; close(7102)
   call system ("rm .ph.readin")
 
@@ -72,14 +72,14 @@ subroutine read_parameters()
 
 
   !! What is the length of the simulation?
-  call system("cat param.in | grep ^SIMLEN | sed 's/SIMLEN//g'| sed 's/=//g' > .nomc.readin")
+  call system("cat param.in | sed 's/!.*//g' | grep '^ *SIMLEN' | sed 's/SIMLEN//g'| sed 's/=//g' > .nomc.readin")
   open(unit = 7103, file = ".nomc.readin", status = 'old');   read(7103,*,IOSTAT=error_nomc) nomc ; close(7103)
   call system ("rm .nomc.readin")
 
   if (error_nomc .lt. 0) then
      nomc = 1000000
      write(6,*) "-----------------------------------------------------------------"
-     write(6,*) "WARNING: No SIMLEN specified. Simulation will run for 10^6 steps."    
+     write(6,*) "WARNING: No SIMLEN specified. Simulation will run for 106 steps."    
      write(6,*) "-----------------------------------------------------------------"
   end if
 
@@ -93,7 +93,7 @@ subroutine read_parameters()
 
 
   !! Should dissolution be included in the simulation?
-  call system("cat param.in | grep ^DISSOLVE | sed 's/DISSOLVE//g'| sed 's/=//g' > .isdissolve.readin")
+  call system("cat param.in | sed 's/!.*//g' | grep '^ *DISSOLVE' | sed 's/DISSOLVE//g'| sed 's/=//g' > .isdissolve.readin")
   open(unit = 7000, file = ".isdissolve.readin", status = 'old') ; read(7000,*,IOSTAT=error_dissolve) isdissolve ; close(7000)
   call system ("rm .isdissolve.readin")
 
@@ -123,7 +123,7 @@ subroutine read_parameters()
 
 
   !! Should the electrochemistry module be included?
-  call system("cat param.in | grep ^ELECTRO | sed 's/ELECTRO//g'| sed 's/=//g' > .useelectro.readin")
+  call system("cat param.in | sed 's/!.*//g' | grep '^ *ELECTRO' | sed 's/ELECTRO//g'| sed 's/=//g' > .useelectro.readin")
   open(unit = 7000, file = ".useelectro.readin", status = 'old') ; read(7000,*,IOSTAT=error_electro) useelectro ; close(7000)
   call system ("rm .useelectro.readin")
 
@@ -142,7 +142,7 @@ subroutine read_parameters()
         write (6,*) 'Electrochemistry module included.'
 
 
-        call system("cat param.in | grep ^METPOTL | sed 's/METPOTL//g'| sed 's/=//g' > .metpotl.readin")
+        call system("cat param.in | sed 's/!.*//g' | grep '^ *METPOTL' | sed 's/METPOTL//g'| sed 's/=//g' > .metpotl.readin")
         open(unit = 7000, file = ".metpotl.readin", status = 'old') ; read(7000,*,IOSTAT=error_metpotl) metal_potential ; close(7000)
         call system ("rm .metpotl.readin")
 
