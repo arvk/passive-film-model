@@ -120,7 +120,7 @@ program passive_film_model
 
 
 !!!         Write output files at fixed times
-     if (mod(iter,(nomc/noimg)-1).eq.0) then
+     if (mod(iter,max(floor(real(nomc/noimg)),1)).eq.0) then
 
         call gather_pf()
         call gather_mu()

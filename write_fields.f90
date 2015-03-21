@@ -112,7 +112,7 @@ subroutine write_fields(iter)
 
 
 
-  write(img_id,'(I5.5)') iter/((nomc/noimg)-1)
+  write(img_id,'(I5.5)') iter/max(floor(real(nomc/noimg)),1)
   call system("cp MET.out MET_"//img_id//".out")
   call system("cp MKW.out MKW_"//img_id//".out")
   call system("cp PHT.out PHT_"//img_id//".out")
