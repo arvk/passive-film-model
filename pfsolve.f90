@@ -43,18 +43,18 @@ subroutine pfsolve(iter)
 
   integer, parameter :: no_fields = 5
 
-  real*8, dimension(psx,psy,psz+2) :: D_met, D_met_mkw, D_met_pht, D_met_pyr, D_met_env
-  real*8, dimension(psx,psy,psz+2) :: D_mkw_met, D_mkw, D_mkw_pht, D_mkw_pyr, D_mkw_env
-  real*8, dimension(psx,psy,psz+2) :: D_pht_met, D_pht_mkw, D_pht, D_pht_pyr, D_pht_env
-  real*8, dimension(psx,psy,psz+2) :: D_pyr_met, D_pyr_mkw, D_pyr_pht, D_pyr, D_pyr_env
-  real*8, dimension(psx,psy,psz+2) :: D_env_met, D_env_mkw, D_env_pht, D_env_pyr, D_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_met, D_met_mkw, D_met_pht, D_met_pyr, D_met_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_mkw_met, D_mkw, D_mkw_pht, D_mkw_pyr, D_mkw_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_pht_met, D_pht_mkw, D_pht, D_pht_pyr, D_pht_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_pyr_met, D_pyr_mkw, D_pyr_pht, D_pyr, D_pyr_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_env_met, D_env_mkw, D_env_pht, D_env_pyr, D_env
 
   ! A/B/JA matrices for implicit solver
-  real*8, dimension(psx*psy*psz*no_fields) :: B
-  real*8, dimension(psx*psy*psz*no_fields) :: approxsol
-  integer, dimension(psx*psy*psz*no_fields) :: vector_locator
-  real*8, dimension(psx*psy*psz*no_fields) :: vecread
-  real*8, dimension(psx*psy*psz*no_fields) :: scratch1,scratch2,scratch3
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: B
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: approxsol
+  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: vector_locator
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: vecread
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: scratch1,scratch2,scratch3
 
   integer :: linindex, contindex
   integer :: iterations, solver_info
@@ -137,7 +137,7 @@ subroutine pfsolve(iter)
 
 
   call VecCreate(PETSC_COMM_SELF,ret_vec,ierr)
-  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*psz*no_fields,ierr)
+  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2)*no_fields,ierr)
   call VecSetFromOptions(ret_vec,ierr)
   call VecSetUp(ret_vec,ierr)
 
@@ -190,7 +190,7 @@ subroutine pfsolve(iter)
               B(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_pyr_env(x,y,z+1)+D_pyr_env(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
               B(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_env(x,y,z+1)+D_env(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
 
-           elseif (z.eq.psz) then
+           elseif (z.eq.(psz+(2*ghost_width)-2)) then
 
               B(linindex+((imet-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((imet-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_met(x,y,z+1+1)+D_met(x,y,z+1))/(dpf*dpf))*met(x,y,z+1+1))
               B(linindex+((imet-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((imet-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_mkw_met(x,y,z+1+1)+D_mkw_met(x,y,z+1))/(dpf*dpf))*mkw(x,y,z+1+1))

@@ -4,7 +4,7 @@ subroutine swap_pf
   implicit none
   include 'mpif.h'
 
-  integer :: x, y   ! Loop variables
+  integer :: x, y, z  ! Loop variables
   integer :: ierr
   integer :: stat(MPI_STATUS_SIZE)
 

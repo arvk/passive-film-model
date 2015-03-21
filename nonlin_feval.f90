@@ -51,13 +51,13 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
   real*8 :: sigma_pyr_met, sigma_pyr_mkw, sigma_pyr_pht, sigma_pyr_env
   real*8 :: sigma_met_pyr, sigma_mkw_pyr, sigma_pht_pyr, sigma_env_pyr
 
-  real*8, dimension(psx,psy,psz+2) :: D_met, D_met_mkw, D_met_pht, D_met_pyr, D_met_env
-  real*8, dimension(psx,psy,psz+2) :: D_mkw_met, D_mkw, D_mkw_pht, D_mkw_pyr, D_mkw_env
-  real*8, dimension(psx,psy,psz+2) :: D_pht_met, D_pht_mkw, D_pht, D_pht_pyr, D_pht_env
-  real*8, dimension(psx,psy,psz+2) :: D_pyr_met, D_pyr_mkw, D_pyr_pht, D_pyr, D_pyr_env
-  real*8, dimension(psx,psy,psz+2) :: D_env_met, D_env_mkw, D_env_pht, D_env_pyr, D_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_met, D_met_mkw, D_met_pht, D_met_pyr, D_met_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_mkw_met, D_mkw, D_mkw_pht, D_mkw_pyr, D_mkw_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_pht_met, D_pht_mkw, D_pht, D_pht_pyr, D_pht_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_pyr_met, D_pyr_mkw, D_pyr_pht, D_pyr, D_pyr_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_env_met, D_env_mkw, D_env_pht, D_env_pyr, D_env
 
-  real*8, dimension(psx,psy,psz+2) :: loc_met, loc_mkw, loc_pht, loc_pyr, loc_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: loc_met, loc_mkw, loc_pht, loc_pyr, loc_env
 
   call calc_grad_pf()
 
@@ -195,7 +195,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met(x,y,(z+1)-1)+D_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -223,10 +223,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_met(x,wrap(y+1,psy),z+1)+D_met(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met(x,y,(z+1)+1)+D_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -236,7 +236,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw_met(x,y,(z+1)-1)+D_mkw_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -263,10 +263,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_mkw_met(x,wrap(y+1,psy),z+1)+D_mkw_met(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw_met(x,y,(z+1)+1)+D_mkw_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -276,7 +276,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht_met(x,y,(z+1)-1)+D_pht_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -303,10 +303,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pht_met(x,wrap(y+1,psy),z+1)+D_pht_met(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht_met(x,y,(z+1)+1)+D_pht_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -319,7 +319,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr_met(x,y,(z+1)-1)+D_pyr_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -346,10 +346,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pyr_met(x,wrap(y+1,psy),z+1)+D_pyr_met(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr_met(x,y,(z+1)+1)+D_pyr_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -362,7 +362,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env_met(x,y,(z+1)-1)+D_env_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -389,10 +389,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_env_met(x,wrap(y+1,psy),z+1)+D_env_met(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env_met(x,y,(z+1)+1)+D_env_met(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
         end do
@@ -452,7 +452,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met_mkw(x,y,(z+1)-1)+D_met_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -479,10 +479,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_met_mkw(x,wrap(y+1,psy),z+1)+D_met_mkw(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met_mkw(x,y,(z+1)+1)+D_met_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -492,7 +492,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw(x,y,(z+1)-1)+D_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -520,10 +520,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_mkw(x,wrap(y+1,psy),z+1)+D_mkw(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw(x,y,(z+1)+1)+D_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -533,7 +533,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht_mkw(x,y,(z+1)-1)+D_pht_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -560,10 +560,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pht_mkw(x,wrap(y+1,psy),z+1)+D_pht_mkw(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht_mkw(x,y,(z+1)+1)+D_pht_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -576,7 +576,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr_mkw(x,y,(z+1)-1)+D_pyr_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -603,10 +603,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pyr_mkw(x,wrap(y+1,psy),z+1)+D_pyr_mkw(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr_mkw(x,y,(z+1)+1)+D_pyr_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -619,7 +619,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env_mkw(x,y,(z+1)-1)+D_env_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -646,10 +646,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_env_mkw(x,wrap(y+1,psy),z+1)+D_env_mkw(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env_mkw(x,y,(z+1)+1)+D_env_mkw(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
         end do
@@ -714,7 +714,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met_pht(x,y,(z+1)-1)+D_met_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -741,10 +741,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_met_pht(x,wrap(y+1,psy),z+1)+D_met_pht(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met_pht(x,y,(z+1)+1)+D_met_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -753,7 +753,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw_pht(x,y,(z+1)-1)+D_mkw_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -780,10 +780,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_mkw_pht(x,wrap(y+1,psy),z+1)+D_mkw_pht(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw_pht(x,y,(z+1)+1)+D_mkw_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -792,7 +792,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,y,(z+1)-1)+D_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -820,10 +820,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,wrap(y+1,psy),z+1)+D_pht(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht(x,y,(z+1)+1)+D_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -836,7 +836,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr_pht(x,y,(z+1)-1)+D_pyr_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -863,10 +863,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pyr_pht(x,wrap(y+1,psy),z+1)+D_pyr_pht(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr_pht(x,y,(z+1)+1)+D_pyr_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -879,7 +879,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env_pht(x,y,(z+1)-1)+D_env_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -906,10 +906,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_env_pht(x,wrap(y+1,psy),z+1)+D_env_pht(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env_pht(x,y,(z+1)+1)+D_env_pht(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
         end do
@@ -983,7 +983,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met_pyr(x,y,(z+1)-1)+D_met_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1010,10 +1010,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_met_pyr(x,wrap(y+1,psy),z+1)+D_met_pyr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met_pyr(x,y,(z+1)+1)+D_met_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -1022,7 +1022,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw_pyr(x,y,(z+1)-1)+D_mkw_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1049,10 +1049,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_mkw_pyr(x,wrap(y+1,psy),z+1)+D_mkw_pyr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw_pyr(x,y,(z+1)+1)+D_mkw_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -1062,7 +1062,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht_pyr(x,y,(z+1)-1)+D_pht_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1089,10 +1089,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pht_pyr(x,wrap(y+1,psy),z+1)+D_pht_pyr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht_pyr(x,y,(z+1)+1)+D_pht_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -1102,7 +1102,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr(x,y,(z+1)-1)+D_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1130,10 +1130,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pyr(x,wrap(y+1,psy),z+1)+D_pyr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr(x,y,(z+1)+1)+D_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -1142,7 +1142,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env_pyr(x,y,(z+1)-1)+D_env_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1169,10 +1169,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_env_pyr(x,wrap(y+1,psy),z+1)+D_env_pyr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env_pyr(x,y,(z+1)+1)+D_env_pyr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
         end do
@@ -1246,7 +1246,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met_env(x,y,(z+1)-1)+D_met_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1273,10 +1273,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_met_env(x,wrap(y+1,psy),z+1)+D_met_env(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_met_env(x,y,(z+1)+1)+D_met_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imet-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -1285,7 +1285,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw_env(x,y,(z+1)-1)+D_mkw_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1312,10 +1312,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_mkw_env(x,wrap(y+1,psy),z+1)+D_mkw_env(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_mkw_env(x,y,(z+1)+1)+D_mkw_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -1325,7 +1325,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht_env(x,y,(z+1)-1)+D_pht_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1352,10 +1352,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pht_env(x,wrap(y+1,psy),z+1)+D_pht_env(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pht_env(x,y,(z+1)+1)+D_pht_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -1367,7 +1367,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr_env(x,y,(z+1)-1)+D_pyr_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1394,10 +1394,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_pyr_env(x,wrap(y+1,psy),z+1)+D_pyr_env(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_pyr_env(x,y,(z+1)+1)+D_pyr_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
 
@@ -1408,7 +1408,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env(x,y,(z+1)-1)+D_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
            contindex = contindex + 1
@@ -1436,10 +1436,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            A(contindex) = 0.0d0 - (0.5d0*(D_env(x,wrap(y+1,psy),z+1)+D_env(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D_env(x,y,(z+1)+1)+D_env(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x + ((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))
            end if
 
         end do
