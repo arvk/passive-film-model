@@ -19,12 +19,12 @@ subroutine orsolve(iter)
   integer :: x, y, z   ! Loop variables
   integer, intent(in) :: iter
 
-  real*8, dimension(psx,psy,psz) :: M_opyr
+  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: M_opyr
   real*8 :: M_opyr_max = 7.5E-9
   real*8 :: M_opyr_min = 7.5E-12
 
-  real*8, dimension(psx,psy,psz) :: D_opyr
-  real*8, dimension(psx,psy,psz) :: del_opyr
+  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: D_opyr
+  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: del_opyr
   real*8 :: D_opyr_max = 1E6   !! Truncation for the orientation field
 
   real*8 :: delx,dely,delz
@@ -37,11 +37,11 @@ subroutine orsolve(iter)
 
   real*8 :: orc,orc1,orc2,orc3,orc4,orc5,orc6
 
-  real*8, dimension(psx*psy*psz) :: B
-  real*8, dimension(psx*psy*psz) :: approxsol
-  integer, dimension(psx*psy*psz) :: vector_locator
-  real*8, dimension(psx*psy*psz) :: vecread
-  real*8, dimension(psx*psy*psz) :: scratch1,scratch2,scratch3
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: approxsol
+  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vecread
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: scratch1,scratch2,scratch3
 
   real*8, dimension(:), allocatable :: A, LU
   integer, dimension(:), allocatable :: JA, IA
@@ -61,7 +61,7 @@ subroutine orsolve(iter)
 
   do x = 1,psx
      do y = 1,psy
-        do z = 1,psz
+        do z = 1,(psz+(2*ghost_width)-2)
 
            M_opyr(x,y,z) = min(M_opyr_min/(((pyr(x,y,z+1))**2)+epsilon),M_opyr_max)
 
@@ -86,7 +86,7 @@ subroutine orsolve(iter)
 
   orc = 0.0d0
 
-  do z = 1,psz
+  do z = 1,(psz+(2*ghost_width)-2)
      do y = 1,psy
         do x = 1,psx
 
@@ -108,7 +108,7 @@ subroutine orsolve(iter)
            orc5 = orc * M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,z)+D_opyr(x,y,max(z-1,1)))/(dpf*dpf)
 
            orc = odiff(opyr(x,y,z+1+1),opyr(x,y,z+1))-(opyr(x,y,z+1+1)-opyr(x,y,z+1))
-           orc6 = orc * M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,min(z+1,psz))+D_opyr(x,y,z))/(dpf*dpf)
+           orc6 = orc * M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,min(z+1,(psz+(2*ghost_width)-2)))+D_opyr(x,y,z))/(dpf*dpf)
 
            orc = (orc1+orc3+orc5)-(orc2+orc4+orc6)
 
@@ -116,8 +116,8 @@ subroutine orsolve(iter)
 
            if (z.eq.1) then
               B(linindex) = B(linindex) + ((M_opyr(x,y,z)*0.5d0*(D_opyr(x,y,z)+D_opyr(x,y,max(z-1,1)))/(dpf*dpf))*opyr(x,y,z+1-1))
-           elseif (z.eq.psz) then
-              B(linindex) = B(linindex) + ((M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,min(z+1,psz))+D_opyr(x,y,z))/(dpf*dpf))*opyr(x,y,z+1+1))
+           elseif (z.eq.(psz+(2*ghost_width)-2)) then
+              B(linindex) = B(linindex) + ((M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,min(z+1,(psz+(2*ghost_width)-2)))+D_opyr(x,y,z))/(dpf*dpf))*opyr(x,y,z+1+1))
            end if
 
            approxsol(linindex) = opyr(x,y,z+1)
@@ -131,30 +131,30 @@ subroutine orsolve(iter)
 
 
   call VecCreate(PETSC_COMM_SELF,or_vec,ierr)
-  call VecSetSizes(or_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetSizes(or_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(or_vec,ierr)
   call VecSetUp(or_vec,ierr)
 
 
   call VecCreate(PETSC_COMM_SELF,rhs_vec,ierr)
-  call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(rhs_vec,ierr)
   call VecSetUp(rhs_vec,ierr)
-  call VecSetValues(rhs_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+  call VecSetValues(rhs_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,B,INSERT_VALUES,ierr)
 
 
 
   !! Calculate the LHS (A matrix in Ax=B)
-  allocate(A((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(LU((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(IA((psx*psy*psz)+1))
+  allocate(A((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(JA((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(LU((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(IA((psx*psy*(psz+(2*ghost_width)-2))+1))
 
   IA=0 ; JA=0 ; A=0
   contindex = 0
   linindex = 0
 
-  do z = 1,psz
+  do z = 1,(psz+(2*ghost_width)-2)
      do y = 1,psy
         do x = 1,psx
 
@@ -164,8 +164,8 @@ subroutine orsolve(iter)
 
            if (z .gt. 1) then
               contindex = contindex + 1
-              A(contindex) = 0.0d0 - (M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,wrap(z-1,psz))+D_opyr(x,y,z)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+              A(contindex) = 0.0d0 - (M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,wrap(z-1,(psz+(2*ghost_width)-2)))+D_opyr(x,y,z)))/(dpf*dpf)
+              JA(contindex) = ((wrap(z-1,(psz+(2*ghost_width)-2))-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
            contindex = contindex + 1
@@ -177,7 +177,7 @@ subroutine orsolve(iter)
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
 
            contindex = contindex + 1
-           A(contindex) = D_opyr(x,y,wrap(z+1,psz))+D_opyr(x,y,wrap(z-1,psz))+&
+           A(contindex) = D_opyr(x,y,wrap(z+1,(psz+(2*ghost_width)-2)))+D_opyr(x,y,wrap(z-1,(psz+(2*ghost_width)-2)))+&
                 &D_opyr(x,wrap(y+1,psy),z)+D_opyr(x,wrap(y-1,psy),z)+&
                 &D_opyr(wrap(x+1,psx),y,z)+D_opyr(wrap(x-1,psx),y,z)
            A(contindex) = A(contindex) + 6*D_opyr(x,y,z)
@@ -193,10 +193,10 @@ subroutine orsolve(iter)
            A(contindex) = 0.0d0 - (M_opyr(x,y,z) * 0.5d0*(D_opyr(x,wrap(y+1,psy),z)+D_opyr(x,y,z)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
-              A(contindex) = 0.0d0 - (M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,wrap(z+1,psz))+D_opyr(x,y,z)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+              A(contindex) = 0.0d0 - (M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,wrap(z+1,(psz+(2*ghost_width)-2)))+D_opyr(x,y,z)))/(dpf*dpf)
+              JA(contindex) = ((wrap(z+1,(psz+(2*ghost_width)-2))-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
 
@@ -204,11 +204,11 @@ subroutine orsolve(iter)
      end do
   end do
 
-  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+6
+  IA((psx*psy*(psz+(2*ghost_width)-2))+1)= IA(psx*psy*(psz+(2*ghost_width)-2))+6
 
 
 
-  do linindex = 1,psx*psy*psz
+  do linindex = 1,psx*psy*(psz+(2*ghost_width)-2)
      is_sorted = .FALSE.
 
      do while (is_sorted .eqv. .FALSE.)
@@ -246,7 +246,7 @@ subroutine orsolve(iter)
   IA = IA - 1
   JA = JA - 1
 
-  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*psz,psx*psy*psz,IA,JA,A,lhs_mat,ierr)
+  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*(psz+(2*ghost_width)-2),psx*psy*(psz+(2*ghost_width)-2),IA,JA,A,lhs_mat,ierr)
 
   call KSPCreate(PETSC_COMM_SELF,ksp_or,ierr)
   call KSPSetOperators(ksp_or,lhs_mat,lhs_mat,ierr)
@@ -255,7 +255,7 @@ subroutine orsolve(iter)
 
   call VecGetArrayF90(or_vec,point_or_vec,ierr)
 
-  do z = 1,psz
+  do z = 1,(psz+(2*ghost_width)-2)
      do y = 1,psy
         do x = 1,psx
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
