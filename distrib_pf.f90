@@ -45,8 +45,6 @@ subroutine distrib_pf()
      end do
   end do
 
-  call mpi_bcast(min_mu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-  call mpi_bcast(max_mu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(avg_mu_env,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
 end subroutine distrib_pf

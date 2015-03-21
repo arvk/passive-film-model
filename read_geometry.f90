@@ -92,11 +92,7 @@ subroutine read_geometry
   end do
   close(303)  
 
-
   avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0) 
-
-  min_mu = R*T*(0-50.0d0)
-  max_mu = avg_mu_env+(R*T*0.5)
 
 end subroutine read_geometry
 

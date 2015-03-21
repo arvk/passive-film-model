@@ -15,9 +15,6 @@ subroutine initialize_geometry()
   avg_mu_met = mus_met_mkw_eqb - (R*T*0.5d0) 
   avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0) 
 
-  min_mu = R*T*(0-50.0d0)
-  max_mu = avg_mu_env+(R*T*0.5)
-
 !! Initialize global phase-fraction fields
   do x = 1,psx_g
      do y = 1,psy_g
