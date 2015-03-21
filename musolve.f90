@@ -26,7 +26,7 @@ subroutine musolve(iter)
 
   !! Diffusivities
   real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
-  real*8, dimension(psx,psy,psz+2) :: D
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D
 
   !! Derivative of sulfur density with chemical potential
   real*8 :: drho_dmu_met, drho_dmu_mkw, drho_dmu_pht, drho_dmu_pyr, drho_dmu_env, Chi
@@ -34,16 +34,16 @@ subroutine musolve(iter)
   integer, dimension(psx,psy) :: interface_loc
   real*8 :: noise
 
-  real*8, dimension(psx,psy,psz+2) :: newmu
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: newmu
   integer :: wrap
 
 
   ! A/B/JA matrices for implicit solver
-  real*8, dimension(psx*psy*psz) :: B
-  real*8, dimension(psx*psy*psz) :: approxsol
-  integer, dimension(psx*psy*psz) :: vector_locator
-  real*8, dimension(psx*psy*psz) :: vecread
-  real*8, dimension(psx*psy*psz) :: scratch1,scratch2,scratch3
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: approxsol
+  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vecread
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: scratch1,scratch2,scratch3
 
   real*8, dimension(:), allocatable :: A, LU
   integer, dimension(:), allocatable :: JA, IA
@@ -87,7 +87,7 @@ subroutine musolve(iter)
 
   do x = 1,psx
      do y = 1,psy
-        do z = 1,psz+2
+        do z = 1,psz+(2*ghost_width)
            !! Calculate chemical 'specific heat'
            Chi = (met(x,y,z)*drho_dmu_met)+(mkw(x,y,z)*drho_dmu_mkw)+(pht(x,y,z)*drho_dmu_pht)+(pyr(x,y,z)*drho_dmu_pyr)+(env(x,y,z)*drho_dmu_env)
 
@@ -103,7 +103,7 @@ subroutine musolve(iter)
   approxsol = 0.0d0
 
 
-  do z = 1,psz
+  do z = 1,(psz+(2*ghost_width)-2)
      do y = 1,psy
         do x = 1,psx
 
@@ -116,7 +116,7 @@ subroutine musolve(iter)
 
            if (z.eq.1) then
               B(linindex) = B(linindex) + ((0.5d0*(D(x,y,z+1)+D(x,y,z+1-1))/(dpf*dpf))*mu(x,y,z+1-1))
-           elseif (z.eq.psz) then
+           elseif (z.eq.(psz+(2*ghost_width)-2)) then
               B(linindex) = B(linindex) + ((0.5d0*(D(x,y,z+1+1)+D(x,y,z+1))/(dpf*dpf))*mu(x,y,z+1+1))
            end if
 
@@ -132,23 +132,23 @@ subroutine musolve(iter)
 
 
   call VecCreate(PETSC_COMM_SELF,mus_vec,ierr)
-  call VecSetSizes(mus_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetSizes(mus_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(mus_vec,ierr)
   call VecSetUp(mus_vec,ierr)
 
 
   call VecCreate(PETSC_COMM_SELF,rhs_vec,ierr)
-  call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(rhs_vec,ierr)
   call VecSetUp(rhs_vec,ierr)
-  call VecSetValues(rhs_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+  call VecSetValues(rhs_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,B,INSERT_VALUES,ierr)
 
 
   !! Calculate the LHS (A matrix in Ax=B)
-  allocate(A((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(LU((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(IA((psx*psy*psz)+1))
+  allocate(A((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(JA((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(LU((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(IA((psx*psy*(psz+(2*ghost_width)-2))+1))
 
 
   IA=0 ; JA=0 ; A=0
@@ -158,7 +158,7 @@ subroutine musolve(iter)
 
 
 
-  do z = 1,psz
+  do z = 1,(psz+(2*ghost_width)-2)
      do y = 1,psy
         do x = 1,psx
 
@@ -169,7 +169,7 @@ subroutine musolve(iter)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D(x,y,(z+1)-1)+D(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+              JA(contindex) = ((wrap(z-1,(psz+(2*ghost_width)-2))-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
            contindex = contindex + 1
@@ -197,10 +197,10 @@ subroutine musolve(iter)
            A(contindex) = 0.0d0 - (0.5d0*(D(x,wrap(y+1,psy),z+1)+D(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
 
-           if (z .lt. psz) then
+           if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D(x,y,(z+1)+1)+D(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x
+              JA(contindex) = ((wrap(z+1,(psz+(2*ghost_width)-2))-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
 
@@ -208,7 +208,7 @@ subroutine musolve(iter)
      end do
   end do
 
-  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+6
+  IA((psx*psy*(psz+(2*ghost_width)-2))+1)= IA(psx*psy*(psz+(2*ghost_width)-2))+6
 
 
 
@@ -220,7 +220,7 @@ subroutine musolve(iter)
 
 
 
-  do linindex = 1,psx*psy*psz
+  do linindex = 1,psx*psy*(psz+(2*ghost_width)-2)
      is_sorted = .FALSE.
 
      do while (is_sorted .eqv. .FALSE.)
@@ -258,7 +258,7 @@ subroutine musolve(iter)
   IA = IA - 1
   JA = JA - 1
 
-  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*psz,psx*psy*psz,IA,JA,A,lhs_mat,ierr)
+  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*(psz+(2*ghost_width)-2),psx*psy*(psz+(2*ghost_width)-2),IA,JA,A,lhs_mat,ierr)
 
 
   call KSPCreate(PETSC_COMM_SELF,ksp_mu,ierr)
@@ -272,7 +272,7 @@ subroutine musolve(iter)
 
   call VecGetArrayF90(mus_vec,point_mu_vec,ierr)
 
-  do z = 1,psz
+  do z = 1,(psz+(2*ghost_width)-2)
      do y = 1,psy
         do x = 1,psx
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
@@ -300,13 +300,13 @@ subroutine musolve(iter)
   if (rank.eq.0) then
      do x = 1,psx
         do y = 1,psy
-           newmu(x,y,2) = mu(x,y,2)
+           newmu(x,y,1+ghost_width) = mu(x,y,1+ghost_width)
         end do
      end do
   elseif(rank.eq.procs-1) then
      do x = 1,psx
         do y = 1,psy
-           newmu(x,y,psz+1) = mu(x,y,psz+1)
+           newmu(x,y,psz+ghost_width) = mu(x,y,psz+ghost_width)       
         end do
      end do
   end if
@@ -314,7 +314,7 @@ subroutine musolve(iter)
   !! Normalize chemical potential in bulk phases
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+1
+        do z = 2,psz+(2*ghost_width)-1
            if (env(x,y,z).gt.0.97) then
               newmu(x,y,z) = avg_mu_env
            end if
@@ -335,7 +335,7 @@ subroutine musolve(iter)
 
      do x = 1,psx
         do y = 1,psy
-           do z = psz+1,2,-1
+           do z = psz+ghost_width,1+ghost_width,-1
               if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
                  interface_loc(x,y) = z
                  newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
@@ -351,7 +351,7 @@ subroutine musolve(iter)
 
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+1
+        do z = 1+ghost_width,psz+ghost_width
            mu(x,y,z) = newmu(x,y,z)
         end do
      end do
