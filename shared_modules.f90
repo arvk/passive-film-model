@@ -22,15 +22,8 @@ module fields
   real*8, dimension(:,:,:), allocatable :: opyr_g  ! Global orientation field for pyrite
   real*8, dimension(:,:,:), allocatable :: elpot_g ! Global electrical potential
 
-  real*8 :: avg_mu_env
-  real*8 :: sulfidation_rate     ! Sulfidation rate / Film growth rate in m/s
-  real*8 :: metal_potential      ! Electric potential of the metal
-
-
   real*8, dimension(:,:,:), allocatable :: dmet_dt, dmkw_dt, dpht_dt, dpyr_dt, denv_dt, dmu_dt
   real*8, dimension(:,:,:), allocatable :: newmet, newmkw, newpht, newpyr, newenv
-
-
 
 end module fields
 
@@ -42,28 +35,32 @@ module commondata
   implicit none
   save
 
+  ! MPI PARAMETERS
   logical :: isroot
   integer :: rank, procs
-  integer, dimension(:), allocatable :: seed  !! Seed for PRNG
 
-  real*8 :: dpf = 5E-9  ! Phase-field grid size
-  real*8 :: dt          ! Timestep for PF evolution
-
+  ! INPUT PARAMETERS
   character*1 :: isrestart     ! Is the calculation a restarted one?
+  integer :: nomc              ! Number of PF iterations
   integer :: T                 ! Temperature of the simulation box
   real*8 :: pH_in              ! Scalar pH input
-  integer :: nomc              ! Number of kMC steps
-
+  integer :: noimg             ! Number of output files
+  real*8 :: metal_potential    ! Electric potential of the metal
   logical :: include_dissolve  ! Include film dissolution
   logical :: include_electro   ! Include potential distribution
 
 
-  integer :: noimg                        ! Number of output files
-  integer :: freq_scale = 1750000000      ! KMC information is transferred every freq_scale steps
-  integer :: kg_scale = 5                 ! Number of KMC grid points per PF grid
-  integer :: swap_freq_pf = 5             ! Frequency with which MPI swaps are conducted for PF solving
-  integer :: swap_freq_kmc = 10           ! Frequency with which MPI swaps are conducted for KMC solving
-  real*8 :: max_mu, min_mu                ! Bounds for chemical potential
+  ! INTERNAL PARAMETERS
+  real*8, parameter :: dpf = 5E-9     ! Phase-field grid size
+  real*8 :: dt                        ! Timestep for PF evolution
+  real*8 :: avg_mu_env                ! Sulfur chemical potential in the environment
+  real*8 :: sulfidation_rate          ! Sulfidation rate / Film growth rate in m/s
+  integer :: swap_freq_pf = 5         ! Frequency with which MPI swaps are conducted for PF solving
+  integer :: swap_freq_kmc = 10       ! Frequency with which MPI swaps are conducted for KMC solving
+  integer :: freq_scale = 1750000000  ! KMC information is transferred every freq_scale steps
+  integer :: kg_scale = 5             ! Number of KMC grid points per PF grid
+
+  integer, dimension(:), allocatable :: seed  ! Seed for PRNG
 
 end module commondata
 
