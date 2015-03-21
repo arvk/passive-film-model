@@ -30,27 +30,27 @@ subroutine allocate_matrices()
 
 
 !! Allocate local matrices
-  allocate(met(psx,psy,psz+2)); allocate(mkw(psx,psy,psz+2)) ; allocate(pht(psx,psy,psz+2)); allocate(pyr(psx,psy,psz+2)); allocate(env(psx,psy,psz+2)) 
-  allocate(mu(psx,psy,psz+2)) 
-  allocate(opyr(psx,psy,psz+2)) 
-  allocate(voids(psx,psy,psz+2)) 
+  allocate(met(psx,psy,psz+(2*ghost_width))); allocate(mkw(psx,psy,psz+(2*ghost_width))) ; allocate(pht(psx,psy,psz+(2*ghost_width))); allocate(pyr(psx,psy,psz+(2*ghost_width))); allocate(env(psx,psy,psz+(2*ghost_width))) 
+  allocate(mu(psx,psy,psz+(2*ghost_width))) 
+  allocate(opyr(psx,psy,psz+(2*ghost_width))) 
+  allocate(voids(psx,psy,psz+(2*ghost_width))) 
   voids = 0.0d0
-  allocate(elpot(psx,psy,psz+2)) 
+  allocate(elpot(psx,psy,psz+(2*ghost_width))) 
   
 
 !! Allocate gradient matrices
-  allocate(delypyr(psx,psy,psz+2)); allocate(delzpyr(psx,psy,psz+2))
+  allocate(delypyr(psx,psy,psz+(2*ghost_width))); allocate(delzpyr(psx,psy,psz+(2*ghost_width)))
 
 
 !! Allocate time-evolution matrices
-  allocate(dmet_dt(psx,psy,psz+2)); allocate(dmkw_dt(psx,psy,psz+2)); allocate(dpht_dt(psx,psy,psz+2)); allocate(dpyr_dt(psx,psy,psz+2)); allocate(denv_dt(psx,psy,psz+2))
-  allocate(dmu_dt(psx,psy,psz+2))
+  allocate(dmet_dt(psx,psy,psz+(2*ghost_width))); allocate(dmkw_dt(psx,psy,psz+(2*ghost_width))); allocate(dpht_dt(psx,psy,psz+(2*ghost_width))); allocate(dpyr_dt(psx,psy,psz+(2*ghost_width))); allocate(denv_dt(psx,psy,psz+(2*ghost_width)))
+  allocate(dmu_dt(psx,psy,psz+(2*ghost_width)))
   
   dpht_dt = 0.0d0 ; denv_dt = 0.0d0 ; dmet_dt = 0.0d0 ; dmkw_dt = 0.0d0 ; dpyr_dt = 0.0d0 ; dmu_dt = 0.0d0
 
 
 !! Allocate local matrices for updated phase-fields
-  allocate(newmet(psx,psy,psz+2)); allocate(newmkw(psx,psy,psz+2)); allocate(newpht(psx,psy,psz+2)); allocate(newpyr(psx,psy,psz+2)); allocate(newenv(psx,psy,psz+2))
+  allocate(newmet(psx,psy,psz+(2*ghost_width))); allocate(newmkw(psx,psy,psz+(2*ghost_width))); allocate(newpht(psx,psy,psz+(2*ghost_width))); allocate(newpyr(psx,psy,psz+(2*ghost_width))); allocate(newenv(psx,psy,psz+(2*ghost_width)))
 
 
 
