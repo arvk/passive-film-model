@@ -7,7 +7,7 @@ subroutine voids_create()
 
   integer :: x, y, z   ! Loop variables
 
-    do z = 2,psz+1
+    do z = 2,psz+(2*ghost_width)-1
      do y = 1,psy
         do x = 1,psx
            if ((mkw(x,y,z).lt.0.3).and.(mkw(x,y,z).gt.0.02).and.(met(x,y,z).gt.0.7).and.(met(x,y,z).lt.0.98)) then

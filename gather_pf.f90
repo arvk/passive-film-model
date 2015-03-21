@@ -13,11 +13,11 @@ subroutine gather_pf
      do x = 1,psx
         do y = 1,psy
            do z = 1,psz
-              met_g(x,y,z) = met(x,y,z+1)
-              mkw_g(x,y,z) = mkw(x,y,z+1)
-              pht_g(x,y,z) = pht(x,y,z+1)
-              pyr_g(x,y,z) = pyr(x,y,z+1)
-              env_g(x,y,z) = env(x,y,z+1)
+              met_g(x,y,z) = met(x,y,z+ghost_width)
+              mkw_g(x,y,z) = mkw(x,y,z+ghost_width)
+              pht_g(x,y,z) = pht(x,y,z+ghost_width)
+              pyr_g(x,y,z) = pyr(x,y,z+ghost_width)
+              env_g(x,y,z) = env(x,y,z+ghost_width)
            end do
         end do
      end do
@@ -33,11 +33,11 @@ subroutine gather_pf
 
   else
 
-     call mpi_send(met(1,1,2),psx*psy*psz,MPI_DOUBLE_PRECISION,0,1,MPI_COMM_WORLD,ierr)
-     call mpi_send(pht(1,1,2),psx*psy*psz,MPI_DOUBLE_PRECISION,0,2,MPI_COMM_WORLD,ierr)
-     call mpi_send(pyr(1,1,2),psx*psy*psz,MPI_DOUBLE_PRECISION,0,3,MPI_COMM_WORLD,ierr)
-     call mpi_send(env(1,1,2),psx*psy*psz,MPI_DOUBLE_PRECISION,0,4,MPI_COMM_WORLD,ierr)
-     call mpi_send(mkw(1,1,2),psx*psy*psz,MPI_DOUBLE_PRECISION,0,5,MPI_COMM_WORLD,ierr)
+     call mpi_send(met(1,1,1+ghost_width),psx*psy*psz,MPI_DOUBLE_PRECISION,0,1,MPI_COMM_WORLD,ierr)
+     call mpi_send(pht(1,1,1+ghost_width),psx*psy*psz,MPI_DOUBLE_PRECISION,0,2,MPI_COMM_WORLD,ierr)
+     call mpi_send(pyr(1,1,1+ghost_width),psx*psy*psz,MPI_DOUBLE_PRECISION,0,3,MPI_COMM_WORLD,ierr)
+     call mpi_send(env(1,1,1+ghost_width),psx*psy*psz,MPI_DOUBLE_PRECISION,0,4,MPI_COMM_WORLD,ierr)
+     call mpi_send(mkw(1,1,1+ghost_width),psx*psy*psz,MPI_DOUBLE_PRECISION,0,5,MPI_COMM_WORLD,ierr)
 
   end if
   

@@ -13,7 +13,7 @@ subroutine gather_mu
      do x = 1,psx
         do y = 1,psy
            do z = 1,psz
-              mu_g(x,y,z) = mu(x,y,z+1)
+              mu_g(x,y,z) = mu(x,y,z+ghost_width)
            end do
         end do
      end do
@@ -25,7 +25,7 @@ subroutine gather_mu
 
   else
 
-     call mpi_send(mu(1,1,2),psx*psy*psz,MPI_DOUBLE_PRECISION,0,1,MPI_COMM_WORLD,ierr)
+     call mpi_send(mu(1,1,1+ghost_width),psx*psy*psz,MPI_DOUBLE_PRECISION,0,1,MPI_COMM_WORLD,ierr)
 
   end if
   

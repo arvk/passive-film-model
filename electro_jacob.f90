@@ -24,7 +24,7 @@ subroutine electroJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
   PetscScalar val
 
   ! A/B/JA matrices for implicit solver
-  integer, dimension(psx*psy*psz) :: vector_locator
+  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
   real*8 :: lnr,sqr
 
   integer :: io,jo
@@ -46,14 +46,14 @@ subroutine electroJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
   real*8 :: el_charg = 1.60217657E-19*6.022E23
 
   real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
-  real*8, dimension(psx,psy,psz+2) :: loc_elpot
-  real*8, dimension(psx,psy,psz+2) :: epsilonr
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: loc_elpot
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: epsilonr
   real*8 :: exponent
-  real*8, dimension(psx*psy*psz) :: nonlin
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: nonlin
 
 
   call VecGetArrayF90(elpot_vec,point_elpot_vec,ierr)
-  do z = 1,psz
+  do z = 1,psz+(2*ghost_width)-2
      do y = 1,psy
         do x = 1,psx
 
@@ -69,7 +69,7 @@ subroutine electroJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
 
   do y = 1,psy
      do x = 1,psx
-        loc_elpot(x,y,1) = loc_elpot(x,y,1) ; loc_elpot(x,y,psz+2) = loc_elpot(x,y,psz+1) 
+        loc_elpot(x,y,1) = loc_elpot(x,y,1) ; loc_elpot(x,y,psz+(2*ghost_width)) = loc_elpot(x,y,psz+1) 
      end do
   end do
 
@@ -82,7 +82,7 @@ subroutine electroJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
 
 epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
 
-  do z = 1,psz+2
+  do z = 1,psz+(2*ghost_width)
      do y = 1,psy
         do x = 1,psx
            epsilonr(x,y,z) = epsilon_met*met(x,y,z) + epsilon_mkw*mkw(x,y,z) + epsilon_pht*pht(x,y,z) + epsilon_pyr*pyr(x,y,z) + epsilon_env*env(x,y,z) 
@@ -93,14 +93,14 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
 
 
 
-  allocate(A((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(IA((psx*psy*psz)+1))
+  allocate(A((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(JA((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(IA((psx*psy*(psz+(2*ghost_width)-2))+1))
 
   IA=0 ; JA=0 ; A=0
   contindex = 0; linindex = 0
 
-  do z = 1,psz
+  do z = 1,psz+(2*ghost_width)-2
      do y = 1,psy
         do x = 1,psx
 
@@ -116,7 +116,7 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)-1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x 
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x 
            end if
 
            contindex = contindex + 1
@@ -144,20 +144,20 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
            A(contindex) = (0.5d0*(epsilonr(x,wrap(y+1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x 
 
-           if (z .lt. psz) then
+           if (z .lt. psz+(2*ghost_width)-2) then
               contindex = contindex + 1
               A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x 
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x 
            end if
 
         end do
      end do
   end do
 
-  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+6
+  IA((psx*psy*(psz+(2*ghost_width)-2))+1)= IA(psx*psy*(psz+(2*ghost_width)-2))+6
 
 
-  do linindex = 1,psx*psy*psz
+  do linindex = 1,psx*psy*(psz+(2*ghost_width)-2)
      is_sorted = .FALSE.
 
      do while (is_sorted .eqv. .FALSE.)
@@ -193,7 +193,7 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
   IA = IA - 1
   JA = JA - 1
 
-  do io = 1,psx*psy*psz
+  do io = 1,psx*psy*(psz+(2*ghost_width)-2)
 
      rowval = io-1
 

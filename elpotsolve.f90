@@ -22,16 +22,16 @@ subroutine elpotsolve(iter)
   integer :: status(MPI_STATUS_SIZE)
   integer, intent(in) :: iter
 
-  real*8, dimension(psx,psy,psz+2) :: epsilonr
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: epsilonr
 
-  real*8, dimension(psx,psy,psz+2) :: newelpot
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: newelpot
 
   ! A/B/JA matrices for implicit solver
-  real*8, dimension(psx*psy*psz) :: B
-  real*8, dimension(psx*psy*psz) :: approxsol
-  integer, dimension(psx*psy*psz) :: vector_locator
-  real*8, dimension(psx*psy*psz) :: vecread
-  real*8, dimension(psx*psy*psz) :: scratch1,scratch2,scratch3
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: approxsol
+  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vecread
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: scratch1,scratch2,scratch3
 
   integer :: linindex, contindex
   integer :: iterations, solver_info
@@ -58,7 +58,7 @@ subroutine elpotsolve(iter)
 
   epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
 
-  do z = 1,psz+2
+  do z = 1,psz+(2*ghost_width)
      do y = 1,psy
         do x = 1,psx
 
@@ -76,7 +76,7 @@ subroutine elpotsolve(iter)
 
 
   call VecCreate(PETSC_COMM_SELF,ret_vec,ierr)
-  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(ret_vec,ierr)
   call VecSetUp(ret_vec,ierr)
 
@@ -85,7 +85,7 @@ subroutine elpotsolve(iter)
 
 
 
-  do z = 1,psz
+  do z = 1,psz+(2*ghost_width)-2
      do y = 1,psy
         do x = 1,psx
 
@@ -95,7 +95,7 @@ subroutine elpotsolve(iter)
 
            if (z.eq.1) then
               B(linindex) = B(linindex) - ((0.5d0*(epsilonr(x,y,z+1)+epsilonr(x,y,z+1-1))/(dpf*dpf))*elpot(x,y,z+1-1))
-           elseif (z.eq.psz) then
+           elseif (z.eq.psz+(2*ghost_width)-2) then
               B(linindex) = B(linindex) - ((0.5d0*(epsilonr(x,y,z+1+1)+epsilonr(x,y,z+1))/(dpf*dpf))*elpot(x,y,z+1+1))
            end if
 
@@ -110,25 +110,25 @@ subroutine elpotsolve(iter)
 
 
   call VecCreate(PETSC_COMM_SELF,elpot_vec,ierr)
-  call VecSetSizes(elpot_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetSizes(elpot_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(elpot_vec,ierr)
   call VecSetUp(elpot_vec,ierr)
-  call VecSetValues(elpot_vec,psx*psy*psz,vector_locator,approxsol,INSERT_VALUES,ierr)
+  call VecSetValues(elpot_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,approxsol,INSERT_VALUES,ierr)
 
   call VecAssemblyBegin(elpot_vec,ierr)
   call VecAssemblyEnd(elpot_vec,ierr)
 
   call VecCreate(PETSC_COMM_SELF,rhs_vec,ierr)
-  call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*psz,ierr)
+  call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(rhs_vec,ierr)
   call VecSetUp(rhs_vec,ierr)
-  call VecSetValues(rhs_vec,psx*psy*psz,vector_locator,B,INSERT_VALUES,ierr)
+  call VecSetValues(rhs_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,B,INSERT_VALUES,ierr)
 
   call VecAssemblyBegin(rhs_vec,ierr)
   call VecAssemblyEnd(rhs_vec,ierr)
 
   call MatCreate(PETSC_COMM_SELF,jac,ierr)
-  call MatSetSizes(jac,PETSC_DECIDE,PETSC_DECIDE,psx*psy*psz,psx*psy*psz,ierr)
+  call MatSetSizes(jac,PETSC_DECIDE,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),psx*psy*(psz+(2*ghost_width)-2),ierr)
   call MatSetUp(jac,ierr)
 
   call SNESCreate(PETSC_COMM_SELF,snes_elpot,ierr)
@@ -139,7 +139,7 @@ subroutine elpotsolve(iter)
 
 
   call VecGetArrayF90(elpot_vec,point_elpot_vec,ierr)
-  do z = 1,psz
+  do z = 1,psz+(2*ghost_width)-2
      do y = 1,psy
         do x = 1,psx
 
@@ -157,7 +157,7 @@ subroutine elpotsolve(iter)
   if (rank.eq.0) then
      do x = 1,psx
         do y = 1,psy
-           newelpot(x,y,2) = elpot(x,y,2)
+           newelpot(x,y,1+ghost_width) = elpot(x,y,1+ghost_width)
         end do
      end do
   end if
@@ -166,7 +166,7 @@ subroutine elpotsolve(iter)
   !! Apply boundary conditions to the environment
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+1
+        do z = 1+ghost_width,psz+ghost_width
            if (env(x,y,z).lt.0.15) then
               newelpot(x,y,z) = metal_potential
            end if
@@ -183,7 +183,7 @@ subroutine elpotsolve(iter)
 
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+1
+        do z = 1+ghost_width,psz+ghost_width
            elpot(x,y,z) = newelpot(x,y,z)
         end do
      end do

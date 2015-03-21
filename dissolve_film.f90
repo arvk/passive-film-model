@@ -21,7 +21,7 @@ subroutine dissolve_film()
 
      do x = 1,psx
         do y = 1,psy
-           do z = psz+1,2,-1
+           do z = psz+(2*ghost_width)-1,2,-1
               if ((env(x,y,z) .le. 9.9E-1).and.(env(x,y,z+1) .gt. 9.9E-1)) then
 
                  met(x,y,z) = max(met(x,y,z) - ((diss_rate_met*1E-9*dt)/dpf),0.0d0)
@@ -40,7 +40,7 @@ subroutine dissolve_film()
 !! Void filling
      do x = 1,psx
         do y = 1,psy
-           do z = psz+1,2,-1
+           do z = psz+(2*ghost_width)-1,2,-1
               if ((voids(x,y,z).gt.0.0d0).and.(env(x,y,z+1).eq.1.0d0)) then
                  met(x,y,z) = 0.0d0
                  met(x,y,z) = 0.0d0

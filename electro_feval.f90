@@ -21,8 +21,8 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   PetscScalar, pointer :: point_elpot_vec(:)
 
   ! A/B/JA matrices for implicit solver
-  integer, dimension(psx*psy*psz) :: vector_locator
-  real*8, dimension(psx*psy*psz) :: const,lnr,sqr
+  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: const,lnr,sqr
 
   real*8, dimension(:), allocatable :: A
   integer, dimension(:), allocatable :: JA, IA
@@ -41,15 +41,15 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
 
   real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
 
-  real*8, dimension(psx,psy,psz+2) :: loc_elpot
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: loc_elpot
 
-  real*8, dimension(psx,psy,psz+2) :: epsilonr
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: epsilonr
 
   real*8 :: exponent
-  real*8, dimension(psx*psy*psz) :: nonlin
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: nonlin
 
   call VecGetArrayF90(elpot_vec,point_elpot_vec,ierr)
-  do z = 1,psz
+  do z = 1,psz+(2*ghost_width)-2
      do y = 1,psy
         do x = 1,psx
 
@@ -62,10 +62,11 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   end do
   call VecRestoreArrayF90(elpot_vec,point_elpot_vec,ierr)
 
-
-  do y = 1,psy
-     do x = 1,psx
-        loc_elpot(x,y,1) = loc_elpot(x,y,1) ; loc_elpot(x,y,psz+2) = loc_elpot(x,y,psz+1) 
+  do z = 1,ghost_width
+     do y = 1,psy
+        do x = 1,psx
+           loc_elpot(x,y,z) = loc_elpot(x,y,1+ghost_width) ; loc_elpot(x,y,psz+z+ghost_width) = loc_elpot(x,y,psz+ghost_width) 
+        end do
      end do
   end do
 
@@ -78,7 +79,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
 
   epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
 
-  do z = 1,psz+2
+  do z = 1,psz+(2*ghost_width)
      do y = 1,psy
         do x = 1,psx
            epsilonr(x,y,z) = epsilon_met*met(x,y,z) + epsilon_mkw*mkw(x,y,z) + epsilon_pht*pht(x,y,z) + epsilon_pyr*pyr(x,y,z) + epsilon_env*env(x,y,z) 
@@ -89,14 +90,14 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
 
 
 
-  allocate(A((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(JA((7*psx*psy*psz)-(2*psx*psy)))
-  allocate(IA((psx*psy*psz)+1))
+  allocate(A((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(JA((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
+  allocate(IA((psx*psy*(psz+(2*ghost_width)-2))+1))
 
   IA=0 ; JA=0 ; A=0
   contindex = 0; linindex = 0
 
-  do z = 1,psz
+  do z = 1,psz+(2*ghost_width)-2
      do y = 1,psy
         do x = 1,psx
 
@@ -108,7 +109,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)-1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz)-1)*psx*psy) + ((y-1)*psx) + x 
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x 
            end if
 
            contindex = contindex + 1
@@ -135,20 +136,20 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
            A(contindex) = (0.5d0*(epsilonr(x,wrap(y+1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x 
 
-           if (z .lt. psz) then
+           if (z .lt. psz+(2*ghost_width)-2) then
               contindex = contindex + 1
               A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz)-1)*psx*psy) + ((y-1)*psx) + x 
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x 
            end if
 
         end do
      end do
   end do
 
-  IA((psx*psy*psz)+1)= IA(psx*psy*psz)+6
+  IA((psx*psy*(psz+(2*ghost_width)-2))+1)= IA(psx*psy*(psz+(2*ghost_width)-2))+6
 
 
-  do linindex = 1,psx*psy*psz
+  do linindex = 1,psx*psy*(psz+(2*ghost_width)-2)
      is_sorted = .FALSE.
 
      do while (is_sorted .eqv. .FALSE.)
@@ -184,13 +185,13 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   IA = IA - 1
   JA = JA - 1
 
-  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*psz,psx*psy*psz,IA,JA,A,lhs_mat,ierr)
+  call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*(psz+(2*ghost_width)-2),psx*psy*(psz+(2*ghost_width)-2),IA,JA,A,lhs_mat,ierr)
   call MatMult(lhs_mat,elpot_vec,ret_vec,ierr)
 
   lnr = 0.0d0
   sqr = 0.0d0
 
-  do z = 1,psz
+  do z = 1,psz+(2*ghost_width)-2
      do y = 1,psy
         do x = 1,psx
 
@@ -203,7 +204,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
      end do
   end do
   
-  call VecSetValues(ret_vec,psx*psy*psz,vector_locator,nonlin,ADD_VALUES,ierr)
+  call VecSetValues(ret_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,nonlin,ADD_VALUES,ierr)
 
   call VecAssemblyBegin(ret_vec,ierr)
   call VecAssemblyEnd(ret_vec,ierr)
