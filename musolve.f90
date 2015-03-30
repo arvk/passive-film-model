@@ -59,10 +59,6 @@ subroutine musolve(iter)
 
   newmu = 0.0d0
 
-  if (mod(iter,swap_freq_pf).eq.1) then
-     call swap_mu()
-  end if
-
   open(unit = 55, file = '/dev/null')
 
   D_inter_met = max(D_Fe_met,D_S_met)*1E7
