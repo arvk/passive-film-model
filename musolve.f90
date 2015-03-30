@@ -64,7 +64,7 @@ subroutine musolve(iter)
   D_inter_met = max(D_Fe_met,D_S_met)*1E7
   D_inter_mkw = max(D_Fe_mkw,D_S_mkw)*1E11
   D_inter_pht = max(D_Fe_pht,D_S_pht)*3E11
-  D_inter_pyr = max(D_Fe_pyr,D_S_pyr)*1E16
+  D_inter_pyr = max(D_Fe_pyr,D_S_pyr)*1E14
   D_inter_env = max(D_Fe_env,D_S_env)*1E7
 
   !! Calculate derivative of sulfur concentration with chemical potential
