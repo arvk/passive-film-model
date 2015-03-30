@@ -80,14 +80,25 @@ subroutine musolve(iter)
 
   drho_dmu_pyr = (2*41667.0d0)/(2*250896.0d0)
 
+  D = 0.0d0
+  Chi = 0.0d0
 
   do x = 1,psx
      do y = 1,psy
         do z = 1,psz+(2*ghost_width)
-           !! Calculate chemical 'specific heat'
-           Chi = (met(x,y,z)*drho_dmu_met)+(mkw(x,y,z)*drho_dmu_mkw)+(pht(x,y,z)*drho_dmu_pht)+(pyr(x,y,z)*drho_dmu_pyr)+(env(x,y,z)*drho_dmu_env)
 
-           D(x,y,z) = ((met(x,y,z)*D_inter_met)+(mkw(x,y,z)*D_inter_mkw)+(pht(x,y,z)*D_inter_pht)+(pyr(x,y,z)*D_inter_pyr)+(env(x,y,z)*D_inter_env))
+           !! Calculate chemical 'specific heat'
+           Chi = max(min(met(x,y,z),1.0d0),0.0d0)*drho_dmu_met
+           Chi = Chi + max(min(mkw(x,y,z),1.0d0),0.0d0)*drho_dmu_mkw
+           Chi = Chi + max(min(pht(x,y,z),1.0d0),0.0d0)*drho_dmu_pht
+           Chi = Chi + max(min(pyr(x,y,z),1.0d0),0.0d0)*drho_dmu_pyr
+           Chi = Chi + max(min(env(x,y,z),1.0d0),0.0d0)*drho_dmu_env
+
+           D(x,y,z) = max(min(met(x,y,z),1.0d0),0.0d0)*D_inter_met
+           D(x,y,z) = D(x,y,z) + max(min(mkw(x,y,z),1.0d0),0.0d0)*D_inter_mkw
+           D(x,y,z) = D(x,y,z) + max(min(pht(x,y,z),1.0d0),0.0d0)*D_inter_pht
+           D(x,y,z) = D(x,y,z) + max(min(pyr(x,y,z),1.0d0),0.0d0)*D_inter_pyr
+           D(x,y,z) = D(x,y,z) + max(min(env(x,y,z),1.0d0),0.0d0)*D_inter_env
            D(x,y,z) = D(x,y,z)/Chi
            D(x,y,z) = D(x,y,z)*(1.0d0-voids(x,y,z))
 
@@ -106,7 +117,11 @@ subroutine musolve(iter)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            !! Calculate chemical 'specific heat'
-           Chi = (met(x,y,z+1)*drho_dmu_met)+(mkw(x,y,z+1)*drho_dmu_mkw)+(pht(x,y,z+1)*drho_dmu_pht)+(pyr(x,y,z+1)*drho_dmu_pyr)+(env(x,y,z+1)*drho_dmu_env)
+           Chi = max(min(met(x,y,z+1),1.0d0),0.0d0)*drho_dmu_met
+           Chi = Chi + max(min(mkw(x,y,z+1),1.0d0),0.0d0)*drho_dmu_mkw
+           Chi = Chi + max(min(pht(x,y,z+1),1.0d0),0.0d0)*drho_dmu_pht
+           Chi = Chi + max(min(pyr(x,y,z+1),1.0d0),0.0d0)*drho_dmu_pyr
+           Chi = Chi + max(min(env(x,y,z+1),1.0d0),0.0d0)*drho_dmu_env
 
            B(linindex) =  (mu(x,y,z+1)/dt) - (((dpht_dt(x,y,z+1)*rho_pht) + (dmet_dt(x,y,z+1)*rho_met) + (dmkw_dt(x,y,z+1)*rho_mkw) + (denv_dt(x,y,z+1)*rho_env) + (dpyr_dt(x,y,z+1)*rho_pyr))/Chi)
 
