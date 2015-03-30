@@ -278,11 +278,11 @@ subroutine pfsolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-           newmet(x,y,z+1) = max(min(point_pf_vec(linindex+((imet-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
-           newmkw(x,y,z+1) = max(min(point_pf_vec(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
-           newpht(x,y,z+1) = max(min(point_pf_vec(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
-           newpyr(x,y,z+1) = max(min(point_pf_vec(linindex+((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
-           newenv(x,y,z+1) = env(x,y,z+1) !max(min(point_pf_vec(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
+           newmet(x,y,z+1) = point_pf_vec(linindex+((imet-1)*psx*psy*(psz+(2*ghost_width)-2)))
+           newmkw(x,y,z+1) = point_pf_vec(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2)))
+           newpht(x,y,z+1) = point_pf_vec(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2)))
+           newpyr(x,y,z+1) = point_pf_vec(linindex+((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2)))
+           newenv(x,y,z+1) = env(x,y,z+1) !point_pf_vec(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
 
         end do
      end do
@@ -336,21 +336,6 @@ subroutine pfsolve(iter)
 
 
 !!! Update phase fields
-  do x = 1,psx
-     do y = 1,psy
-        do z = 1+ghost_width,psz+ghost_width
-           sumfields = (newmet(x,y,z)+newmkw(x,y,z)+newpht(x,y,z)+newpyr(x,y,z))+(1E-10)
-           newmet(x,y,z) = (newmet(x,y,z)/sumfields)*(1.0d0-newenv(x,y,z))
-           newmkw(x,y,z) = (newmkw(x,y,z)/sumfields)*(1.0d0-newenv(x,y,z))
-           newpht(x,y,z) = (newpht(x,y,z)/sumfields)*(1.0d0-newenv(x,y,z))
-           newpyr(x,y,z) = (newpyr(x,y,z)/sumfields)*(1.0d0-newenv(x,y,z))
-        end do
-     end do
-  end do
-  
-
-
-
 
 
   do x = 1,psx
