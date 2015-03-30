@@ -188,19 +188,19 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            w_env = 0.0d0
 
 
-           hill_met_mkw = 3.0d0*abs(w_met-w_mkw); hill_mkw_met = 3.0d0*abs(w_mkw-w_met)
-           hill_met_pht = 3.0d0*abs(w_met-w_pht); hill_pht_met = 3.0d0*abs(w_pht-w_met)
-           hill_met_pyr = 3.0d0*abs(w_met-w_pyr); hill_pyr_met = 3.0d0*abs(w_pyr-w_met)
-           hill_met_env = 3.0d0*abs(w_met-w_env); hill_env_met = 3.0d0*abs(w_env-w_met)
+           hill_met_mkw = 5.0d0*abs(w_met-w_mkw); hill_mkw_met = 5.0d0*abs(w_mkw-w_met)
+           hill_met_pht = 5.0d0*abs(w_met-w_pht); hill_pht_met = 5.0d0*abs(w_pht-w_met)
+           hill_met_pyr = 5.0d0*abs(w_met-w_pyr); hill_pyr_met = 5.0d0*abs(w_pyr-w_met)
+           hill_met_env = 5.0d0*abs(w_met-w_env); hill_env_met = 5.0d0*abs(w_env-w_met)
 
-           hill_mkw_pht = 3.0d0*abs(w_mkw-w_pht); hill_pht_mkw = 3.0d0*abs(w_pht-w_mkw)
-           hill_mkw_pyr = 3.0d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 3.0d0*abs(w_pyr-w_mkw)
-           hill_mkw_env = 3.0d0*abs(w_mkw-w_env); hill_env_mkw = 3.0d0*abs(w_env-w_mkw)
+           hill_mkw_pht = 5.0d0*abs(w_mkw-w_pht); hill_pht_mkw = 5.0d0*abs(w_pht-w_mkw)
+           hill_mkw_pyr = 5.0d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 5.0d0*abs(w_pyr-w_mkw)
+           hill_mkw_env = 5.0d0*abs(w_mkw-w_env); hill_env_mkw = 5.0d0*abs(w_env-w_mkw)
 
-           hill_pht_pyr = 3.0d0*abs(w_pht-w_pyr); hill_pyr_pht = 3.0d0*abs(w_pyr-w_pht)
-           hill_pht_env = 3.0d0*abs(w_pht-w_env); hill_env_pht = 3.0d0*abs(w_env-w_pht)
+           hill_pht_pyr = 5.0d0*abs(w_pht-w_pyr); hill_pyr_pht = 5.0d0*abs(w_pyr-w_pht)
+           hill_pht_env = 5.0d0*abs(w_pht-w_env); hill_env_pht = 5.0d0*abs(w_env-w_pht)
 
-           hill_pyr_env = 3.0d0*abs(w_pyr-w_env); hill_env_pyr = 3.0d0*abs(w_env-w_pyr)
+           hill_pyr_env = 5.0d0*abs(w_pyr-w_env); hill_env_pyr = 5.0d0*abs(w_env-w_pyr)
 
 
 
