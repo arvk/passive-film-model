@@ -7,6 +7,8 @@ subroutine dissolve_film()
 
   integer :: x, y, z   ! Loop variables
   real*8 :: diss_rate_met,diss_rate_mkw,diss_rate_pht,diss_rate_pyr,diss_rate_env
+  real*8 :: dissolved_met,dissolved_mkw,dissolved_pht,dissolved_pyr
+  real*8 :: pf_after_dissolve
 
 
 !!!! Define dissolution rates (in nm/s)
@@ -24,11 +26,23 @@ subroutine dissolve_film()
            do z = psz+(2*ghost_width)-1,2,-1
               if ((env(x,y,z) .le. 9.9E-1).and.(env(x,y,z+1) .gt. 9.9E-1)) then
 
-                 met(x,y,z) = max(met(x,y,z) - ((diss_rate_met*1E-9*dt)/dpf),0.0d0)
-                 mkw(x,y,z) = max(mkw(x,y,z) - ((diss_rate_mkw*1E-9*dt)/dpf),0.0d0)
-                 pht(x,y,z) = max(pht(x,y,z) - ((diss_rate_pht*1E-9*dt)/dpf),0.0d0)
-                 pyr(x,y,z) = max(pyr(x,y,z) - ((diss_rate_pyr*1E-9*dt)/dpf),0.0d0)
-                 env(x,y,z) = 1.0d0 - (met(x,y,z) + mkw(x,y,z) + pht(x,y,z) + pyr(x,y,z))
+                 pf_after_dissolve = met(x,y,z) - ((diss_rate_met*1E-9*dt)/dpf)
+                 dissolved_met = met(x,y,z) - pf_after_dissolve
+                 met(x,y,z) = pf_after_dissolve
+
+                 pf_after_dissolve = mkw(x,y,z) - ((diss_rate_mkw*1E-9*dt)/dpf)
+                 dissolved_mkw = mkw(x,y,z) - pf_after_dissolve
+                 mkw(x,y,z) = pf_after_dissolve
+
+                 pf_after_dissolve = pht(x,y,z) - ((diss_rate_pht*1E-9*dt)/dpf)
+                 dissolved_pht = pht(x,y,z) - pf_after_dissolve
+                 pht(x,y,z) = pf_after_dissolve
+
+                 pf_after_dissolve = pyr(x,y,z) - ((diss_rate_pyr*1E-9*dt)/dpf)
+                 dissolved_pyr = pyr(x,y,z) - pf_after_dissolve
+                 pyr(x,y,z) = pf_after_dissolve
+
+                 env(x,y,z) = env(x,y,z) + dissolved_met + dissolved_mkw + dissolved_pht + dissolved_pyr
 
                  exit
               end if
