@@ -63,6 +63,11 @@ program passive_film_model
 
   call distrib_pf()
 
+  call swap_pf()
+  call swap_mu()
+  call swap_or()
+  call swap_electro()
+
   if(isroot) then
      call write_parameters()
   end if
@@ -78,7 +83,9 @@ program passive_film_model
 
      !! Solve PF equations
      call pfsolve(iter)
+     call swap_pf()
      call musolve(iter)
+     call swap_mu()
      call orsolve(iter)
 
      if (include_dissolve) then
