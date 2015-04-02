@@ -7,7 +7,7 @@ FC=mpif90
 CFLAG= -CB -fp-model precise -cpp 
 
 # Define optimization flags
-OFLAG= -O0 -xhost 
+OFLAG= -O2 -xhost 
 
 # Include files
 INC= -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include
