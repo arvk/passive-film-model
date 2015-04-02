@@ -59,8 +59,6 @@ subroutine musolve(iter)
 
   newmu = 0.0d0
 
-  open(unit = 55, file = '/dev/null')
-
   D_inter_met = max(D_Fe_met,D_S_met)*1E7
   D_inter_mkw = max(D_Fe_mkw,D_S_mkw)*1E11
   D_inter_pht = max(D_Fe_pht,D_S_pht)*3E11
@@ -278,9 +276,6 @@ subroutine musolve(iter)
 
 
 
-  write(55,*) "RANK", rank,iterations
-  
-
   call VecGetArrayF90(mus_vec,point_mu_vec,ierr)
 
   do z = 1,(psz+(2*ghost_width)-2)
@@ -368,9 +363,6 @@ subroutine musolve(iter)
      end do
   end do
 
-
-
-close(55)
 
 
 end subroutine musolve
