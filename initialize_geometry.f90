@@ -9,6 +9,7 @@ subroutine initialize_geometry()
   integer :: met_z_end
   integer :: rank_loop
   real*8 :: avg_mu_met
+  real*8, parameter :: epsilon = 0.00001d0 ! A small number
 
   met_z_end = 15*(psz_g/16)
 
@@ -20,11 +21,11 @@ subroutine initialize_geometry()
      do y = 1,psy_g
 
         do z = 1,met_z_end
-           met_g(x,y,z) = 1.0d0; mkw_g(x,y,z) = 0.0d0; pht_g(x,y,z) = 0.0d0; pyr_g(x,y,z) = 0.0d0; env_g(x,y,z) = 0.0d0
+           met_g(x,y,z) = 1.0d0-epsilon; mkw_g(x,y,z) = 0.0d0+epsilon; pht_g(x,y,z) = 0.0d0+epsilon; pyr_g(x,y,z) = 0.0d0+epsilon; env_g(x,y,z) = 0.0d0+epsilon
         end do
 
         do z = met_z_end+1,psz_g
-           met_g(x,y,z) = 0.0d0; mkw_g(x,y,z) = 0.0d0; pht_g(x,y,z) = 0.0d0; pyr_g(x,y,z) = 0.0d0; env_g(x,y,z) = 1.0d0
+           met_g(x,y,z) = 0.0d0+epsilon; mkw_g(x,y,z) = 0.0d0+epsilon; pht_g(x,y,z) = 0.0d0+epsilon; pyr_g(x,y,z) = 0.0d0+epsilon; env_g(x,y,z) = 1.0d0-epsilon
         end do
 
      end do
