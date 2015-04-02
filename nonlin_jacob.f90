@@ -188,19 +188,19 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            w_env = 0.0d0
 
 
-           hill_met_mkw = 5.0d0*abs(w_met-w_mkw); hill_mkw_met = 5.0d0*abs(w_mkw-w_met)
-           hill_met_pht = 5.0d0*abs(w_met-w_pht); hill_pht_met = 5.0d0*abs(w_pht-w_met)
-           hill_met_pyr = 5.0d0*abs(w_met-w_pyr); hill_pyr_met = 5.0d0*abs(w_pyr-w_met)
-           hill_met_env = 5.0d0*abs(w_met-w_env); hill_env_met = 5.0d0*abs(w_env-w_met)
+           hill_met_mkw = 0.25d0*abs(w_met-w_mkw); hill_mkw_met = 0.25d0*abs(w_mkw-w_met)
+           hill_met_pht = 0.25d0*abs(w_met-w_pht); hill_pht_met = 0.25d0*abs(w_pht-w_met)
+           hill_met_pyr = 0.25d0*abs(w_met-w_pyr); hill_pyr_met = 0.25d0*abs(w_pyr-w_met)
+           hill_met_env = 0.25d0*abs(w_met-w_env); hill_env_met = 0.25d0*abs(w_env-w_met)
 
-           hill_mkw_pht = 5.0d0*abs(w_mkw-w_pht); hill_pht_mkw = 5.0d0*abs(w_pht-w_mkw)
-           hill_mkw_pyr = 5.0d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 5.0d0*abs(w_pyr-w_mkw)
-           hill_mkw_env = 5.0d0*abs(w_mkw-w_env); hill_env_mkw = 5.0d0*abs(w_env-w_mkw)
+           hill_mkw_pht = 0.25d0*abs(w_mkw-w_pht); hill_pht_mkw = 0.25d0*abs(w_pht-w_mkw)
+           hill_mkw_pyr = 0.25d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 0.25d0*abs(w_pyr-w_mkw)
+           hill_mkw_env = 0.25d0*abs(w_mkw-w_env); hill_env_mkw = 0.25d0*abs(w_env-w_mkw)
 
-           hill_pht_pyr = 5.0d0*abs(w_pht-w_pyr); hill_pyr_pht = 5.0d0*abs(w_pyr-w_pht)
-           hill_pht_env = 5.0d0*abs(w_pht-w_env); hill_env_pht = 5.0d0*abs(w_env-w_pht)
+           hill_pht_pyr = 0.25d0*abs(w_pht-w_pyr); hill_pyr_pht = 0.25d0*abs(w_pyr-w_pht)
+           hill_pht_env = 0.25d0*abs(w_pht-w_env); hill_env_pht = 0.25d0*abs(w_env-w_pht)
 
-           hill_pyr_env = 5.0d0*abs(w_pyr-w_env); hill_env_pyr = 5.0d0*abs(w_env-w_pyr)
+           hill_pyr_env = 0.25d0*abs(w_pyr-w_env); hill_env_pyr = 0.25d0*abs(w_env-w_pyr)
 
 
 
@@ -210,15 +210,15 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            IA(linindex) = contindex + 1
 
 !!!!! MET-MET
-           lnr = (2*M_met_mkw*hill_met_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_met-w_mkw)*loc_mkw(x,y,z+1)*M_met_mkw) + &
-                & (2*M_met_pht*hill_met_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_met-w_pht)*loc_pht(x,y,z+1)*M_met_pht) + &
-                & (2*M_met_pyr*hill_met_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_met-w_pyr)*loc_pyr(x,y,z+1)*M_met_pyr) + &
-                & (2*M_met_env*hill_met_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (4*(w_met-w_env)*loc_env(x,y,z+1)*M_met_env) 
+           lnr = (2*M_met_mkw*hill_met_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (6*(w_met-w_mkw)*loc_mkw(x,y,z+1)*M_met_mkw) + &
+                & (2*M_met_pht*hill_met_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (6*(w_met-w_pht)*loc_pht(x,y,z+1)*M_met_pht) + &
+                & (2*M_met_pyr*hill_met_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (6*(w_met-w_pyr)*loc_pyr(x,y,z+1)*M_met_pyr) + &
+                & (2*M_met_env*hill_met_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (6*(w_met-w_env)*loc_env(x,y,z+1)*M_met_env) 
 
-           sqr = (2*M_met_mkw*(w_met-w_mkw)) - (M_met_mkw*2*hill_met_mkw*loc_mkw(x,y,z+1)) + &
-                & (2*M_met_pht*(w_met-w_pht)) - (M_met_pht*2*hill_met_pht*loc_pht(x,y,z+1)) + &
-                & (2*M_met_pyr*(w_met-w_pyr)) - (M_met_pyr*2*hill_met_pyr*loc_pyr(x,y,z+1)) + &
-                & (2*M_met_env*(w_met-w_env)) - (M_met_env*2*hill_met_env*loc_env(x,y,z+1)) 
+           sqr = 0.0d0 - (M_met_mkw*2*hill_met_mkw*loc_mkw(x,y,z+1)) &
+                &  - (M_met_pht*2*hill_met_pht*loc_pht(x,y,z+1)) &
+                &  - (M_met_pyr*2*hill_met_pyr*loc_pyr(x,y,z+1)) &
+                &  - (M_met_env*2*hill_met_env*loc_env(x,y,z+1)) 
 
            sqr = sqr*2.0d0*loc_met(x,y,z+1)
 
@@ -263,8 +263,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! MET-MKW
-           lnr = (4*(w_met-w_mkw)*loc_met(x,y,z+1)*M_met_mkw) - (2*M_met_mkw*hill_met_mkw*loc_met(x,y,z+1)*loc_met(x,y,z+1))
-           sqr = (2*M_met_mkw*(w_met-w_mkw)) + (M_met_mkw*2*hill_met_mkw*loc_met(x,y,z+1))
+           lnr = (6*(w_met-w_mkw)*loc_met(x,y,z+1)*M_met_mkw) - (2*M_met_mkw*hill_met_mkw*loc_met(x,y,z+1)*loc_met(x,y,z+1))
+           sqr = (M_met_mkw*2*hill_met_mkw*loc_met(x,y,z+1))
            sqr = sqr*2.0d0*loc_mkw(x,y,z+1)
 
            if (z .gt. 1) then
@@ -307,8 +307,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! MET-PHT
-           lnr = (4*(w_met-w_pht)*loc_met(x,y,z+1)*M_met_pht) - (2*M_met_pht*hill_met_pht*loc_met(x,y,z+1)*loc_met(x,y,z+1))
-           sqr = (2*M_met_pht*(w_met-w_pht)) + (M_met_pht*2*hill_met_pht*loc_met(x,y,z+1))
+           lnr = (6*(w_met-w_pht)*loc_met(x,y,z+1)*M_met_pht) - (2*M_met_pht*hill_met_pht*loc_met(x,y,z+1)*loc_met(x,y,z+1))
+           sqr = (M_met_pht*2*hill_met_pht*loc_met(x,y,z+1))
            sqr = sqr*2.0d0*loc_pht(x,y,z+1)
 
            if (z .gt. 1) then
@@ -354,8 +354,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! MET-PYR
-           lnr = (4*(w_met-w_pyr)*loc_met(x,y,z+1)*M_met_pyr) - (2*M_met_pyr*hill_met_pyr*loc_met(x,y,z+1)*loc_met(x,y,z+1))
-           sqr = (2*M_met_pyr*(w_met-w_pyr)) + (M_met_pyr*2*hill_met_pyr*loc_met(x,y,z+1))
+           lnr = (6*(w_met-w_pyr)*loc_met(x,y,z+1)*M_met_pyr) - (2*M_met_pyr*hill_met_pyr*loc_met(x,y,z+1)*loc_met(x,y,z+1))
+           sqr = (M_met_pyr*2*hill_met_pyr*loc_met(x,y,z+1))
            sqr = sqr*2.0d0*loc_pyr(x,y,z+1)
 
            if (z .gt. 1) then
@@ -401,8 +401,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! MET-ENV
-           lnr = (4*(w_met-w_env)*loc_met(x,y,z+1)*M_met_env) - (2*M_met_env*hill_met_env*loc_met(x,y,z+1)*loc_met(x,y,z+1))
-           sqr = (2*M_met_env*(w_met-w_env)) + (M_met_env*2*hill_met_env*loc_met(x,y,z+1))
+           lnr = (6*(w_met-w_env)*loc_met(x,y,z+1)*M_met_env) - (2*M_met_env*hill_met_env*loc_met(x,y,z+1)*loc_met(x,y,z+1))
+           sqr = (M_met_env*2*hill_met_env*loc_met(x,y,z+1))
            sqr = sqr*2.0d0*loc_env(x,y,z+1)
 
            if (z .gt. 1) then
@@ -494,19 +494,19 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 
-           hill_met_mkw = 3.0d0*abs(w_met-w_mkw); hill_mkw_met = 3.0d0*abs(w_mkw-w_met)
-           hill_met_pht = 3.0d0*abs(w_met-w_pht); hill_pht_met = 3.0d0*abs(w_pht-w_met)
-           hill_met_pyr = 3.0d0*abs(w_met-w_pyr); hill_pyr_met = 3.0d0*abs(w_pyr-w_met)
-           hill_met_env = 3.0d0*abs(w_met-w_env); hill_env_met = 3.0d0*abs(w_env-w_met)
+           hill_met_mkw = 0.25d0*abs(w_met-w_mkw); hill_mkw_met = 0.25d0*abs(w_mkw-w_met)
+           hill_met_pht = 0.25d0*abs(w_met-w_pht); hill_pht_met = 0.25d0*abs(w_pht-w_met)
+           hill_met_pyr = 0.25d0*abs(w_met-w_pyr); hill_pyr_met = 0.25d0*abs(w_pyr-w_met)
+           hill_met_env = 0.25d0*abs(w_met-w_env); hill_env_met = 0.25d0*abs(w_env-w_met)
 
-           hill_mkw_pht = 3.0d0*abs(w_mkw-w_pht); hill_pht_mkw = 3.0d0*abs(w_pht-w_mkw)
-           hill_mkw_pyr = 3.0d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 3.0d0*abs(w_pyr-w_mkw)
-           hill_mkw_env = 3.0d0*abs(w_mkw-w_env); hill_env_mkw = 3.0d0*abs(w_env-w_mkw)
+           hill_mkw_pht = 0.25d0*abs(w_mkw-w_pht); hill_pht_mkw = 0.25d0*abs(w_pht-w_mkw)
+           hill_mkw_pyr = 0.25d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 0.25d0*abs(w_pyr-w_mkw)
+           hill_mkw_env = 0.25d0*abs(w_mkw-w_env); hill_env_mkw = 0.25d0*abs(w_env-w_mkw)
 
-           hill_pht_pyr = 3.0d0*abs(w_pht-w_pyr); hill_pyr_pht = 3.0d0*abs(w_pyr-w_pht)
-           hill_pht_env = 3.0d0*abs(w_pht-w_env); hill_env_pht = 3.0d0*abs(w_env-w_pht)
+           hill_pht_pyr = 0.25d0*abs(w_pht-w_pyr); hill_pyr_pht = 0.25d0*abs(w_pyr-w_pht)
+           hill_pht_env = 0.25d0*abs(w_pht-w_env); hill_env_pht = 0.25d0*abs(w_env-w_pht)
 
-           hill_pyr_env = 3.0d0*abs(w_pyr-w_env); hill_env_pyr = 3.0d0*abs(w_env-w_pyr)
+           hill_pyr_env = 0.25d0*abs(w_pyr-w_env); hill_env_pyr = 0.25d0*abs(w_env-w_pyr)
 
 
 
@@ -517,8 +517,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            IA(linindex) = contindex + 1
 
 !!! MKW-MET
-           lnr = (4*(w_mkw-w_met)*loc_mkw(x,y,z+1)*M_mkw_met) - (2*M_mkw_met*hill_mkw_met*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1))
-           sqr = (2*M_mkw_met*(w_mkw-w_met)) + (M_mkw_met*2*hill_mkw_met*loc_mkw(x,y,z+1))
+           lnr = (6*(w_mkw-w_met)*loc_mkw(x,y,z+1)*M_mkw_met) - (2*M_mkw_met*hill_mkw_met*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1))
+           sqr = (M_mkw_met*2*hill_mkw_met*loc_mkw(x,y,z+1))
            sqr = sqr*2.0d0*loc_met(x,y,z+1)
 
            if (z .gt. 1) then
@@ -563,15 +563,15 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 !!!!! MKW-MKW
 
 
-           lnr = (2*M_mkw_met*hill_mkw_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_mkw-w_met)*loc_met(x,y,z+1)*M_mkw_met) + &
-                & (2*M_mkw_pht*hill_mkw_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_mkw-w_pht)*loc_pht(x,y,z+1)*M_mkw_pht) + &
-                & (2*M_mkw_pyr*hill_mkw_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_mkw-w_pyr)*loc_pyr(x,y,z+1)*M_mkw_pyr) + &
-                & (2*M_mkw_env*hill_mkw_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (4*(w_mkw-w_env)*loc_env(x,y,z+1)*M_mkw_env) 
+           lnr = (2*M_mkw_met*hill_mkw_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (6*(w_mkw-w_met)*loc_met(x,y,z+1)*M_mkw_met) + &
+                & (2*M_mkw_pht*hill_mkw_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (6*(w_mkw-w_pht)*loc_pht(x,y,z+1)*M_mkw_pht) + &
+                & (2*M_mkw_pyr*hill_mkw_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (6*(w_mkw-w_pyr)*loc_pyr(x,y,z+1)*M_mkw_pyr) + &
+                & (2*M_mkw_env*hill_mkw_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (6*(w_mkw-w_env)*loc_env(x,y,z+1)*M_mkw_env) 
 
-           sqr = (2*M_mkw_met*(w_mkw-w_met)) - (M_mkw_met*2*hill_mkw_met*loc_met(x,y,z+1)) + &
-                & (2*M_mkw_pht*(w_mkw-w_pht)) - (M_mkw_pht*2*hill_mkw_pht*loc_pht(x,y,z+1)) + &
-                & (2*M_mkw_pyr*(w_mkw-w_pyr)) - (M_mkw_pyr*2*hill_mkw_pyr*loc_pyr(x,y,z+1)) + &
-                & (2*M_mkw_env*(w_mkw-w_env)) - (M_mkw_env*2*hill_mkw_env*loc_env(x,y,z+1)) 
+           sqr = 0.0d0 - (M_mkw_met*2*hill_mkw_met*loc_met(x,y,z+1)) &
+                &  - (M_mkw_pht*2*hill_mkw_pht*loc_pht(x,y,z+1)) &
+                &  - (M_mkw_pyr*2*hill_mkw_pyr*loc_pyr(x,y,z+1)) &
+                &  - (M_mkw_env*2*hill_mkw_env*loc_env(x,y,z+1)) 
 
            sqr = sqr*2.0d0*loc_mkw(x,y,z+1)
 
@@ -617,8 +617,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! MKW-PHT
-           lnr = (4*(w_mkw-w_pht)*loc_mkw(x,y,z+1)*M_mkw_pht) - (2*M_mkw_pht*hill_mkw_pht*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1))
-           sqr = (2*M_mkw_pht*(w_mkw-w_pht)) + (M_mkw_pht*2*hill_mkw_pht*loc_mkw(x,y,z+1))
+           lnr = (6*(w_mkw-w_pht)*loc_mkw(x,y,z+1)*M_mkw_pht) - (2*M_mkw_pht*hill_mkw_pht*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1))
+           sqr = (M_mkw_pht*2*hill_mkw_pht*loc_mkw(x,y,z+1))
            sqr = sqr*2.0d0*loc_pht(x,y,z+1)
 
            if (z .gt. 1) then
@@ -664,8 +664,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! MKW-PYR
-           lnr = (4*(w_mkw-w_pyr)*loc_mkw(x,y,z+1)*M_mkw_pyr) - (2*M_mkw_pyr*hill_mkw_pyr*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1))
-           sqr = (2*M_mkw_pyr*(w_mkw-w_pyr)) + (M_mkw_pyr*2*hill_mkw_pyr*loc_mkw(x,y,z+1))
+           lnr = (6*(w_mkw-w_pyr)*loc_mkw(x,y,z+1)*M_mkw_pyr) - (2*M_mkw_pyr*hill_mkw_pyr*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1))
+           sqr = (M_mkw_pyr*2*hill_mkw_pyr*loc_mkw(x,y,z+1))
            sqr = sqr*2.0d0*loc_pyr(x,y,z+1)
 
            if (z .gt. 1) then
@@ -711,8 +711,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! MKW-ENV
-           lnr = (4*(w_mkw-w_env)*loc_mkw(x,y,z+1)*M_mkw_env) - (2*M_mkw_env*hill_mkw_env*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1))
-           sqr = (2*M_mkw_env*(w_mkw-w_env)) + (M_mkw_env*2*hill_mkw_env*loc_mkw(x,y,z+1))
+           lnr = (6*(w_mkw-w_env)*loc_mkw(x,y,z+1)*M_mkw_env) - (2*M_mkw_env*hill_mkw_env*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1))
+           sqr = (M_mkw_env*2*hill_mkw_env*loc_mkw(x,y,z+1))
            sqr = sqr*2.0d0*loc_env(x,y,z+1)
 
            if (z .gt. 1) then
@@ -804,19 +804,19 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            w_env = 0.0d0
 
 
-           hill_met_mkw = 3.0d0*abs(w_met-w_mkw); hill_mkw_met = 3.0d0*abs(w_mkw-w_met)
-           hill_met_pht = 3.0d0*abs(w_met-w_pht); hill_pht_met = 3.0d0*abs(w_pht-w_met)
-           hill_met_pyr = 3.0d0*abs(w_met-w_pyr); hill_pyr_met = 3.0d0*abs(w_pyr-w_met)
-           hill_met_env = 3.0d0*abs(w_met-w_env); hill_env_met = 3.0d0*abs(w_env-w_met)
+           hill_met_mkw = 0.25d0*abs(w_met-w_mkw); hill_mkw_met = 0.25d0*abs(w_mkw-w_met)
+           hill_met_pht = 0.25d0*abs(w_met-w_pht); hill_pht_met = 0.25d0*abs(w_pht-w_met)
+           hill_met_pyr = 0.25d0*abs(w_met-w_pyr); hill_pyr_met = 0.25d0*abs(w_pyr-w_met)
+           hill_met_env = 0.25d0*abs(w_met-w_env); hill_env_met = 0.25d0*abs(w_env-w_met)
 
-           hill_mkw_pht = 3.0d0*abs(w_mkw-w_pht); hill_pht_mkw = 3.0d0*abs(w_pht-w_mkw)
-           hill_mkw_pyr = 3.0d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 3.0d0*abs(w_pyr-w_mkw)
-           hill_mkw_env = 3.0d0*abs(w_mkw-w_env); hill_env_mkw = 3.0d0*abs(w_env-w_mkw)
+           hill_mkw_pht = 0.25d0*abs(w_mkw-w_pht); hill_pht_mkw = 0.25d0*abs(w_pht-w_mkw)
+           hill_mkw_pyr = 0.25d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 0.25d0*abs(w_pyr-w_mkw)
+           hill_mkw_env = 0.25d0*abs(w_mkw-w_env); hill_env_mkw = 0.25d0*abs(w_env-w_mkw)
 
-           hill_pht_pyr = 3.0d0*abs(w_pht-w_pyr); hill_pyr_pht = 3.0d0*abs(w_pyr-w_pht)
-           hill_pht_env = 3.0d0*abs(w_pht-w_env); hill_env_pht = 3.0d0*abs(w_env-w_pht)
+           hill_pht_pyr = 0.25d0*abs(w_pht-w_pyr); hill_pyr_pht = 0.25d0*abs(w_pyr-w_pht)
+           hill_pht_env = 0.25d0*abs(w_pht-w_env); hill_env_pht = 0.25d0*abs(w_env-w_pht)
 
-           hill_pyr_env = 3.0d0*abs(w_pyr-w_env); hill_env_pyr = 3.0d0*abs(w_env-w_pyr)
+           hill_pyr_env = 0.25d0*abs(w_pyr-w_env); hill_env_pyr = 0.25d0*abs(w_env-w_pyr)
 
 
 
@@ -826,8 +826,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            IA(linindex) = contindex + 1
 
 !!! PHT-MET
-           lnr = (4*(w_pht-w_met)*loc_pht(x,y,z+1)*M_pht_met) - (2*M_pht_met*hill_pht_met*loc_pht(x,y,z+1)*loc_pht(x,y,z+1))
-           sqr = (2*M_pht_met*(w_pht-w_met)) + (M_pht_met*2*hill_pht_met*loc_pht(x,y,z+1))
+           lnr = (6*(w_pht-w_met)*loc_pht(x,y,z+1)*M_pht_met) - (2*M_pht_met*hill_pht_met*loc_pht(x,y,z+1)*loc_pht(x,y,z+1))
+           sqr = (M_pht_met*2*hill_pht_met*loc_pht(x,y,z+1))
            sqr = sqr*2.0d0*loc_met(x,y,z+1)
 
            if (z .gt. 1) then
@@ -869,8 +869,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! PHT-MKW
-           lnr = (4*(w_pht-w_mkw)*loc_pht(x,y,z+1)*M_pht_mkw) - (2*M_pht_mkw*hill_pht_mkw*loc_pht(x,y,z+1)*loc_pht(x,y,z+1))
-           sqr = (2*M_pht_mkw*(w_pht-w_mkw)) + (M_pht_mkw*2*hill_pht_mkw*loc_pht(x,y,z+1))
+           lnr = (6*(w_pht-w_mkw)*loc_pht(x,y,z+1)*M_pht_mkw) - (2*M_pht_mkw*hill_pht_mkw*loc_pht(x,y,z+1)*loc_pht(x,y,z+1))
+           sqr = (M_pht_mkw*2*hill_pht_mkw*loc_pht(x,y,z+1))
            sqr = sqr*2.0d0*loc_mkw(x,y,z+1)
 
            if (z .gt. 1) then
@@ -913,15 +913,15 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 !!!!! PHT-PHT
 
-           lnr = (2*M_pht_met*hill_pht_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_pht-w_met)*loc_met(x,y,z+1)*M_pht_met) + &
-                & (2*M_pht_mkw*hill_pht_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_pht-w_mkw)*loc_mkw(x,y,z+1)*M_pht_mkw) + &
-                & (2*M_pht_pyr*hill_pht_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_pht-w_pyr)*loc_pyr(x,y,z+1)*M_pht_pyr) + &
-                & (2*M_pht_env*hill_pht_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (4*(w_pht-w_env)*loc_env(x,y,z+1)*M_pht_env) 
+           lnr = (2*M_pht_met*hill_pht_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (6*(w_pht-w_met)*loc_met(x,y,z+1)*M_pht_met) + &
+                & (2*M_pht_mkw*hill_pht_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (6*(w_pht-w_mkw)*loc_mkw(x,y,z+1)*M_pht_mkw) + &
+                & (2*M_pht_pyr*hill_pht_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (6*(w_pht-w_pyr)*loc_pyr(x,y,z+1)*M_pht_pyr) + &
+                & (2*M_pht_env*hill_pht_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (6*(w_pht-w_env)*loc_env(x,y,z+1)*M_pht_env) 
 
-           sqr = (2*M_pht_met*(w_pht-w_met)) - (M_pht_met*2*hill_pht_met*loc_met(x,y,z+1)) + &
-                & (2*M_pht_mkw*(w_pht-w_mkw)) - (M_pht_mkw*2*hill_pht_mkw*loc_mkw(x,y,z+1)) + &
-                & (2*M_pht_pyr*(w_pht-w_pyr)) - (M_pht_pyr*2*hill_pht_pyr*loc_pyr(x,y,z+1)) + &
-                & (2*M_pht_env*(w_pht-w_env)) - (M_pht_env*2*hill_pht_env*loc_env(x,y,z+1)) 
+           sqr = 0.0d0 - (M_pht_met*2*hill_pht_met*loc_met(x,y,z+1)) &
+                &  - (M_pht_mkw*2*hill_pht_mkw*loc_mkw(x,y,z+1)) &
+                &  - (M_pht_pyr*2*hill_pht_pyr*loc_pyr(x,y,z+1)) &
+                &  - (M_pht_env*2*hill_pht_env*loc_env(x,y,z+1)) 
 
            sqr = sqr*2.0d0*loc_pht(x,y,z+1)
 
@@ -969,8 +969,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! PHT-PYR
-           lnr = (4*(w_pht-w_pyr)*loc_pht(x,y,z+1)*M_pht_pyr) - (2*M_pht_pyr*hill_pht_pyr*loc_pht(x,y,z+1)*loc_pht(x,y,z+1))
-           sqr = (2*M_pht_pyr*(w_pht-w_pyr)) + (M_pht_pyr*2*hill_pht_pyr*loc_pht(x,y,z+1))
+           lnr = (6*(w_pht-w_pyr)*loc_pht(x,y,z+1)*M_pht_pyr) - (2*M_pht_pyr*hill_pht_pyr*loc_pht(x,y,z+1)*loc_pht(x,y,z+1))
+           sqr = (M_pht_pyr*2*hill_pht_pyr*loc_pht(x,y,z+1))
            sqr = sqr*2.0d0*loc_pyr(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1016,8 +1016,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! PHT-ENV
-           lnr = (4*(w_pht-w_env)*loc_pht(x,y,z+1)*M_pht_env) - (2*M_pht_env*hill_pht_env*loc_pht(x,y,z+1)*loc_pht(x,y,z+1))
-           sqr = (2*M_pht_env*(w_pht-w_env)) + (M_pht_env*2*hill_pht_env*loc_pht(x,y,z+1))
+           lnr = (6*(w_pht-w_env)*loc_pht(x,y,z+1)*M_pht_env) - (2*M_pht_env*hill_pht_env*loc_pht(x,y,z+1)*loc_pht(x,y,z+1))
+           sqr = (M_pht_env*2*hill_pht_env*loc_pht(x,y,z+1))
            sqr = sqr*2.0d0*loc_env(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1121,19 +1121,19 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            w_env = 0.0d0
 
 
-           hill_met_mkw = 3.0d0*abs(w_met-w_mkw); hill_mkw_met = 3.0d0*abs(w_mkw-w_met)
-           hill_met_pht = 3.0d0*abs(w_met-w_pht); hill_pht_met = 3.0d0*abs(w_pht-w_met)
-           hill_met_pyr = 3.0d0*abs(w_met-w_pyr); hill_pyr_met = 3.0d0*abs(w_pyr-w_met)
-           hill_met_env = 3.0d0*abs(w_met-w_env); hill_env_met = 3.0d0*abs(w_env-w_met)
+           hill_met_mkw = 0.25d0*abs(w_met-w_mkw); hill_mkw_met = 0.25d0*abs(w_mkw-w_met)
+           hill_met_pht = 0.25d0*abs(w_met-w_pht); hill_pht_met = 0.25d0*abs(w_pht-w_met)
+           hill_met_pyr = 0.25d0*abs(w_met-w_pyr); hill_pyr_met = 0.25d0*abs(w_pyr-w_met)
+           hill_met_env = 0.25d0*abs(w_met-w_env); hill_env_met = 0.25d0*abs(w_env-w_met)
 
-           hill_mkw_pht = 3.0d0*abs(w_mkw-w_pht); hill_pht_mkw = 3.0d0*abs(w_pht-w_mkw)
-           hill_mkw_pyr = 3.0d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 3.0d0*abs(w_pyr-w_mkw)
-           hill_mkw_env = 3.0d0*abs(w_mkw-w_env); hill_env_mkw = 3.0d0*abs(w_env-w_mkw)
+           hill_mkw_pht = 0.25d0*abs(w_mkw-w_pht); hill_pht_mkw = 0.25d0*abs(w_pht-w_mkw)
+           hill_mkw_pyr = 0.25d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 0.25d0*abs(w_pyr-w_mkw)
+           hill_mkw_env = 0.25d0*abs(w_mkw-w_env); hill_env_mkw = 0.25d0*abs(w_env-w_mkw)
 
-           hill_pht_pyr = 3.0d0*abs(w_pht-w_pyr); hill_pyr_pht = 3.0d0*abs(w_pyr-w_pht)
-           hill_pht_env = 3.0d0*abs(w_pht-w_env); hill_env_pht = 3.0d0*abs(w_env-w_pht)
+           hill_pht_pyr = 0.25d0*abs(w_pht-w_pyr); hill_pyr_pht = 0.25d0*abs(w_pyr-w_pht)
+           hill_pht_env = 0.25d0*abs(w_pht-w_env); hill_env_pht = 0.25d0*abs(w_env-w_pht)
 
-           hill_pyr_env = 3.0d0*abs(w_pyr-w_env); hill_env_pyr = 3.0d0*abs(w_env-w_pyr)
+           hill_pyr_env = 0.25d0*abs(w_pyr-w_env); hill_env_pyr = 0.25d0*abs(w_env-w_pyr)
 
 
 
@@ -1143,8 +1143,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            IA(linindex) = contindex + 1
 
 !!! PYR-MET
-           lnr = (4*(w_pyr-w_met)*loc_pyr(x,y,z+1)*M_pyr_met) - (2*M_pyr_met*hill_pyr_met*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
-           sqr = (2*M_pyr_met*(w_pyr-w_met)) + (M_pyr_met*2*hill_pyr_met*loc_pyr(x,y,z+1))
+           lnr = (6*(w_pyr-w_met)*loc_pyr(x,y,z+1)*M_pyr_met) - (2*M_pyr_met*hill_pyr_met*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
+           sqr = (M_pyr_met*2*hill_pyr_met*loc_pyr(x,y,z+1))
            sqr = sqr*2.0d0*loc_met(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1186,8 +1186,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! PYR-MKW
-           lnr = (4*(w_pyr-w_mkw)*loc_pyr(x,y,z+1)*M_pyr_mkw) - (2*M_pyr_mkw*hill_pyr_mkw*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
-           sqr = (2*M_pyr_mkw*(w_pyr-w_mkw)) + (M_pyr_mkw*2*hill_pyr_mkw*loc_pyr(x,y,z+1))
+           lnr = (6*(w_pyr-w_mkw)*loc_pyr(x,y,z+1)*M_pyr_mkw) - (2*M_pyr_mkw*hill_pyr_mkw*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
+           sqr = (M_pyr_mkw*2*hill_pyr_mkw*loc_pyr(x,y,z+1))
            sqr = sqr*2.0d0*loc_mkw(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1230,8 +1230,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! PYR-PHT
-           lnr = (4*(w_pyr-w_pht)*loc_pyr(x,y,z+1)*M_pyr_pht) - (2*M_pyr_pht*hill_pyr_pht*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
-           sqr = (2*M_pyr_pht*(w_pyr-w_pht)) + (M_pyr_pht*2*hill_pyr_pht*loc_pyr(x,y,z+1))
+           lnr = (6*(w_pyr-w_pht)*loc_pyr(x,y,z+1)*M_pyr_pht) - (2*M_pyr_pht*hill_pyr_pht*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
+           sqr = (M_pyr_pht*2*hill_pyr_pht*loc_pyr(x,y,z+1))
            sqr = sqr*2.0d0*loc_pht(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1275,15 +1275,15 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 !!!!! PYR-PYR
 
-           lnr = (2*M_pyr_met*hill_pyr_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_pyr-w_met)*loc_met(x,y,z+1)*M_pyr_met) + &
-                         & (2*M_pyr_mkw*hill_pyr_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_pyr-w_mkw)*loc_mkw(x,y,z+1)*M_pyr_mkw) + &
-                         & (2*M_pyr_pht*hill_pyr_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_pyr-w_pht)*loc_pht(x,y,z+1)*M_pyr_pht) + &
-                         & (2*M_pyr_env*hill_pyr_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (4*(w_pyr-w_env)*loc_env(x,y,z+1)*M_pyr_env) 
+           lnr = (2*M_pyr_met*hill_pyr_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (6*(w_pyr-w_met)*loc_met(x,y,z+1)*M_pyr_met) + &
+                         & (2*M_pyr_mkw*hill_pyr_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (6*(w_pyr-w_mkw)*loc_mkw(x,y,z+1)*M_pyr_mkw) + &
+                         & (2*M_pyr_pht*hill_pyr_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (6*(w_pyr-w_pht)*loc_pht(x,y,z+1)*M_pyr_pht) + &
+                         & (2*M_pyr_env*hill_pyr_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (6*(w_pyr-w_env)*loc_env(x,y,z+1)*M_pyr_env) 
 
-           sqr = (2*M_pyr_met*(w_pyr-w_met)) - (M_pyr_met*2*hill_pyr_met*loc_met(x,y,z+1)) + &
-                         & (2*M_pyr_mkw*(w_pyr-w_mkw)) - (M_pyr_mkw*2*hill_pyr_mkw*loc_mkw(x,y,z+1)) + &
-                         & (2*M_pyr_pht*(w_pyr-w_pht)) - (M_pyr_pht*2*hill_pyr_pht*loc_pht(x,y,z+1)) + &
-                         & (2*M_pyr_env*(w_pyr-w_env)) - (M_pyr_env*2*hill_pyr_env*loc_env(x,y,z+1)) 
+           sqr = 0.0d0  - (M_pyr_met*2*hill_pyr_met*loc_met(x,y,z+1)) &
+                         &  - (M_pyr_mkw*2*hill_pyr_mkw*loc_mkw(x,y,z+1)) &
+                         &  - (M_pyr_pht*2*hill_pyr_pht*loc_pht(x,y,z+1)) &
+                         &  - (M_pyr_env*2*hill_pyr_env*loc_env(x,y,z+1)) 
 
            sqr = sqr*2.0d0*loc_pyr(x,y,z+1)
 
@@ -1328,8 +1328,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! PYR-ENV
-           lnr = (4*(w_pyr-w_env)*loc_pyr(x,y,z+1)*M_pyr_env) - (2*M_pyr_env*hill_pyr_env*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
-           sqr = (2*M_pyr_env*(w_pyr-w_env)) + (M_pyr_env*2*hill_pyr_env*loc_pyr(x,y,z+1))
+           lnr = (6*(w_pyr-w_env)*loc_pyr(x,y,z+1)*M_pyr_env) - (2*M_pyr_env*hill_pyr_env*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1))
+           sqr = (M_pyr_env*2*hill_pyr_env*loc_pyr(x,y,z+1))
            sqr = sqr*2.0d0*loc_env(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1435,19 +1435,19 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 
-           hill_met_mkw = 3.0d0*abs(w_met-w_mkw); hill_mkw_met = 3.0d0*abs(w_mkw-w_met)
-           hill_met_pht = 3.0d0*abs(w_met-w_pht); hill_pht_met = 3.0d0*abs(w_pht-w_met)
-           hill_met_pyr = 3.0d0*abs(w_met-w_pyr); hill_pyr_met = 3.0d0*abs(w_pyr-w_met)
-           hill_met_env = 3.0d0*abs(w_met-w_env); hill_env_met = 3.0d0*abs(w_env-w_met)
+           hill_met_mkw = 0.25d0*abs(w_met-w_mkw); hill_mkw_met = 0.25d0*abs(w_mkw-w_met)
+           hill_met_pht = 0.25d0*abs(w_met-w_pht); hill_pht_met = 0.25d0*abs(w_pht-w_met)
+           hill_met_pyr = 0.25d0*abs(w_met-w_pyr); hill_pyr_met = 0.25d0*abs(w_pyr-w_met)
+           hill_met_env = 0.25d0*abs(w_met-w_env); hill_env_met = 0.25d0*abs(w_env-w_met)
 
-           hill_mkw_pht = 3.0d0*abs(w_mkw-w_pht); hill_pht_mkw = 3.0d0*abs(w_pht-w_mkw)
-           hill_mkw_pyr = 3.0d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 3.0d0*abs(w_pyr-w_mkw)
-           hill_mkw_env = 3.0d0*abs(w_mkw-w_env); hill_env_mkw = 3.0d0*abs(w_env-w_mkw)
+           hill_mkw_pht = 0.25d0*abs(w_mkw-w_pht); hill_pht_mkw = 0.25d0*abs(w_pht-w_mkw)
+           hill_mkw_pyr = 0.25d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 0.25d0*abs(w_pyr-w_mkw)
+           hill_mkw_env = 0.25d0*abs(w_mkw-w_env); hill_env_mkw = 0.25d0*abs(w_env-w_mkw)
 
-           hill_pht_pyr = 3.0d0*abs(w_pht-w_pyr); hill_pyr_pht = 3.0d0*abs(w_pyr-w_pht)
-           hill_pht_env = 3.0d0*abs(w_pht-w_env); hill_env_pht = 3.0d0*abs(w_env-w_pht)
+           hill_pht_pyr = 0.25d0*abs(w_pht-w_pyr); hill_pyr_pht = 0.25d0*abs(w_pyr-w_pht)
+           hill_pht_env = 0.25d0*abs(w_pht-w_env); hill_env_pht = 0.25d0*abs(w_env-w_pht)
 
-           hill_pyr_env = 3.0d0*abs(w_pyr-w_env); hill_env_pyr = 3.0d0*abs(w_env-w_pyr)
+           hill_pyr_env = 0.25d0*abs(w_pyr-w_env); hill_env_pyr = 0.25d0*abs(w_env-w_pyr)
 
 
 
@@ -1459,8 +1459,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
            IA(linindex) = contindex + 1
 
 !!! ENV-MET
-           lnr = (4*(w_env-w_met)*loc_env(x,y,z+1)*M_env_met) - (2*M_env_met*hill_env_met*loc_env(x,y,z+1)*loc_env(x,y,z+1))
-           sqr = (2*M_env_met*(w_env-w_met)) + (M_env_met*2*hill_env_met*loc_env(x,y,z+1))
+           lnr = (6*(w_env-w_met)*loc_env(x,y,z+1)*M_env_met) - (2*M_env_met*hill_env_met*loc_env(x,y,z+1)*loc_env(x,y,z+1))
+           sqr = (M_env_met*2*hill_env_met*loc_env(x,y,z+1))
            sqr = sqr*2.0d0*loc_met(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1502,8 +1502,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! ENV-MKW
-           lnr = (4*(w_env-w_mkw)*loc_env(x,y,z+1)*M_env_mkw) - (2*M_env_mkw*hill_env_mkw*loc_env(x,y,z+1)*loc_env(x,y,z+1))
-           sqr = (2*M_env_mkw*(w_env-w_mkw)) + (M_env_mkw*2*hill_env_mkw*loc_env(x,y,z+1))
+           lnr = (6*(w_env-w_mkw)*loc_env(x,y,z+1)*M_env_mkw) - (2*M_env_mkw*hill_env_mkw*loc_env(x,y,z+1)*loc_env(x,y,z+1))
+           sqr = (M_env_mkw*2*hill_env_mkw*loc_env(x,y,z+1))
            sqr = sqr*2.0d0*loc_mkw(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1546,8 +1546,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! ENV-PHT
-           lnr = (4*(w_env-w_pht)*loc_env(x,y,z+1)*M_env_pht) - (2*M_env_pht*hill_env_pht*loc_env(x,y,z+1)*loc_env(x,y,z+1))
-           sqr = (2*M_env_pht*(w_env-w_pht)) + (M_env_pht*2*hill_env_pht*loc_env(x,y,z+1))
+           lnr = (6*(w_env-w_pht)*loc_env(x,y,z+1)*M_env_pht) - (2*M_env_pht*hill_env_pht*loc_env(x,y,z+1)*loc_env(x,y,z+1))
+           sqr = (M_env_pht*2*hill_env_pht*loc_env(x,y,z+1))
            sqr = sqr*2.0d0*loc_pht(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1592,8 +1592,8 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 
 !!! ENV-PYR
-           lnr = (4*(w_env-w_pyr)*loc_env(x,y,z+1)*M_env_pyr) - (2*M_env_pyr*hill_env_pyr*loc_env(x,y,z+1)*loc_env(x,y,z+1))
-           sqr = (2*M_env_pyr*(w_env-w_pyr)) + (M_env_pyr*2*hill_env_pyr*loc_env(x,y,z+1))
+           lnr = (6*(w_env-w_pyr)*loc_env(x,y,z+1)*M_env_pyr) - (2*M_env_pyr*hill_env_pyr*loc_env(x,y,z+1)*loc_env(x,y,z+1))
+           sqr = (M_env_pyr*2*hill_env_pyr*loc_env(x,y,z+1))
            sqr = sqr*2.0d0*loc_pyr(x,y,z+1)
 
            if (z .gt. 1) then
@@ -1638,15 +1638,15 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
 !!!!! ENV-ENV
            
-           lnr = (2*M_env_met*hill_env_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (4*(w_env-w_met)*loc_met(x,y,z+1)*M_env_met) + &
-                & (2*M_env_mkw*hill_env_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (4*(w_env-w_mkw)*loc_mkw(x,y,z+1)*M_env_mkw) + &
-                & (2*M_env_pht*hill_env_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (4*(w_env-w_pht)*loc_pht(x,y,z+1)*M_env_pht) + &
-                & (2*M_env_pyr*hill_env_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (4*(w_env-w_pyr)*loc_pyr(x,y,z+1)*M_env_pyr)
+           lnr = (2*M_env_met*hill_env_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (6*(w_env-w_met)*loc_met(x,y,z+1)*M_env_met) + &
+                & (2*M_env_mkw*hill_env_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (6*(w_env-w_mkw)*loc_mkw(x,y,z+1)*M_env_mkw) + &
+                & (2*M_env_pht*hill_env_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (6*(w_env-w_pht)*loc_pht(x,y,z+1)*M_env_pht) + &
+                & (2*M_env_pyr*hill_env_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (6*(w_env-w_pyr)*loc_pyr(x,y,z+1)*M_env_pyr)
 
-           sqr = (2*M_env_met*(w_env-w_met)) - (M_env_met*2*hill_env_met*loc_met(x,y,z+1)) + &
-                & (2*M_env_mkw*(w_env-w_mkw)) - (M_env_mkw*2*hill_env_mkw*loc_mkw(x,y,z+1)) + &
-                & (2*M_env_pht*(w_env-w_pht)) - (M_env_pht*2*hill_env_pht*loc_pht(x,y,z+1)) + &
-                & (2*M_env_pyr*(w_env-w_pyr)) - (M_env_pyr*2*hill_env_pyr*loc_pyr(x,y,z+1))
+           sqr = 0.0d0 - (M_env_met*2*hill_env_met*loc_met(x,y,z+1)) &
+                & - (M_env_mkw*2*hill_env_mkw*loc_mkw(x,y,z+1)) &
+                & - (M_env_pht*2*hill_env_pht*loc_pht(x,y,z+1)) &
+                & - (M_env_pyr*2*hill_env_pyr*loc_pyr(x,y,z+1))
 
            sqr = sqr*2.0d0*loc_env(x,y,z+1)
 
