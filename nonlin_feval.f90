@@ -59,6 +59,12 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: loc_met, loc_mkw, loc_pht, loc_pyr, loc_env
 
+  real*8 :: S = 1E-3
+
+  real*8 :: odiff
+  real*8 :: delx,dely,delz
+  real*8 :: del_omet,del_omkw,del_opht,del_opyr,del_oenv
+
   call calc_grad_pf()
 
   call VecGetArrayF90(pf_vec,point_pf_vec,ierr)
@@ -1495,7 +1501,6 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
      do y = 1,psy
         do x = 1,psx
 
-
            !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
            !! Number of moles per m^3 = 140401
            f_met = 0.0d0*140401
@@ -1522,6 +1527,19 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            w_env = 0.0d0
 
 
+           del_omet = 0.0d0
+           del_omkw = 0.0d0
+           del_opht = 0.0d0
+           del_oenv = 0.0d0
+
+           delx = odiff(opyr(wrap(x+1,psx),y,z+1),opyr(wrap(x-1,psx),y,z+1))
+           dely = odiff(opyr(x,wrap(y+1,psy),z+1),opyr(x,wrap(y-1,psy),z+1))
+           delz = odiff(opyr(x,y,z+1+1),opyr(x,y,z+1-1))
+           del_opyr = (sqrt((delx*delx)+(dely*dely)+(delz*delz))/dpf)
+
+
+
+
            hill_met_mkw = 0.25d0*abs(w_met-w_mkw); hill_mkw_met = 0.25d0*abs(w_mkw-w_met)
            hill_met_pht = 0.25d0*abs(w_met-w_pht); hill_pht_met = 0.25d0*abs(w_pht-w_met)
            hill_met_pyr = 0.25d0*abs(w_met-w_pyr); hill_pyr_met = 0.25d0*abs(w_pyr-w_met)
@@ -1542,10 +1560,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            const(linindex) = 0.0d0
 
-           lnr(linindex) = (2*M_met_mkw*hill_met_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (6*(w_met-w_mkw)*loc_mkw(x,y,z+1)*M_met_mkw) + &
-                         & (2*M_met_pht*hill_met_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (6*(w_met-w_pht)*loc_pht(x,y,z+1)*M_met_pht) + &
-                         & (2*M_met_pyr*hill_met_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (6*(w_met-w_pyr)*loc_pyr(x,y,z+1)*M_met_pyr) + &
-                         & (2*M_met_env*hill_met_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (6*(w_met-w_env)*loc_env(x,y,z+1)*M_met_env) 
+           lnr(linindex) = (2*M_met_mkw*hill_met_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (S*(del_omet-del_omkw)*loc_mkw(x,y,z+1)*M_met_mkw) + (6*(w_met-w_mkw)*loc_mkw(x,y,z+1)*M_met_mkw) + &
+                         & (2*M_met_pht*hill_met_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (S*(del_omet-del_opht)*loc_pht(x,y,z+1)*M_met_pht) + (6*(w_met-w_pht)*loc_pht(x,y,z+1)*M_met_pht) + &
+                         & (2*M_met_pyr*hill_met_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (S*(del_omet-del_opyr)*loc_pyr(x,y,z+1)*M_met_pyr) + (6*(w_met-w_pyr)*loc_pyr(x,y,z+1)*M_met_pyr) + &
+                         & (2*M_met_env*hill_met_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (S*(del_omet-del_oenv)*loc_env(x,y,z+1)*M_met_env) + (6*(w_met-w_env)*loc_env(x,y,z+1)*M_met_env) 
 
            lnr(linindex) = lnr(linindex)*loc_met(x,y,z+1)
 
@@ -1562,10 +1580,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            const(linindex) = 0.0d0
 
-           lnr(linindex) = (2*M_mkw_met*hill_mkw_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (6*(w_mkw-w_met)*loc_met(x,y,z+1)*M_mkw_met) + &
-                         & (2*M_mkw_pht*hill_mkw_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (6*(w_mkw-w_pht)*loc_pht(x,y,z+1)*M_mkw_pht) + &
-                         & (2*M_mkw_pyr*hill_mkw_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (6*(w_mkw-w_pyr)*loc_pyr(x,y,z+1)*M_mkw_pyr) + &
-                         & (2*M_mkw_env*hill_mkw_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (6*(w_mkw-w_env)*loc_env(x,y,z+1)*M_mkw_env) 
+           lnr(linindex) = (2*M_mkw_met*hill_mkw_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (S*(del_omkw-del_omet)*loc_met(x,y,z+1)*M_mkw_met) + (6*(w_mkw-w_met)*loc_met(x,y,z+1)*M_mkw_met) + &
+                         & (2*M_mkw_pht*hill_mkw_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (S*(del_omkw-del_opht)*loc_pht(x,y,z+1)*M_mkw_pht) + (6*(w_mkw-w_pht)*loc_pht(x,y,z+1)*M_mkw_pht) + &
+                         & (2*M_mkw_pyr*hill_mkw_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (S*(del_omkw-del_opyr)*loc_pyr(x,y,z+1)*M_mkw_pyr) + (6*(w_mkw-w_pyr)*loc_pyr(x,y,z+1)*M_mkw_pyr) + &
+                         & (2*M_mkw_env*hill_mkw_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (S*(del_omkw-del_oenv)*loc_env(x,y,z+1)*M_mkw_env) + (6*(w_mkw-w_env)*loc_env(x,y,z+1)*M_mkw_env) 
 
            lnr(linindex) = lnr(linindex)*loc_mkw(x,y,z+1)
 
@@ -1582,10 +1600,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            const(linindex) = 0.0d0
 
-           lnr(linindex) = (2*M_pht_met*hill_pht_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (6*(w_pht-w_met)*loc_met(x,y,z+1)*M_pht_met) + &
-                         & (2*M_pht_mkw*hill_pht_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (6*(w_pht-w_mkw)*loc_mkw(x,y,z+1)*M_pht_mkw) + &
-                         & (2*M_pht_pyr*hill_pht_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (6*(w_pht-w_pyr)*loc_pyr(x,y,z+1)*M_pht_pyr) + &
-                         & (2*M_pht_env*hill_pht_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (6*(w_pht-w_env)*loc_env(x,y,z+1)*M_pht_env) 
+           lnr(linindex) = (2*M_pht_met*hill_pht_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (S*(del_opht-del_omet)*loc_met(x,y,z+1)*M_pht_met) + (6*(w_pht-w_met)*loc_met(x,y,z+1)*M_pht_met) + &
+                         & (2*M_pht_mkw*hill_pht_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (S*(del_opht-del_omkw)*loc_mkw(x,y,z+1)*M_pht_mkw) + (6*(w_pht-w_mkw)*loc_mkw(x,y,z+1)*M_pht_mkw) + &
+                         & (2*M_pht_pyr*hill_pht_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (S*(del_opht-del_opyr)*loc_pyr(x,y,z+1)*M_pht_pyr) + (6*(w_pht-w_pyr)*loc_pyr(x,y,z+1)*M_pht_pyr) + &
+                         & (2*M_pht_env*hill_pht_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (S*(del_opht-del_oenv)*loc_env(x,y,z+1)*M_pht_env) + (6*(w_pht-w_env)*loc_env(x,y,z+1)*M_pht_env) 
 
            lnr(linindex) = lnr(linindex)*loc_pht(x,y,z+1)
 
@@ -1604,10 +1622,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            const(linindex) = 0.0d0
 
-           lnr(linindex) = (2*M_pyr_met*hill_pyr_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (6*(w_pyr-w_met)*loc_met(x,y,z+1)*M_pyr_met) + &
-                         & (2*M_pyr_mkw*hill_pyr_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (6*(w_pyr-w_mkw)*loc_mkw(x,y,z+1)*M_pyr_mkw) + &
-                         & (2*M_pyr_pht*hill_pyr_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (6*(w_pyr-w_pht)*loc_pht(x,y,z+1)*M_pyr_pht) + &
-                         & (2*M_pyr_env*hill_pyr_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (6*(w_pyr-w_env)*loc_env(x,y,z+1)*M_pyr_env) 
+           lnr(linindex) = (2*M_pyr_met*hill_pyr_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (S*(del_opyr-del_omet)*loc_met(x,y,z+1)*M_pyr_met) + (6*(w_pyr-w_met)*loc_met(x,y,z+1)*M_pyr_met) + &
+                         & (2*M_pyr_mkw*hill_pyr_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (S*(del_opyr-del_omkw)*loc_mkw(x,y,z+1)*M_pyr_mkw) + (6*(w_pyr-w_mkw)*loc_mkw(x,y,z+1)*M_pyr_mkw) + &
+                         & (2*M_pyr_pht*hill_pyr_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (S*(del_opyr-del_opht)*loc_pht(x,y,z+1)*M_pyr_pht) + (6*(w_pyr-w_pht)*loc_pht(x,y,z+1)*M_pyr_pht) + &
+                         & (2*M_pyr_env*hill_pyr_env*loc_env(x,y,z+1)*loc_env(x,y,z+1)) + (S*(del_opyr-del_oenv)*loc_env(x,y,z+1)*M_pyr_env) + (6*(w_pyr-w_env)*loc_env(x,y,z+1)*M_pyr_env) 
 
            lnr(linindex) = lnr(linindex)*loc_pyr(x,y,z+1)
 
@@ -1625,10 +1643,10 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            const(linindex) = 0.0d0
 
-           lnr(linindex) = (2*M_env_met*hill_env_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (6*(w_env-w_met)*loc_met(x,y,z+1)*M_env_met) + &
-                         & (2*M_env_mkw*hill_env_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (6*(w_env-w_mkw)*loc_mkw(x,y,z+1)*M_env_mkw) + &
-                         & (2*M_env_pht*hill_env_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (6*(w_env-w_pht)*loc_pht(x,y,z+1)*M_env_pht) + &
-                         & (2*M_env_pyr*hill_env_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (6*(w_env-w_pyr)*loc_pyr(x,y,z+1)*M_env_pyr)
+           lnr(linindex) = (2*M_env_met*hill_env_met*loc_met(x,y,z+1)*loc_met(x,y,z+1)) + (S*(del_oenv-del_omet)*loc_met(x,y,z+1)*M_env_met) + (6*(w_env-w_met)*loc_met(x,y,z+1)*M_env_met) + &
+                         & (2*M_env_mkw*hill_env_mkw*loc_mkw(x,y,z+1)*loc_mkw(x,y,z+1)) + (S*(del_oenv-del_omkw)*loc_mkw(x,y,z+1)*M_env_mkw) + (6*(w_env-w_mkw)*loc_mkw(x,y,z+1)*M_env_mkw) + &
+                         & (2*M_env_pht*hill_env_pht*loc_pht(x,y,z+1)*loc_pht(x,y,z+1)) + (S*(del_oenv-del_opht)*loc_pht(x,y,z+1)*M_env_pht) + (6*(w_env-w_pht)*loc_pht(x,y,z+1)*M_env_pht) + &
+                         & (2*M_env_pyr*hill_env_pyr*loc_pyr(x,y,z+1)*loc_pyr(x,y,z+1)) + (S*(del_oenv-del_opyr)*loc_pyr(x,y,z+1)*M_env_pyr) + (6*(w_env-w_pyr)*loc_pyr(x,y,z+1)*M_env_pyr)
 
            lnr(linindex) = lnr(linindex)*loc_env(x,y,z+1)
 
