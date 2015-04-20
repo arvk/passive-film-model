@@ -107,7 +107,6 @@ subroutine musolve(iter)
 
   approxsol = 0.0d0
 
-
   do z = 1,(psz+(2*ghost_width)-2)
      do y = 1,psy
         do x = 1,psx
@@ -136,6 +135,56 @@ subroutine musolve(iter)
         end do
      end do
   end do
+
+
+  !! Impose boundary counditions on the composition field (sulfidation rate)
+
+
+  rho_pht = 52275.0d0
+  rho_met = 0.0015d0*140401
+  interface_loc = 0
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+(2*ghost_width)-1
+           if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
+
+              interface_loc(x,y) = z
+
+              !             D(x,y,z-1) = D(x,y,z)*0.001d0
+              !             D(x,y,z+2) = D(x,y,z+1)*0.001d0
+
+              !             newmu(x,y,z) = mu(x,y,z) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              !             newmu(x,y,z) = min(newmu(x,y,z),avg_mu_env-(R*T*2.0d0))
+
+              !             newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              !             newmu(x,y,z-1) = min(newmu(x,y,z-1),avg_mu_env-(R*T*2.0d0))
+
+              !             newmu(x,y,z-2) = mu(x,y,z-2) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              !             newmu(x,y,z-2) = min(newmu(x,y,z-2),avg_mu_env-(R*T*2.0d0))
+
+              !             newmu(x,y,z-3) = mu(x,y,z-3) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              !             newmu(x,y,z-3) = min(newmu(x,y,z-3),avg_mu_env-(R*T*2.0d0))
+
+              !             newmu(x,y,z-4) = mu(x,y,z-4) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              !             newmu(x,y,z-4) = min(newmu(x,y,z-4),avg_mu_env-(R*T*2.0d0))
+
+              !             newmu(x,y,z-5) = mu(x,y,z-5) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              !             newmu(x,y,z-5) = min(newmu(x,y,z-5),avg_mu_env-(R*T*2.0d0))
+
+              !             newmu(x,y,z-6) = mu(x,y,z-6) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              !             newmu(x,y,z-6) = min(newmu(x,y,z-6),avg_mu_env-(R*T*2.0d0))
+
+              exit
+           end if
+        end do
+     end do
+  end do
+
+
+
+
+
 
 
 
@@ -275,7 +324,6 @@ subroutine musolve(iter)
   call KSPSolve(ksp_mu,rhs_vec,mus_vec,ierr)
 
 
-
   call VecGetArrayF90(mus_vec,point_mu_vec,ierr)
 
   do z = 1,(psz+(2*ghost_width)-2)
@@ -329,32 +377,7 @@ subroutine musolve(iter)
   end do
 
 
-  !! Impose boundary counditions on the composition field (sulfidation rate)
-  
-  if (dt.gt.0) then
-
-     interface_loc = 0
-
-     rho_pht = 52275.0d0
-     rho_met = 0.0015d0*140401       
-
-
-     do x = 1,psx
-        do y = 1,psy
-           do z = psz+ghost_width,1+ghost_width,-1
-              if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
-                 interface_loc(x,y) = z
-                 newmu(x,y,interface_loc(x,y)) = mu(x,y,interface_loc(x,y)) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
-                 newmu(x,y,interface_loc(x,y)) = min(newmu(x,y,interface_loc(x,y)),avg_mu_env)
-                 newmu(x,y,interface_loc(x,y)+1) = newmu(x,y,interface_loc(x,y)-1)
-                 exit
-              end if
-           end do
-        end do
-     end do
-
-  end if
-
+ 
   do x = 1,psx
      do y = 1,psy
         do z = 1+ghost_width,psz+ghost_width
