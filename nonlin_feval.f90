@@ -1539,20 +1539,19 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
 
 
+           hill_met_mkw = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_met+rho_mkw); hill_mkw_met = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_mkw+rho_met)
+           hill_met_pht = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_met+rho_pht); hill_pht_met = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_pht+rho_met)
+           hill_met_pyr = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_met+rho_pyr); hill_pyr_met = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_pyr+rho_met)
+           hill_met_env = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_met+rho_env); hill_env_met = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_env+rho_met)
 
-           hill_met_mkw = 0.25d0*abs(w_met-w_mkw); hill_mkw_met = 0.25d0*abs(w_mkw-w_met)
-           hill_met_pht = 0.25d0*abs(w_met-w_pht); hill_pht_met = 0.25d0*abs(w_pht-w_met)
-           hill_met_pyr = 0.25d0*abs(w_met-w_pyr); hill_pyr_met = 0.25d0*abs(w_pyr-w_met)
-           hill_met_env = 0.25d0*abs(w_met-w_env); hill_env_met = 0.25d0*abs(w_env-w_met)
+           hill_mkw_pht = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_mkw+rho_pht); hill_pht_mkw = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_pht+rho_mkw)
+           hill_mkw_pyr = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_mkw+rho_pyr); hill_pyr_mkw = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_pyr+rho_mkw)
+           hill_mkw_env = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_mkw+rho_env); hill_env_mkw = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_env+rho_mkw)
 
-           hill_mkw_pht = 0.25d0*abs(w_mkw-w_pht); hill_pht_mkw = 0.25d0*abs(w_pht-w_mkw)
-           hill_mkw_pyr = 0.25d0*abs(w_mkw-w_pyr); hill_pyr_mkw = 0.25d0*abs(w_pyr-w_mkw)
-           hill_mkw_env = 0.25d0*abs(w_mkw-w_env); hill_env_mkw = 0.25d0*abs(w_env-w_mkw)
+           hill_pht_pyr = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_pht+rho_pyr); hill_pyr_pht = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_pyr+rho_pht)
+           hill_pht_env = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_pht+rho_env); hill_env_pht = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_env+rho_pht)
 
-           hill_pht_pyr = 0.25d0*abs(w_pht-w_pyr); hill_pyr_pht = 0.25d0*abs(w_pyr-w_pht)
-           hill_pht_env = 0.25d0*abs(w_pht-w_env); hill_env_pht = 0.25d0*abs(w_env-w_pht)
-
-           hill_pyr_env = 0.25d0*abs(w_pyr-w_env); hill_env_pyr = 0.25d0*abs(w_env-w_pyr)
+           hill_pyr_env = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_pyr+rho_env); hill_env_pyr = (16.0d0/3.0d0)*1000.0d0*0.5d0*(rho_env+rho_pyr)
 
 
 !!! FOR MET           
