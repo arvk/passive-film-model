@@ -65,7 +65,7 @@ subroutine pfJacobian(snes,pf_vec,pf_jacob,pf_precond,dummy,ierr)
 
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: loc_met, loc_mkw, loc_pht, loc_pyr, loc_env
 
-  real*8 :: S = 1E-3
+  real*8 :: S = 2E1
 
   real*8 :: odiff
   real*8 :: delx,dely,delz
