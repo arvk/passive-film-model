@@ -20,12 +20,12 @@ subroutine orsolve(iter)
   integer, intent(in) :: iter
 
   real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: M_opyr
-  real*8 :: M_opyr_max = 7.5E-9
-  real*8 :: M_opyr_min = 7.5E-12
+  real*8 :: M_opyr_max = 1.0E-17
+  real*8 :: M_opyr_min = 1.0E-18
 
   real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: D_opyr
   real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: del_opyr
-  real*8 :: D_opyr_max = 1E6   !! Truncation for the orientation field
+  real*8 :: D_opyr_max = 1E0   !! Truncation for the orientation field
 
   real*8 :: delx,dely,delz
   real*8 :: epsilon = 1E-15
@@ -53,9 +53,7 @@ subroutine orsolve(iter)
   integer :: rowindex, JAleft, JAright, JAswap
   real*8 :: Aswap
 
-  if (mod(iter,swap_freq_pf).eq.1) then
      call swap_or()
-  end if
 
   M_opyr = 0.0d0   !! Initialize to 0
 
@@ -64,15 +62,7 @@ subroutine orsolve(iter)
         do z = 1,(psz+(2*ghost_width)-2)
 
            M_opyr(x,y,z) = min(M_opyr_min/(((pyr(x,y,z+1))**2)+epsilon),M_opyr_max)
-
-           delx = odiff(opyr(wrap(x+1,psx),y,z+1),opyr(wrap(x-1,psx),y,z+1))
-           dely = odiff(opyr(x,wrap(y+1,psy),z+1),opyr(x,wrap(y-1,psy),z+1))
-           delz = odiff(opyr(x,y,z+1+1),opyr(x,y,z+1-1))
-
-           del_opyr(x,y,z) = (sqrt((delx*delx)+(dely*dely)+(delz*delz))/dpf) + 1E-15
-
-           D_opyr(x,y,z) = ((pyr(x,y,z+1)*pyr(x,y,z+1))/del_opyr(x,y,z)) + epsilon
-           D_opyr(x,y,z) = min(D_opyr(x,y,z),D_opyr_max)
+           D_opyr(x,y,z) = D_opyr_max
 
         end do
      end do
@@ -111,6 +101,8 @@ subroutine orsolve(iter)
            orc6 = orc * M_opyr(x,y,z) * 0.5d0*(D_opyr(x,y,min(z+1,(psz+(2*ghost_width)-2)))+D_opyr(x,y,z))/(dpf*dpf)
 
            orc = (orc1+orc3+orc5)-(orc2+orc4+orc6)
+
+           orc = 0.0d0
 
            B(linindex) = (opyr(x,y,z+1)/dt) + orc
 
@@ -261,7 +253,7 @@ subroutine orsolve(iter)
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
               if (point_or_vec(linindex).eq.point_or_vec(linindex)) then
-                 opyr(x,y,z+1) = point_or_vec(linindex)
+                 opyr(x,y,z+1) = (pyr(x,y,z+1)*point_or_vec(linindex)) + ((1.0d0-pyr(x,y,z+1))*opyr(x,y,z+1))
               end if
 
         end do
