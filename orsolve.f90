@@ -20,12 +20,12 @@ subroutine orsolve(iter)
   integer, intent(in) :: iter
 
   real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: M_opyr
-  real*8 :: M_opyr_max = 1.0E-17
-  real*8 :: M_opyr_min = 1.0E-18
+  real*8 :: M_opyr_max = 1.0E-16
+  real*8 :: M_opyr_min = 1.0E-19
 
   real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: D_opyr
   real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: del_opyr
-  real*8 :: D_opyr_max = 1E0   !! Truncation for the orientation field
+  real*8 :: D_opyr_max = 1E1   !! Truncation for the orientation field
 
   real*8 :: delx,dely,delz
   real*8 :: epsilon = 1E-15
@@ -45,7 +45,6 @@ subroutine orsolve(iter)
 
   real*8, dimension(:), allocatable :: A, LU
   integer, dimension(:), allocatable :: JA, IA
-
   integer :: contindex
   integer :: iterations, solver_info
 
@@ -61,7 +60,7 @@ subroutine orsolve(iter)
      do y = 1,psy
         do z = 1,(psz+(2*ghost_width)-2)
 
-           M_opyr(x,y,z) = min(M_opyr_min/(((pyr(x,y,z+1))**2)+epsilon),M_opyr_max)
+           M_opyr(x,y,z) = min(M_opyr_min/(((pyr(x,y,z+1))**4)+epsilon),M_opyr_max)
            D_opyr(x,y,z) = D_opyr_max
 
         end do
@@ -252,9 +251,9 @@ subroutine orsolve(iter)
         do x = 1,psx
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-              if (point_or_vec(linindex).eq.point_or_vec(linindex)) then
-                 opyr(x,y,z+1) = (pyr(x,y,z+1)*point_or_vec(linindex)) + ((1.0d0-pyr(x,y,z+1))*opyr(x,y,z+1))
-              end if
+           if (point_or_vec(linindex).eq.point_or_vec(linindex)) then
+              opyr(x,y,z+1) = (pyr(x,y,z+1)*point_or_vec(linindex)) + ((1.0d0-pyr(x,y,z+1))*opyr(x,y,z+1))
+           end if
 
         end do
      end do
@@ -269,6 +268,22 @@ subroutine orsolve(iter)
   call MatDestroy(lhs_mat,ierr)
   call KSPDestroy(ksp_or,ierr)
 
+
+
+  !! Identify the iron(sulfide)/environment boundary and set the gradient of the OPYR field to zero there
+  do x = 1,psx
+     do y = 1,psy
+        do z = 3,psz+(2*ghost_width)-2
+           if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
+              opyr(x,y,z-2) = opyr(x,y,z)
+              opyr(x,y,z-1) = opyr(x,y,z)
+              opyr(x,y,z+1) = opyr(x,y,z)
+              opyr(x,y,z+2) = opyr(x,y,z)
+              exit
+           end if
+        end do
+     end do
+  end do
 
 
 
