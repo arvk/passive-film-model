@@ -22,6 +22,7 @@ subroutine musolve(iter)
   integer, intent(in) :: iter
 
   integer :: x, y, z   ! Loop variables
+  real*8 :: interface_multiply ! Flag to control interfacial diffusion
   real*8 :: asd ! Anti-Surface-Diffusion
 
   !! Diffusivities
@@ -56,6 +57,7 @@ subroutine musolve(iter)
   logical :: is_sorted
   integer :: rowindex, JAleft, JAright, JAswap
   real*8 :: Aswap
+
 
   newmu = 0.0d0
 
@@ -105,6 +107,19 @@ subroutine musolve(iter)
   end do
 
 
+  !! Identify the iron(sulfide)/environment boundary
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+(2*ghost_width)-1
+           if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
+              interface_loc(x,y) = z
+              exit
+           end if
+        end do
+     end do
+  end do
+
+
   approxsol = 0.0d0
 
   do z = 1,(psz+(2*ghost_width)-2)
@@ -112,7 +127,6 @@ subroutine musolve(iter)
         do x = 1,psx
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
-
            !! Calculate chemical 'specific heat'
            Chi = max(min(met(x,y,z+1),1.0d0),0.0d0)*drho_dmu_met
            Chi = Chi + max(min(mkw(x,y,z+1),1.0d0),0.0d0)*drho_dmu_mkw
@@ -135,56 +149,6 @@ subroutine musolve(iter)
         end do
      end do
   end do
-
-
-  !! Impose boundary counditions on the composition field (sulfidation rate)
-
-
-  rho_pht = 52275.0d0
-  rho_met = 0.0015d0*140401
-  interface_loc = 0
-
-  do x = 1,psx
-     do y = 1,psy
-        do z = 2,psz+(2*ghost_width)-1
-           if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
-
-              interface_loc(x,y) = z
-
-              !             D(x,y,z-1) = D(x,y,z)*0.001d0
-              !             D(x,y,z+2) = D(x,y,z+1)*0.001d0
-
-              !             newmu(x,y,z) = mu(x,y,z) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
-              !             newmu(x,y,z) = min(newmu(x,y,z),avg_mu_env-(R*T*2.0d0))
-
-              !             newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
-              !             newmu(x,y,z-1) = min(newmu(x,y,z-1),avg_mu_env-(R*T*2.0d0))
-
-              !             newmu(x,y,z-2) = mu(x,y,z-2) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
-              !             newmu(x,y,z-2) = min(newmu(x,y,z-2),avg_mu_env-(R*T*2.0d0))
-
-              !             newmu(x,y,z-3) = mu(x,y,z-3) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
-              !             newmu(x,y,z-3) = min(newmu(x,y,z-3),avg_mu_env-(R*T*2.0d0))
-
-              !             newmu(x,y,z-4) = mu(x,y,z-4) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
-              !             newmu(x,y,z-4) = min(newmu(x,y,z-4),avg_mu_env-(R*T*2.0d0))
-
-              !             newmu(x,y,z-5) = mu(x,y,z-5) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
-              !             newmu(x,y,z-5) = min(newmu(x,y,z-5),avg_mu_env-(R*T*2.0d0))
-
-              !             newmu(x,y,z-6) = mu(x,y,z-6) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
-              !             newmu(x,y,z-6) = min(newmu(x,y,z-6),avg_mu_env-(R*T*2.0d0))
-
-              exit
-           end if
-        end do
-     end do
-  end do
-
-
-
-
-
 
 
 
@@ -220,6 +184,11 @@ subroutine musolve(iter)
      do y = 1,psy
         do x = 1,psx
 
+           interface_multiply = 1.0d0
+           if ((z.gt.interface_loc(x,y)-2).and.(z.lt.interface_loc(x,y)+1)) then
+              interface_multiply = 0.0d0
+           end if
+
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            IA(linindex) = contindex + 1
@@ -227,15 +196,18 @@ subroutine musolve(iter)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D(x,y,(z+1)-1)+D(x,y,z+1)))/(dpf*dpf)
+              A(contindex) = A(contindex)*interface_multiply
               JA(contindex) = ((wrap(z-1,(psz+(2*ghost_width)-2))-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
            contindex = contindex + 1
            A(contindex) = 0.0d0 - (0.5d0*(D(x,wrap(y-1,psy),z+1)+D(x,y,z+1)))/(dpf*dpf)
+              A(contindex) = A(contindex)*interface_multiply
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x
 
            contindex = contindex + 1
            A(contindex) = 0.0d0 - (0.5d0*(D(wrap(x-1,psx),y,z+1)+D(x,y,z+1)))/(dpf*dpf)
+              A(contindex) = A(contindex)*interface_multiply
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
 
            contindex = contindex + 1
@@ -244,20 +216,24 @@ subroutine musolve(iter)
                 &D(wrap(x+1,psx),y,z+1)+D(wrap(x-1,psx),y,z+1)
            A(contindex) = A(contindex) + 6*D(x,y,z+1)
            A(contindex) = A(contindex)*0.5d0/(dpf*dpf)
+              A(contindex) = A(contindex)*interface_multiply
            A(contindex) = A(contindex) + (1.0d0/dt)
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            contindex = contindex + 1
            A(contindex) = 0.0d0 - (0.5d0*(D(wrap(x+1,psx),y,z+1)+D(x,y,z+1)))/(dpf*dpf)
+              A(contindex) = A(contindex)*interface_multiply
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx)
 
            contindex = contindex + 1
            A(contindex) = 0.0d0 - (0.5d0*(D(x,wrap(y+1,psy),z+1)+D(x,y,z+1)))/(dpf*dpf)
+              A(contindex) = A(contindex)*interface_multiply
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
 
            if (z .lt. (psz+(2*ghost_width)-2)) then
               contindex = contindex + 1
               A(contindex) = 0.0d0 - (0.5d0*(D(x,y,(z+1)+1)+D(x,y,z+1)))/(dpf*dpf)
+              A(contindex) = A(contindex)*interface_multiply
               JA(contindex) = ((wrap(z+1,(psz+(2*ghost_width)-2))-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
@@ -371,6 +347,29 @@ subroutine musolve(iter)
         do z = 2,psz+(2*ghost_width)-1
            if (env(x,y,z).gt.0.97) then
               newmu(x,y,z) = avg_mu_env
+           end if
+        end do
+     end do
+  end do
+
+
+
+  rho_pht = 52275.0d0
+  rho_met = 0.0015d0*140401
+  sulfidation_rate = sulfidation_rate*1E-3
+
+  do x = 1,psx
+     do y = 1,psy
+        do z = 2,psz+(2*ghost_width)-1
+           if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
+
+              newmu(x,y,z) = mu(x,y,z) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              newmu(x,y,z) = min(newmu(x,y,z),avg_mu_env)
+
+              newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf))
+              newmu(x,y,z-1) = min(newmu(x,y,z-1),avg_mu_env)
+
+              exit
            end if
         end do
      end do
