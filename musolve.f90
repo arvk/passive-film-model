@@ -157,6 +157,7 @@ subroutine musolve(iter)
   call VecSetSizes(mus_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(mus_vec,ierr)
   call VecSetUp(mus_vec,ierr)
+  call VecSetValues(mus_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,approxsol,INSERT_VALUES,ierr)
 
 
   call VecCreate(PETSC_COMM_SELF,rhs_vec,ierr)
@@ -293,6 +294,7 @@ subroutine musolve(iter)
 
   call KSPCreate(PETSC_COMM_SELF,ksp_mu,ierr)
   call KSPSetOperators(ksp_mu,lhs_mat,lhs_mat,ierr)
+  call KSPSetInitialGuessNonzero(ksp_mu,PETSC_TRUE,ierr)
   call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSetUp(ksp_mu,ierr)
   call KSPSolve(ksp_mu,rhs_vec,mus_vec,ierr)
