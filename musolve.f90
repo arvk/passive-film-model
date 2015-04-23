@@ -293,6 +293,8 @@ subroutine musolve(iter)
 
   call KSPCreate(PETSC_COMM_SELF,ksp_mu,ierr)
   call KSPSetOperators(ksp_mu,lhs_mat,lhs_mat,ierr)
+  call KSPSetFromOptions(ksp_mu,ierr)
+  call KSPSetUp(ksp_mu,ierr)
   call KSPSolve(ksp_mu,rhs_vec,mus_vec,ierr)
 
 
