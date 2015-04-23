@@ -202,32 +202,28 @@ subroutine musolve(iter)
 
            contindex = contindex + 1
            A(contindex) = 0.0d0 - (0.5d0*(D(x,wrap(y-1,psy),z+1)+D(x,y,z+1)))/(dpf*dpf)
-              A(contindex) = A(contindex)*interface_multiply
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x
 
            contindex = contindex + 1
            A(contindex) = 0.0d0 - (0.5d0*(D(wrap(x-1,psx),y,z+1)+D(x,y,z+1)))/(dpf*dpf)
-              A(contindex) = A(contindex)*interface_multiply
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
 
            contindex = contindex + 1
-           A(contindex) = D(x,y,(z+1)+1)+D(x,y,(z+1)-1)+&
+           A(contindex) = (D(x,y,(z+1)+1) + D(x,y,(z+1)-1) + 2*D(x,y,z+1))*interface_multiply 
+           A(contindex) = A(contindex)+&
                 &D(x,wrap(y+1,psy),z+1)+D(x,wrap(y-1,psy),z+1)+&
                 &D(wrap(x+1,psx),y,z+1)+D(wrap(x-1,psx),y,z+1)
-           A(contindex) = A(contindex) + 6*D(x,y,z+1)
+           A(contindex) = A(contindex) + 4*D(x,y,z+1)
            A(contindex) = A(contindex)*0.5d0/(dpf*dpf)
-              A(contindex) = A(contindex)*interface_multiply
            A(contindex) = A(contindex) + (1.0d0/dt)
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            contindex = contindex + 1
            A(contindex) = 0.0d0 - (0.5d0*(D(wrap(x+1,psx),y,z+1)+D(x,y,z+1)))/(dpf*dpf)
-              A(contindex) = A(contindex)*interface_multiply
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx)
 
            contindex = contindex + 1
            A(contindex) = 0.0d0 - (0.5d0*(D(x,wrap(y+1,psy),z+1)+D(x,y,z+1)))/(dpf*dpf)
-              A(contindex) = A(contindex)*interface_multiply
            JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
 
            if (z .lt. (psz+(2*ghost_width)-2)) then
