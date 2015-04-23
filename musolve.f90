@@ -108,9 +108,10 @@ subroutine musolve(iter)
 
 
   !! Identify the iron(sulfide)/environment boundary
+  interface_loc = 0
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+(2*ghost_width)-1
+        do z = 1+ghost_width,psz+ghost_width
            if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
               interface_loc(x,y) = z
               exit
