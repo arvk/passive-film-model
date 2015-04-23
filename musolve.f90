@@ -61,11 +61,11 @@ subroutine musolve(iter)
 
   newmu = 0.0d0
 
-  D_inter_met = max(D_Fe_met,D_S_met)*1E7
-  D_inter_mkw = max(D_Fe_mkw,D_S_mkw)*1E11
-  D_inter_pht = max(D_Fe_pht,D_S_pht)*3E11
-  D_inter_pyr = max(D_Fe_pyr,D_S_pyr)*1E14
-  D_inter_env = max(D_Fe_env,D_S_env)*1E7
+  D_inter_met = max(D_Fe_met,D_S_met)*1E4
+  D_inter_mkw = max(D_Fe_mkw,D_S_mkw)*1E8
+  D_inter_pht = max(D_Fe_pht,D_S_pht)*3E8
+  D_inter_pyr = max(D_Fe_pyr,D_S_pyr)*1E11
+  D_inter_env = max(D_Fe_env,D_S_env)*1E4
 
   !! Calculate derivative of sulfur concentration with chemical potential
   drho_dmu_met = (0.0015d0*140401)/(R*T)
