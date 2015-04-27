@@ -331,7 +331,7 @@ subroutine musolve(iter)
   if (rank.eq.0) then
      do x = 1,psx
         do y = 1,psy
-           newmu(x,y,1+ghost_width) = mu(x,y,1+ghost_width)
+           newmu(x,y,1+ghost_width) = newmu(x,y,2+ghost_width)
         end do
      end do
   elseif(rank.eq.procs-1) then
