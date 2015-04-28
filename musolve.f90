@@ -361,7 +361,7 @@ subroutine musolve(iter)
 
   do x = 1,psx
      do y = 1,psy
-        do z = 2,psz+(2*ghost_width)-1
+        do z = 1+ghost_width,psz+ghost_width
            if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
 
               newmu(x,y,z) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0)
