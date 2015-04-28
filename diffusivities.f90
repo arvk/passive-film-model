@@ -8,7 +8,7 @@ subroutine diffusivities
 ! in m^2/s
 
   D_Fe_met = 7.87E-7 * exp((96500*(0.0-0.60d0))/(R*T))   ! Ref = PHYSICAL REVIEW B 80, 144111-4 2009
-  D_S_met = 0                                            ! Assumed to be negligible
+  D_S_met = 1.78d0*exp((0.0d0-205000)/(R*T))             ! Ref = Scripta Metallurgica, Col 16, pp 537-540, 1982. (Fillastre C. et. al. - Diffusion of sulfu in iron-chromium alloys)
 
   D_Fe_mkw = 3.37E-16 * exp((0.0d0-15500)/(R*T))         ! Ref = SIMULATION OF SOLID-STATE GROWTH OF IRON SULFIDES IN SOUR CORROSION CONDITIONS, Jamel Amri and Jon Kvarekvål, NACE 2011, Paper 11078
   D_S_mkw = D_Fe_mkw                                     ! Ref = Assumptions. To be later taken from other models
