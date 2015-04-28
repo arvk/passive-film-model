@@ -88,17 +88,17 @@ subroutine musolve(iter)
         do z = 1,psz+(2*ghost_width)
 
            !! Calculate chemical 'specific heat'
-           Chi = max(min(met(x,y,z),1.0d0),0.0d0)*drho_dmu_met
-           Chi = Chi + max(min(mkw(x,y,z),1.0d0),0.0d0)*drho_dmu_mkw
-           Chi = Chi + max(min(pht(x,y,z),1.0d0),0.0d0)*drho_dmu_pht
-           Chi = Chi + max(min(pyr(x,y,z),1.0d0),0.0d0)*drho_dmu_pyr
-           Chi = Chi + max(min(env(x,y,z),1.0d0),0.0d0)*drho_dmu_env
+           Chi = max(min(met(x,y,z)-0.005d0,1.0d0),0.0d0)*drho_dmu_met
+           Chi = Chi + max(min(mkw(x,y,z)-0.005d0,1.0d0),0.0d0)*drho_dmu_mkw
+           Chi = Chi + max(min(pht(x,y,z)-0.005d0,1.0d0),0.0d0)*drho_dmu_pht
+           Chi = Chi + max(min(pyr(x,y,z)-0.005d0,1.0d0),0.0d0)*drho_dmu_pyr
+           Chi = Chi + max(min(env(x,y,z)-0.005d0,1.0d0),0.0d0)*drho_dmu_env
 
-           D(x,y,z) = max(min(met(x,y,z),1.0d0),0.0d0)*D_inter_met
-           D(x,y,z) = D(x,y,z) + max(min(mkw(x,y,z),1.0d0),0.0d0)*D_inter_mkw
-           D(x,y,z) = D(x,y,z) + max(min(pht(x,y,z),1.0d0),0.0d0)*D_inter_pht
-           D(x,y,z) = D(x,y,z) + max(min(pyr(x,y,z),1.0d0),0.0d0)*D_inter_pyr
-           D(x,y,z) = D(x,y,z) + max(min(env(x,y,z),1.0d0),0.0d0)*D_inter_env
+           D(x,y,z) = max(min(met(x,y,z)-0.005d0,1.0d0),0.0d0)*D_inter_met
+           D(x,y,z) = D(x,y,z) + max(min(mkw(x,y,z)-0.005d0,1.0d0),0.0d0)*D_inter_mkw
+           D(x,y,z) = D(x,y,z) + max(min(pht(x,y,z)-0.005d0,1.0d0),0.0d0)*D_inter_pht
+           D(x,y,z) = D(x,y,z) + max(min(pyr(x,y,z)-0.005d0,1.0d0),0.0d0)*D_inter_pyr
+           D(x,y,z) = D(x,y,z) + max(min(env(x,y,z)-0.005d0,1.0d0),0.0d0)*D_inter_env
            D(x,y,z) = D(x,y,z)/Chi
            D(x,y,z) = D(x,y,z)*(1.0d0-voids(x,y,z))
 
@@ -129,11 +129,11 @@ subroutine musolve(iter)
 
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
            !! Calculate chemical 'specific heat'
-           Chi = max(min(met(x,y,z+1),1.0d0),0.0d0)*drho_dmu_met
-           Chi = Chi + max(min(mkw(x,y,z+1),1.0d0),0.0d0)*drho_dmu_mkw
-           Chi = Chi + max(min(pht(x,y,z+1),1.0d0),0.0d0)*drho_dmu_pht
-           Chi = Chi + max(min(pyr(x,y,z+1),1.0d0),0.0d0)*drho_dmu_pyr
-           Chi = Chi + max(min(env(x,y,z+1),1.0d0),0.0d0)*drho_dmu_env
+           Chi = max(min(met(x,y,z+1)-0.005d0,1.0d0),0.0d0)*drho_dmu_met
+           Chi = Chi + max(min(mkw(x,y,z+1)-0.005d0,1.0d0),0.0d0)*drho_dmu_mkw
+           Chi = Chi + max(min(pht(x,y,z+1)-0.005d0,1.0d0),0.0d0)*drho_dmu_pht
+           Chi = Chi + max(min(pyr(x,y,z+1)-0.005d0,1.0d0),0.0d0)*drho_dmu_pyr
+           Chi = Chi + max(min(env(x,y,z+1)-0.005d0,1.0d0),0.0d0)*drho_dmu_env
 
            B(linindex) =  (mu(x,y,z+1)/dt) - (((dpht_dt(x,y,z+1)*rho_pht) + (dmet_dt(x,y,z+1)*rho_met) + (dmkw_dt(x,y,z+1)*rho_mkw) + (denv_dt(x,y,z+1)*rho_env) + (dpyr_dt(x,y,z+1)*rho_pyr))/Chi)
 
