@@ -26,19 +26,19 @@ subroutine dissolve_film()
            do z = psz+(2*ghost_width)-1,2,-1
               if ((env(x,y,z) .le. 9.9E-1).and.(env(x,y,z+1) .gt. 9.9E-1)) then
 
-                 pf_after_dissolve = met(x,y,z) - ((diss_rate_met*1E-9*dt)/dpf)
+                 pf_after_dissolve = max(met(x,y,z) - ((diss_rate_met*1E-9*dt)/dpf),0.0d0)
                  dissolved_met = met(x,y,z) - pf_after_dissolve
                  met(x,y,z) = pf_after_dissolve
 
-                 pf_after_dissolve = mkw(x,y,z) - ((diss_rate_mkw*1E-9*dt)/dpf)
+                 pf_after_dissolve = max(mkw(x,y,z) - ((diss_rate_mkw*1E-9*dt)/dpf),0.0d0)
                  dissolved_mkw = mkw(x,y,z) - pf_after_dissolve
                  mkw(x,y,z) = pf_after_dissolve
 
-                 pf_after_dissolve = pht(x,y,z) - ((diss_rate_pht*1E-9*dt)/dpf)
+                 pf_after_dissolve = max(pht(x,y,z) - ((diss_rate_pht*1E-9*dt)/dpf),0.0d0)
                  dissolved_pht = pht(x,y,z) - pf_after_dissolve
                  pht(x,y,z) = pf_after_dissolve
 
-                 pf_after_dissolve = pyr(x,y,z) - ((diss_rate_pyr*1E-9*dt)/dpf)
+                 pf_after_dissolve = max(pyr(x,y,z) - ((diss_rate_pyr*1E-9*dt)/dpf),0.0d0)
                  dissolved_pyr = pyr(x,y,z) - pf_after_dissolve
                  pyr(x,y,z) = pf_after_dissolve
 
