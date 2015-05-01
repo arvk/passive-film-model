@@ -18,6 +18,7 @@ subroutine musolve(iter)
   Mat lhs_mat
   KSP ksp_mu
   PetscScalar, pointer :: point_mu_vec(:)
+  KSPConvergedReason mu_converged_reason
 
   integer, intent(in) :: iter
 
@@ -300,25 +301,30 @@ subroutine musolve(iter)
   call KSPSetUp(ksp_mu,ierr)
   call KSPSolve(ksp_mu,rhs_vec,mus_vec,ierr)
 
+  call KSPGetConvergedReason(ksp_mu,mu_converged_reason,ierr)
 
-  call VecGetArrayF90(mus_vec,point_mu_vec,ierr)
+  if (mu_converged_reason.gt.0) then
 
-  do z = 1,(psz+(2*ghost_width)-2)
-     do y = 1,psy
-        do x = 1,psx
-           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+     call VecGetArrayF90(mus_vec,point_mu_vec,ierr)
 
-              if (point_mu_vec(linindex).eq.point_mu_vec(linindex)) then
-                 newmu(x,y,z+1) =  point_mu_vec(linindex)
-                 else
-                    write(6,*) 'Uh-oh' 
-              end if
+     do z = 1,(psz+(2*ghost_width)-2)
+        do y = 1,psy
+           do x = 1,psx
+              linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+              newmu(x,y,z+1) =  point_mu_vec(linindex)
+
+           end do
         end do
      end do
-  end do
 
-  call VecRestoreArrayF90(mus_vec,point_mu_vec,ierr)
+     call VecRestoreArrayF90(mus_vec,point_mu_vec,ierr)
+
+  else  ! if mu_converged_reason < 0
+
+     newmu = mu
+
+  end if
 
 
   call VecDestroy(mus_vec,ierr)

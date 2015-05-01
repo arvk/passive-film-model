@@ -15,6 +15,7 @@ subroutine orsolve(iter)
   Mat lhs_mat
   KSP ksp_or
   PetscScalar, pointer :: point_or_vec(:)
+  KSPConvergedReason or_converged_reason
 
   integer :: x, y, z   ! Loop variables
   integer, intent(in) :: iter
@@ -246,6 +247,9 @@ subroutine orsolve(iter)
   call KSPSetUp(ksp_or,ierr)
   call KSPSolve(ksp_or,rhs_vec,or_vec,ierr)
 
+  call KSPGetConvergedReason(ksp_or,or_converged_reason,ierr)
+
+  if (or_converged_reason.gt.0) then
 
   call VecGetArrayF90(or_vec,point_or_vec,ierr)
 
@@ -254,16 +258,16 @@ subroutine orsolve(iter)
         do x = 1,psx
            linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
-           if (point_or_vec(linindex).eq.point_or_vec(linindex)) then
-              opyr(x,y,z+1) = (pyr(x,y,z+1)*point_or_vec(linindex)) + ((1.0d0-pyr(x,y,z+1))*opyr(x,y,z+1))
-           end if
+           opyr(x,y,z+1) = (pyr(x,y,z+1)*point_or_vec(linindex)) + ((1.0d0-pyr(x,y,z+1))*opyr(x,y,z+1))
 
         end do
      end do
   end do
 
-
   call VecRestoreArrayF90(or_vec,point_or_vec,ierr)
+
+  end if
+
 
 
   call VecDestroy(or_vec,ierr)

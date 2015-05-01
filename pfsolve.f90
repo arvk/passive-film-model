@@ -65,7 +65,7 @@ subroutine pfsolve(iter)
   PetscScalar, pointer :: point_pf_vec(:)
   Mat jac
   SNES snes_pf
-
+  SNESConvergedReason pf_converged_reason
 
 
 
@@ -268,24 +268,37 @@ subroutine pfsolve(iter)
   call SNESSetFromOptions(snes_pf,ierr)
   call SNESSolve(snes_pf,rhs_vec,pf_vec,ierr)
 
+  call SNESGetConvergedReason(snes_pf,pf_converged_reason,ierr)
 
-  call VecGetArrayF90(pf_vec,point_pf_vec,ierr)
-  do z = 1,psz+(2*ghost_width)-2
-     do y = 1,psy
-        do x = 1,psx
+  if (pf_converged_reason.gt.0) then
 
-           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+     call VecGetArrayF90(pf_vec,point_pf_vec,ierr)
+     do z = 1,psz+(2*ghost_width)-2
+        do y = 1,psy
+           do x = 1,psx
 
-           newmet(x,y,z+1) = point_pf_vec(linindex+((imet-1)*psx*psy*(psz+(2*ghost_width)-2)))
-           newmkw(x,y,z+1) = point_pf_vec(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2)))
-           newpht(x,y,z+1) = point_pf_vec(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2)))
-           newpyr(x,y,z+1) = point_pf_vec(linindex+((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2)))
-           newenv(x,y,z+1) = env(x,y,z+1) !point_pf_vec(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
+              linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+              newmet(x,y,z+1) = point_pf_vec(linindex+((imet-1)*psx*psy*(psz+(2*ghost_width)-2)))
+              newmkw(x,y,z+1) = point_pf_vec(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2)))
+              newpht(x,y,z+1) = point_pf_vec(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2)))
+              newpyr(x,y,z+1) = point_pf_vec(linindex+((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2)))
+              newenv(x,y,z+1) = env(x,y,z+1) !point_pf_vec(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
+
+           end do
         end do
      end do
-  end do
-  call VecRestoreArrayF90(pf_vec,point_pf_vec,ierr)
+     call VecRestoreArrayF90(pf_vec,point_pf_vec,ierr)
+
+  else ! if pf_converged_reason < 0
+
+     newmet = met
+     newmkw = mkw
+     newpht = pht
+     newpyr = pyr
+     newenv = env
+
+  end if
 
 
   !! Apply boundary conditions to phase field(s) update
