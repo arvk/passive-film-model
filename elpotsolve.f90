@@ -135,6 +135,7 @@ subroutine elpotsolve(iter)
   call SNESSetFunction(snes_elpot,ret_vec,electroFunction,PETSC_NULL_OBJECT,ierr)
   call SNESSetJacobian(snes_elpot,jac,jac,electroJacobian,PETSC_NULL_OBJECT,ierr)
   call SNESSetFromOptions(snes_elpot,ierr)
+  call SNESSetType(snes_elpot,SNESNEWTONLS,ierr)
   call SNESSolve(snes_elpot,rhs_vec,elpot_vec,ierr)
 
 
