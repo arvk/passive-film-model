@@ -370,10 +370,17 @@ subroutine musolve(iter)
         do z = 1+ghost_width,psz+ghost_width
            if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
 
-              newmu(x,y,z) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0)
+              Chi = max(min(met(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_met
+              Chi = Chi + max(min(mkw(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_mkw
+              Chi = Chi + max(min(pht(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_pht
+              Chi = Chi + max(min(pyr(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_pyr
+              Chi = Chi + max(min(env(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_env
+
+
+              newmu(x,y,z) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
               newmu(x,y,z) = min(newmu(x,y,z),avg_mu_env)
 
-              newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0)
+              newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
               newmu(x,y,z-1) = min(newmu(x,y,z-1),avg_mu_env)
 
               exit
