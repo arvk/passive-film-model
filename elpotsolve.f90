@@ -44,6 +44,7 @@ subroutine elpotsolve(iter)
   PetscScalar, pointer :: point_elpot_vec(:)
   Mat jac
   SNES snes_elpot
+  SNESConvergedReason el_converged_reason
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -135,24 +136,33 @@ subroutine elpotsolve(iter)
   call SNESSetFunction(snes_elpot,ret_vec,electroFunction,PETSC_NULL_OBJECT,ierr)
   call SNESSetJacobian(snes_elpot,jac,jac,electroJacobian,PETSC_NULL_OBJECT,ierr)
   call SNESSetFromOptions(snes_elpot,ierr)
-  call SNESSetType(snes_elpot,SNESNEWTONLS,ierr)
+  call SNESSetType(snes_elpot,SNESNEWTONTR,ierr)
   call SNESSolve(snes_elpot,rhs_vec,elpot_vec,ierr)
 
+  call SNESGetConvergedReason(snes_elpot,el_converged_reason,ierr)
 
-  call VecGetArrayF90(elpot_vec,point_elpot_vec,ierr)
-  do z = 1,psz+(2*ghost_width)-2
-     do y = 1,psy
-        do x = 1,psx
+  if (el_converged_reason.gt.0) then
 
-           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
+     call VecGetArrayF90(elpot_vec,point_elpot_vec,ierr)
+     do z = 1,psz+(2*ghost_width)-2
+        do y = 1,psy
+           do x = 1,psx
 
-           newelpot(x,y,z+1) = point_elpot_vec(linindex)
+              linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
+              newelpot(x,y,z+1) = point_elpot_vec(linindex)
+
+           end do
         end do
      end do
-  end do
-  call VecRestoreArrayF90(elpot_vec,point_elpot_vec,ierr)
+     call VecRestoreArrayF90(elpot_vec,point_elpot_vec,ierr)
 
+  else ! if el_converged_reason < 0
+
+     newelpot = elpot
+
+  end if
+ 
 
   !! Apply boundary conditions to potential update
   if (rank.eq.0) then
