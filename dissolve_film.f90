@@ -9,14 +9,15 @@ subroutine dissolve_film()
   real*8 :: diss_rate_met,diss_rate_mkw,diss_rate_pht,diss_rate_pyr,diss_rate_env
   real*8 :: dissolved_met,dissolved_mkw,dissolved_pht,dissolved_pyr
   real*8 :: pf_after_dissolve
-
+  
+  real*8 :: pH = 5
 
 !!!! Define dissolution rates (in nm/s)
   diss_rate_met = 0.257d0 !!! REF = Electrodissolution Kinetics of Iron in Chloride Solutions by Robert J. Chin* and Ken Nobe, JECS Vol 119, No. 11, Nov. 1972
                           !!! Full explression is diss_rate_met = 0.257d0*((0.0d0-log10(14-pH))**0.6)*exp((0.85*F/RT)*(V+0.45))
   diss_rate_mkw = 0.015d0 !!! REF = CORROSION MECHANISMS AND MATERIAL PERFORMANCE IN ENVIRONMENTS CONTAINING HYDROGEN SULFIDE AND ELEMENTAL SULFUR, Liane Smith* and Bruce Craig, SACNUC Workshop 22nd and 23rd October, 2008, Brussels and References therein
-  diss_rate_pht = 0.015d0
-  diss_rate_pyr = 0.015d0
+  diss_rate_pht = 289.15*exp(0.0d0-(65900/(R*T)))*(10**(-1.46*pH)) !! REF = "Pyrrhotite dissolution in acidic media" Chirita. P. et.al. Applied Geochemistry 41 (2014) 1-10. DOI: 10.1016/j.apgeochem.2013.11.013
+  diss_rate_pyr = 0.00017244d0  !!! REF = "Interferometric study of pyrite surface reactivity in acidic conditions", Asta, M. P. et.al. American Mineralogist, Volume 93, pages 508–519, 2008
   diss_rate_env = 0.015d0
 
 
