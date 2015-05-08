@@ -96,9 +96,9 @@ program passive_film_model
         call elpotsolve(iter)
      end if
 
-     if (iter.eq.nomc/10) then
-        call voids_create()
-     end if
+     ! if (iter.eq.nomc/10) then
+     !    call voids_create()
+     ! end if
   
   
      if (mod(iter,freq_scale).eq.0) then
