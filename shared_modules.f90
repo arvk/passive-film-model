@@ -102,6 +102,7 @@ module thermo_constants
   real*8 :: M_env_pyr = 1.0E-15, M_pyr_env = 1.0E-15
 
   !! Double well potential heights
+  real*8 :: double_well_barrier = 1000.0d0 ! in J/mol
   real*8 :: hill_met_mkw, hill_met_pht, hill_met_pyr, hill_met_env
   real*8 :: hill_mkw_met, hill_mkw_pht, hill_mkw_pyr, hill_mkw_env
   real*8 :: hill_pht_met, hill_pht_mkw, hill_pht_pyr, hill_pht_env
