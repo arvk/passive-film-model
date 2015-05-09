@@ -90,12 +90,12 @@ module thermo_constants
   real*8 :: sigma_env_pyr_0 = 1E-12, sigma_pyr_env_0 = 1E-12
 
   !! Field mobilities
-  real*8 :: M_pht_met = 3.0E-9, M_met_pht = 3.0E-9
-  real*8 :: M_mkw_met = 1.0E-7, M_met_mkw = 1.0E-7
-  real*8 :: M_met_pyr = 3.0E-9, M_pyr_met = 3.0E-9
-  real*8 :: M_pht_pyr = 5.0E-8, M_pyr_pht = 5.0E-8
-  real*8 :: M_mkw_pyr = 3.0E-8, M_pyr_mkw = 3.0E-9
-  real*8 :: M_pht_mkw = 1.0E-7, M_mkw_pht = 1.0E-7
+  real*8 :: M_pht_met = 0.75E-8, M_met_pht = 0.75E-8
+  real*8 :: M_mkw_met = 0.35E-6, M_met_mkw = 0.35E-6
+  real*8 :: M_met_pyr = 0.75E-8, M_pyr_met = 0.75E-8
+  real*8 :: M_pht_pyr = 1.25E-7, M_pyr_pht = 1.25E-7
+  real*8 :: M_mkw_pyr = 0.75E-8, M_pyr_mkw = 0.75E-8
+  real*8 :: M_pht_mkw = 0.15E-6, M_mkw_pht = 0.15E-6
   real*8 :: M_pht_env = 1.0E-15, M_env_pht = 1.0E-15
   real*8 :: M_mkw_env = 1.0E-15, M_env_mkw = 1.0E-15
   real*8 :: M_met_env = 1.0E-15, M_env_met = 1.0E-15
