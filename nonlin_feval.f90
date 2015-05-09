@@ -59,7 +59,7 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: loc_met, loc_mkw, loc_pht, loc_pyr, loc_env
 
-  real*8 :: S = 2E1
+  real*8 :: S = 0.0d0!2E1
 
   real*8 :: odiff
   real*8 :: delx,dely,delz
@@ -163,27 +163,27 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
            !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-           w_met = f_met - (mu(x,y,z+1)*140401*0.0015d0)
+           f_met = 0.0d0
+           w_met = f_met - (mu(x,y,z+1)*0.0015d0)
 
            !! Volume per mole of Mkw = 19.130 cc assuming a density of 4.28 g/cc from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
            !! Number of moles per m^3 = 48683
-           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)*48683.0d0
-           w_mkw = f_mkw - (mu(x,y,z+1)*48683.0d0*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
+           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)
+           w_mkw = f_mkw - (mu(x,y,z+1)*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
 
            !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
            !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z+1)*52275)
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)
+           w_pht = f_pht - (mu(x,y,z+1))
 
            !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
            !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)
+           w_pyr = f_pyr - (mu(x,y,z+1)*2)
 
            !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
            !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T)))
            w_env = 0.0d0
 
 
@@ -421,27 +421,27 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
            !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-           w_met = f_met - (mu(x,y,z+1)*140401*0.0015d0)
+           f_met = 0.0d0
+           w_met = f_met - (mu(x,y,z+1)*0.0015d0)
 
            !! Volume per mole of Mkw = 19.130 cc assuming a density of 4.28 g/cc from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
            !! Number of moles per m^3 = 48683
-           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)*48683.0d0
-           w_mkw = f_mkw - (mu(x,y,z+1)*48683.0d0*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
+           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)
+           w_mkw = f_mkw - (mu(x,y,z+1)*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
 
            !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
            !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z+1)*52275)
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)
+           w_pht = f_pht - (mu(x,y,z+1))
 
            !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
            !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)
+           w_pyr = f_pyr - (mu(x,y,z+1)*2)
 
            !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
            !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T)))
            w_env = 0.0d0
 
 
@@ -683,27 +683,27 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
            !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-           w_met = f_met - (mu(x,y,z+1)*140401*0.0015d0)
+           f_met = 0.0d0
+           w_met = f_met - (mu(x,y,z+1)*0.0015d0)
 
            !! Volume per mole of Mkw = 19.130 cc assuming a density of 4.28 g/cc from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
            !! Number of moles per m^3 = 48683
-           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)*48683.0d0
-           w_mkw = f_mkw - (mu(x,y,z+1)*48683.0d0*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
+           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)
+           w_mkw = f_mkw - (mu(x,y,z+1)*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
 
            !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
            !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z+1)*52275)
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)
+           w_pht = f_pht - (mu(x,y,z+1))
 
            !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
            !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)
+           w_pyr = f_pyr - (mu(x,y,z+1)*2)
 
            !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
            !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T)))
            w_env = 0.0d0
 
 
@@ -954,27 +954,27 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
            !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-           w_met = f_met - (mu(x,y,z+1)*140401*0.0015d0)
+           f_met = 0.0d0
+           w_met = f_met - (mu(x,y,z+1)*0.0015d0)
 
            !! Volume per mole of Mkw = 19.130 cc assuming a density of 4.28 g/cc from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
            !! Number of moles per m^3 = 48683
-           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)*48683.0d0
-           w_mkw = f_mkw - (mu(x,y,z+1)*48683.0d0*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
+           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)
+           w_mkw = f_mkw - (mu(x,y,z+1)*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
 
            !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
            !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z+1)*52275)
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)
+           w_pht = f_pht - (mu(x,y,z+1))
 
            !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
            !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)
+           w_pyr = f_pyr - (mu(x,y,z+1)*2)
 
            !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
            !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T)))
            w_env = 0.0d0
 
 
@@ -1216,27 +1216,27 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
            !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-           w_met = f_met - (mu(x,y,z+1)*140401*0.0015d0)
+           f_met = 0.0d0
+           w_met = f_met - (mu(x,y,z+1)*0.0015d0)
 
            !! Volume per mole of Mkw = 19.130 cc assuming a density of 4.28 g/cc from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
            !! Number of moles per m^3 = 48683
-           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)*48683.0d0
-           w_mkw = f_mkw - (mu(x,y,z+1)*48683.0d0*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
+           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)
+           w_mkw = f_mkw - (mu(x,y,z+1)*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
 
            !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
            !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z+1)*52275)
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)
+           w_pht = f_pht - (mu(x,y,z+1))
 
            !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
            !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)
+           w_pyr = f_pyr - (mu(x,y,z+1)*2)
 
            !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
            !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T)))
            w_env = 0.0d0
 
 
@@ -1503,27 +1503,27 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
 
            !! Volume per mole of Fe = 7.122 cc assuming a density of 7.84 g/cc
            !! Number of moles per m^3 = 140401
-           f_met = 0.0d0*140401
-           w_met = f_met - (mu(x,y,z+1)*140401*0.0015d0)
+           f_met = 0.0d0
+           w_met = f_met - (mu(x,y,z+1)*0.0015d0)
 
            !! Volume per mole of Mkw = 19.130 cc assuming a density of 4.28 g/cc from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
            !! Number of moles per m^3 = 48683
-           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)*48683.0d0
-           w_mkw = f_mkw - (mu(x,y,z+1)*48683.0d0*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
+           f_mkw = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 65060)
+           w_mkw = f_mkw - (mu(x,y,z+1)*0.80d0)  ! 0.95 because mackinawite is sligtly iron-rich and sulfur deficient
 
            !! Volume per mole of Pht = 19.130 cc assuming a density of 4.6 g/cc
            !! Number of moles per m^3 = 52275
-           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)*52275
-           w_pht = f_pht - (mu(x,y,z+1)*52275)
+           f_pht = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-6)) + 20.53*T - 72050)
+           w_pht = f_pht - (mu(x,y,z+1))
 
            !! Volumer per mole of Pyrite = 24 cc assuming a density of 5 g/cc
            !! Number of moles per m^3 = 41667
-           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)*41667
-           w_pyr = f_pyr - (mu(x,y,z+1)*2*41667)
+           f_pyr = ((mu(x,y,z+1)*mu(x,y,z+1)*(1E-9)) + 50.355*T - 98710)
+           w_pyr = f_pyr - (mu(x,y,z+1)*2)
 
            !! Volume per mole of air = 22.4 * (T/298) * 1E3 cc
            !! Number of moles per m^3 = 13303/T
-           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T))*(13303/T))
+           f_env = mu(x,y,z+1)*(exp(mu(x,y,z+1)/(R*T)))
            w_env = 0.0d0
 
 
@@ -1538,20 +1538,19 @@ subroutine pfFunction(snes,pf_vec,ret_vec,dummy,ierr)
            del_opyr = (sqrt((delx*delx)+(dely*dely)+(delz*delz))/dpf)
 
 
+           hill_met_mkw = (16.0d0/3.0d0)*double_well_barrier; hill_mkw_met = (16.0d0/3.0d0)*double_well_barrier
+           hill_met_pht = (16.0d0/3.0d0)*double_well_barrier; hill_pht_met = (16.0d0/3.0d0)*double_well_barrier
+           hill_met_pyr = (16.0d0/3.0d0)*double_well_barrier; hill_pyr_met = (16.0d0/3.0d0)*double_well_barrier
+           hill_met_env = (16.0d0/3.0d0)*double_well_barrier; hill_env_met = (16.0d0/3.0d0)*double_well_barrier
 
-           hill_met_mkw = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_met+rho_mkw); hill_mkw_met = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_mkw+rho_met)
-           hill_met_pht = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_met+rho_pht); hill_pht_met = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_pht+rho_met)
-           hill_met_pyr = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_met+rho_pyr); hill_pyr_met = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_pyr+rho_met)
-           hill_met_env = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_met+rho_env); hill_env_met = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_env+rho_met)
+           hill_mkw_pht = (16.0d0/3.0d0)*double_well_barrier; hill_pht_mkw = (16.0d0/3.0d0)*double_well_barrier
+           hill_mkw_pyr = (16.0d0/3.0d0)*double_well_barrier; hill_pyr_mkw = (16.0d0/3.0d0)*double_well_barrier
+           hill_mkw_env = (16.0d0/3.0d0)*double_well_barrier; hill_env_mkw = (16.0d0/3.0d0)*double_well_barrier
 
-           hill_mkw_pht = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_mkw+rho_pht); hill_pht_mkw = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_pht+rho_mkw)
-           hill_mkw_pyr = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_mkw+rho_pyr); hill_pyr_mkw = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_pyr+rho_mkw)
-           hill_mkw_env = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_mkw+rho_env); hill_env_mkw = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_env+rho_mkw)
+           hill_pht_pyr = (16.0d0/3.0d0)*double_well_barrier; hill_pyr_pht = (16.0d0/3.0d0)*double_well_barrier
+           hill_pht_env = (16.0d0/3.0d0)*double_well_barrier; hill_env_pht = (16.0d0/3.0d0)*double_well_barrier
 
-           hill_pht_pyr = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_pht+rho_pyr); hill_pyr_pht = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_pyr+rho_pht)
-           hill_pht_env = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_pht+rho_env); hill_env_pht = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_env+rho_pht)
-
-           hill_pyr_env = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_pyr+rho_env); hill_env_pyr = (16.0d0/3.0d0)*double_well_barrier*0.5d0*(rho_env+rho_pyr)
+           hill_pyr_env = (16.0d0/3.0d0)*double_well_barrier; hill_env_pyr = (16.0d0/3.0d0)*double_well_barrier
 
 
 !!! FOR MET           

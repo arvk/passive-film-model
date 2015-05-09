@@ -78,31 +78,31 @@ module thermo_constants
   real*8, parameter :: R = 8.3144621   
 
   !! Surface energy sigmas
-  real*8 :: sigma_mkw_env= 1E-7, sigma_env_mkw= 1E-7
-  real*8 :: sigma_mkw_met= 1E-7, sigma_met_mkw= 1E-7
-  real*8 :: sigma_mkw_pht= 1E-7, sigma_pht_mkw= 1E-7
-  real*8 :: sigma_mkw_pyr_0 = 1E-7, sigma_pyr_mkw_0 = 1E-7
-  real*8 :: sigma_pht_env= 1E-7, sigma_env_pht= 1E-7
-  real*8 :: sigma_pht_met= 1E-7, sigma_met_pht= 1E-7
-  real*8 :: sigma_pht_pyr_0 = 1E-7, sigma_pyr_pht_0 = 1E-7
-  real*8 :: sigma_met_env= 1E-7, sigma_env_met= 1E-7
-  real*8 :: sigma_met_pyr_0 = 1E-7, sigma_pyr_met_0 = 1E-7
-  real*8 :: sigma_env_pyr_0 = 1E-7, sigma_pyr_env_0 = 1E-7
+  real*8 :: sigma_mkw_env= 1E-12, sigma_env_mkw= 1E-12
+  real*8 :: sigma_mkw_met= 1E-12, sigma_met_mkw= 1E-12
+  real*8 :: sigma_mkw_pht= 1E-12, sigma_pht_mkw= 1E-12
+  real*8 :: sigma_mkw_pyr_0 = 1E-12, sigma_pyr_mkw_0 = 1E-12
+  real*8 :: sigma_pht_env= 1E-12, sigma_env_pht= 1E-12
+  real*8 :: sigma_pht_met= 1E-12, sigma_met_pht= 1E-12
+  real*8 :: sigma_pht_pyr_0 = 1E-12, sigma_pyr_pht_0 = 1E-12
+  real*8 :: sigma_met_env= 1E-12, sigma_env_met= 1E-12
+  real*8 :: sigma_met_pyr_0 = 1E-12, sigma_pyr_met_0 = 1E-12
+  real*8 :: sigma_env_pyr_0 = 1E-12, sigma_pyr_env_0 = 1E-12
 
   !! Field mobilities
-  real*8 :: M_pht_met = 1.0E-12, M_met_pht = 1.0E-12
-  real*8 :: M_mkw_met = 1.0E-12, M_met_mkw = 1.0E-12
-  real*8 :: M_met_pyr = 1.0E-12, M_pyr_met = 1.0E-12
-  real*8 :: M_pht_pyr = 1.0E-12, M_pyr_pht = 1.0E-12
-  real*8 :: M_mkw_pyr = 1.0E-12, M_pyr_mkw = 1.0E-12
-  real*8 :: M_pht_mkw = 1.0E-12, M_mkw_pht = 1.0E-12
+  real*8 :: M_pht_met = 3.0E-9, M_met_pht = 3.0E-9
+  real*8 :: M_mkw_met = 1.0E-7, M_met_mkw = 1.0E-7
+  real*8 :: M_met_pyr = 3.0E-9, M_pyr_met = 3.0E-9
+  real*8 :: M_pht_pyr = 5.0E-8, M_pyr_pht = 5.0E-8
+  real*8 :: M_mkw_pyr = 3.0E-8, M_pyr_mkw = 3.0E-9
+  real*8 :: M_pht_mkw = 1.0E-7, M_mkw_pht = 1.0E-7
   real*8 :: M_pht_env = 1.0E-15, M_env_pht = 1.0E-15
   real*8 :: M_mkw_env = 1.0E-15, M_env_mkw = 1.0E-15
   real*8 :: M_met_env = 1.0E-15, M_env_met = 1.0E-15
   real*8 :: M_env_pyr = 1.0E-15, M_pyr_env = 1.0E-15
 
   !! Double well potential heights
-  real*8 :: double_well_barrier = 1000.0d0 ! in J/mol
+  real*8 :: double_well_barrier = 100.0d0 ! in J/mol
   real*8 :: hill_met_mkw, hill_met_pht, hill_met_pyr, hill_met_env
   real*8 :: hill_mkw_met, hill_mkw_pht, hill_mkw_pyr, hill_mkw_env
   real*8 :: hill_pht_met, hill_pht_mkw, hill_pht_pyr, hill_pht_env
