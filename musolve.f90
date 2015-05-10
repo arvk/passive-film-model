@@ -39,6 +39,11 @@ subroutine musolve(iter)
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: newmu
   integer :: wrap
 
+  real*8 :: threshold_met = 0.25d0
+  real*8 :: threshold_mkw = 0.40d0
+  real*8 :: threshold_pht = 0.60d0
+  real*8 :: threshold_pyr = 1.00d0
+  real*8 :: my_random_number, threshold, my_sulfidation_rate
 
   ! A/B/JA matrices for implicit solver
   real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
@@ -363,7 +368,7 @@ subroutine musolve(iter)
 
   rho_pht = 52275.0d0
   rho_met = 0.0015d0*140401
-  sulfidation_rate = sulfidation_rate*1E-3
+  sulfidation_rate = sulfidation_rate*1E1
 
   do x = 1,psx
      do y = 1,psy
@@ -376,11 +381,19 @@ subroutine musolve(iter)
               Chi = Chi + max(min(pyr(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_pyr
               Chi = Chi + max(min(env(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_env
 
+              call random_number(my_random_number)
+              threshold = ((met(x,y,z-1)*threshold_met)+(mkw(x,y,z-1)*threshold_mkw)+(pht(x,y,z-1)*threshold_pht)+(pyr(x,y,z-1)*threshold_pyr))/(met(x,y,z-1)+mkw(x,y,z-1)+pht(x,y,z-1)+pyr(x,y,z-1))
 
-              newmu(x,y,z) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
+              if (my_random_number.lt.threshold) then
+                 my_sulfidation_rate = sulfidation_rate/min(max(threshold,0.01d0),1.0d0)
+              else
+                 my_sulfidation_rate = 0.0d0
+              end if
+
+              newmu(x,y,z) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*my_sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
               newmu(x,y,z) = min(newmu(x,y,z),avg_mu_env)
 
-              newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
+              newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_pht-rho_met)/drho_dmu_pht)*my_sulfidation_rate*dt)/(dpf)) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
               newmu(x,y,z-1) = min(newmu(x,y,z-1),avg_mu_env)
 
               exit
