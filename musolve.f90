@@ -363,7 +363,11 @@ subroutine musolve(iter)
 
   rho_pht = 52275.0d0
   rho_met = 0.0015d0*140401
-  sulfidation_rate = sulfidation_rate*1E-3
+
+  sulfidation_rate = 0.01372E-9 + 0.04356E-9*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
+  sulfidation_rate = max(sulfidation_rate,0.0d0) 
+
+  sulfidation_rate = sulfidation_rate*1E-1
 
   do x = 1,psx
      do y = 1,psy
