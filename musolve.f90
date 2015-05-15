@@ -39,8 +39,8 @@ subroutine musolve(iter)
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: newmu
   integer :: wrap
 
-  real*8 :: sulf_rate_gas_met, sulf_rate_gas_pht
-  real*8 :: sulf_rate_liq_pht
+  real*8 :: sulf_rate_gas_met, sulf_rate_gas_pht, sulf_rate_gas_pyr
+  real*8 :: sulf_rate_liq_pht, sulf_rate_liq_pyr
 
   ! A/B/JA matrices for implicit solver
   real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
@@ -373,6 +373,9 @@ subroutine musolve(iter)
 
   sulf_rate_liq_pht = 0.01372E-9 + 0.04356E-9*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
   sulf_rate_liq_pht = max(sulf_rate_liq_pht,0.0d0) 
+
+  sulf_rate_liq_pyr = 0.003543 !! Ref = Crystal growth of pyrite in Aqueous solutions. Inhibition by organophosphorous compounds, Harmandas NG. et. al., Langmuir 14, 1250-1255, 1998.
+  sulf_rate_liq_pyr = max(sulf_rate_liq_pyr,0.0d0) 
 
   rho_pht = 52275.0d0
   rho_met = 0.0015d0*140401
