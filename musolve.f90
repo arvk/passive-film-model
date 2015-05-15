@@ -368,6 +368,9 @@ subroutine musolve(iter)
   sulf_rate_gas_pht = exp(-(11766/T)-0.6478) !! Ref = Mechanisms Governing the Growth, Reactivity and Stability of Iron Sulfides, Ph.D Thesis William Herbert, MIT
   sulf_rate_gas_pht = max(sulf_rate_gas_pht,0.0d0) 
 
+  sulf_rate_gas_pyr = 7.45E8 * exp(-(98400/(R*T))) !! Ref = Kinetics of sulfidation of chalcopyrite with gaseous sulfur. Padilla R. et. al., Met Trans B, Vol 34B, Feb 2003, 61-68, 
+  sulf_rate_gas_pyr = max(sulf_rate_gas_pyr,0.0d0) 
+
   sulf_rate_liq_pht = 0.01372E-9 + 0.04356E-9*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
   sulf_rate_liq_pht = max(sulf_rate_liq_pht,0.0d0) 
 
