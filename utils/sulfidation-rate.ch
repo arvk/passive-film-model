@@ -20,9 +20,9 @@ set ytics 5 out nomirror
 
 set key top left
 
-plot log10(sulfid_gas_met(x)*1E-9) w l lt 1 lw 2 lc rgb 'red' title 'Met-Gas', \
-     log10(sulfid_gas_pht(x)*1E-9) w l lt 1 lw 2 lc rgb 'blue' title 'Pht-Gas', \
-     log10(sulfid_liq_pht(x)*1E-9) w l lt 2 lw 2 lc rgb 'blue' title 'Pht-Liq'
+plot log10(sulfid_gas_met(x)*1E-9) w l lt 1 lw 3 lc rgb 'red' title 'Met-Gas', \
+     log10(sulfid_gas_pht(x)*1E-9) w l lt 1 lw 3 lc rgb 'blue' title 'Pht-Gas', \
+     log10(sulfid_liq_pht(x)*1E-9) w l lt 2 lw 3 lc rgb 'blue' title 'Pht-Liq'
 
 
 quit
