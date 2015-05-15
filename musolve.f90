@@ -39,6 +39,8 @@ subroutine musolve(iter)
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: newmu
   integer :: wrap
 
+  real*8 :: sulf_rate_gas_met
+  real*8 :: sulf_rate_liq_pht
 
   ! A/B/JA matrices for implicit solver
   real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
@@ -360,12 +362,20 @@ subroutine musolve(iter)
   end do
 
 
+  sulf_rate_gas_met = 10**((0.00473*T)-5.645+((avg_mu_env+63562)/(R*T))) !! Ref = Assessing Corrosion in Oil Refining and Petrochemical Processing, Materials Research, Vol 7, No 1, pp. 163-173, 2004
+  sulf_rate_gas_met = max(sulf_rate_gas_met,0.0d0) 
+
+  sulf_rate_liq_pht = 0.01372E-9 + 0.04356E-9*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
+  sulf_rate_liq_pht = max(sulf_rate_liq_pht,0.0d0) 
 
   rho_pht = 52275.0d0
   rho_met = 0.0015d0*140401
 
-  sulfidation_rate = 0.01372E-9 + 0.04356E-9*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
-  sulfidation_rate = max(sulfidation_rate,0.0d0) 
+  if (include_dissolve) then
+     sulfidation_rate = sulf_rate_liq_pht
+  else
+     sulfidation_rate = sulf_rate_gas_met
+  end if
 
   sulfidation_rate = sulfidation_rate*1E-1
 
