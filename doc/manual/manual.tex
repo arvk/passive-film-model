@@ -2,8 +2,11 @@
 
 \usepackage{amsmath}
 \usepackage{fullpage}
+\usepackage{array}
 
 \begin{document}
+\renewcommand{\arraystretch}{1.75}
+
 
 \section{Free Energy equations for different phases}
 
@@ -122,6 +125,118 @@ Plugging equation \ref{eq:gr_pot} back into equation \ref{eq:pf_evol}, we get
 \begin{equation}
   \dot{\phi_i} = \sum\limits_{i\neq j}^N -M_{ij}\left[ -\sigma_{ij}\left(\phi_i\nabla^2\phi_j-\phi_j\nabla^2\phi_i\right) + 2H_{ij}\ \phi_i\phi_j (\phi_j-\phi_i) + 2(w_i-w_j)(\phi_i+\phi_j)^2\right]
 \end{equation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Physical parameters from external sources}
+
+\subsection{Diffusivities}
+
+
+\begin{center}
+    \begin{tabular}{ | c | p{5cm} | p{5cm} | c |}
+    \hline
+    Parameter & Description & Value (m$^2$/s) & Source \\
+    \hline
+    $D_{Fe}^{Fe}$ & Self diffusivity of BCC Fe & $7.87 \times 10^{-7} \  e^{\left(\frac{-57900}{R T}\right)}$ & \cite{MDBFMM09} \\
+    \hline
+    $D_{S}^{Fe}$ & Diffusivity of sulfur in BCC Fe & $ 1.78 \ e^{\left(\frac{-205000}{R T}\right)}$ & \cite{DOCACF82} \\
+
+    \hline
+    $D_{Fe}^{mkw}$ & Diffusivity of iron in mackinawite & $ 3.37 \times 10^{-16} \ e^{\left(\frac{-15500}{R T}\right)}$ & \cite{SOCCJA11} \\
+
+    \hline
+    $D_{Fe}^{pht}$ & Diffusivity of iron in pyrrhotite & $ 10^{\left(\frac{-7056}{T} - 2.679 \right)}$ & \cite{MDPFFH15} \\
+
+    \hline
+    $D_{S}^{pyr}$ & Diffusivity of sulfur in pyrite & $ 1.75 \times 10^{-14} \ e^{\left(\frac{-132100}{R T}\right)}$ & \cite{ROOSEW09} \\
+
+    \hline
+    $D_{Fe}^{pyr}$ & Diffusivity of iron in pyrite & $ 2.5 \times 10^{-16} \ e^{\left(\frac{-41840}{R T}\right)}$ & \cite{CSAPJC75} \\
+
+    \hline
+    $D_{S}^{env}$ & Diffusivity of sulfur in water & $ 1.73 \times 10^{-9}$ & \cite{DC3KAT94} \\
+
+    \hline
+    $D_{Fe}^{env}$ & Diffusivity of iron in water & $ 7.19 \times 10^{-10}$ & \cite{MOPMJD02} \\
+
+    \hline
+
+    \end{tabular}
+\end{center}
+
+
+
+\subsection{Dissolution rates}
+
+
+\begin{center}
+    \begin{tabular}{ | c | p{8cm} | c |}
+    \hline
+    Material & Dissolution rate (in nm/s) & Source \\
+
+    \hline
+    Fe & $0.257 [OH^-]^{0.6} e^{\frac{82012(V+0.45)}{R T}}$ & \cite{EKASRC72} \\
+
+    \hline
+    Mackinawite & $0.015$ & \cite{CMESLS08} \\
+
+    \hline
+    Pyrrhotite & $289.15 e^{\frac{-65900}{R T}} \times 10^{-1.46 pH}$ & \cite{PDAMPC14} \\
+
+    \hline
+    Pyrite & $0.00017244$ & \cite{ISACMP08} \\
+
+    \hline
+
+    \end{tabular}
+\end{center}
+
+
+
+
+
+
+\subsection{Sulfidation rates}
+
+
+\begin{center}
+    \begin{tabular}{ | c | c | p{8cm} | c |}
+    \hline
+    Material & Environment & Sulfidation rate (in nm/s) & Source \\
+
+    \hline
+    Fe & Gas & $ 10^{0.00473 T - 5.645 + \frac{\mu_S+63562}{R T}}   $ & \cite{ACPPRJ04} \\
+
+    \hline
+    Pyrrhotite & Gas & $e^{\frac{-11766}{T} - 0.6478}$ & \cite{MGISFH15} \\
+
+    \hline
+    Pyrrhotite & Liquid & $0.01372 \times 10^{-9} + 0.04356 \times 10^{-9} e^{\frac{\mu_S}{R T}}$ & \cite{COAETR90} \\
+
+    \hline
+
+    \end{tabular}
+\end{center}
+
+
+
+
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+
 
 
 \end{document}
