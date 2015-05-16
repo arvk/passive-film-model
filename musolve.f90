@@ -362,10 +362,12 @@ subroutine musolve(iter)
   end do
 
 
+!!! EVERYTHING BELOW IS IN nm/s
+
   sulf_rate_gas_met = 10**((0.00473*T)-5.645+((avg_mu_env+63562)/(R*T))) !! Ref = Assessing Corrosion in Oil Refining and Petrochemical Processing, Materials Research, Vol 7, No 1, pp. 163-173, 2004
   sulf_rate_gas_met = max(sulf_rate_gas_met,0.0d0) 
 
-  sulf_rate_gas_pht = exp(-(11766/T)-0.6478) !! Ref = Mechanisms Governing the Growth, Reactivity and Stability of Iron Sulfides, Ph.D Thesis William Herbert, MIT
+  sulf_rate_gas_pht = exp(-(11766/T)-0.6478)*1E9 !! Ref = Mechanisms Governing the Growth, Reactivity and Stability of Iron Sulfides, Ph.D Thesis William Herbert, MIT
   sulf_rate_gas_pht = max(sulf_rate_gas_pht,0.0d0) 
 
   sulf_rate_gas_pyr = 7.45E8 * exp(-(98400/(R*T))) !! Ref = Kinetics of sulfidation of chalcopyrite with gaseous sulfur. Padilla R. et. al., Met Trans B, Vol 34B, Feb 2003, 61-68, 
@@ -377,7 +379,7 @@ subroutine musolve(iter)
   sulf_rate_liq_mkw = 0.1332*(1 + (2*(avg_mu_env+63562)/(R*T))) !! Ref = Mechanistic model of H2S corrosion of mild steel
   sulf_rate_liq_mkw = max(sulf_rate_liq_mkw,0.0d0) 
 
-  sulf_rate_liq_pht = 0.01372E-9 + 0.04356E-9*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
+  sulf_rate_liq_pht = 0.01372 + 0.04356*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
   sulf_rate_liq_pht = max(sulf_rate_liq_pht,0.0d0) 
 
   sulf_rate_liq_pyr = 0.003543 !! Ref = Crystal growth of pyrite in Aqueous solutions. Inhibition by organophosphorous compounds, Harmandas NG. et. al., Langmuir 14, 1250-1255, 1998.
