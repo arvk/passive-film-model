@@ -10,7 +10,7 @@
 
 \section{Free Energy equations for different phases}
 
-The model takes as input the free energy of all four phases assumed to be present in the simulation box. These phases are 
+The model takes as input the free energy of all four phases assumed to be present in the simulation box. These phases are
 
 \begin{enumerate}
 \item Fe metal containing dissolved sulfur
@@ -45,7 +45,7 @@ The free energies of the phases are given below in J\ mol$^{-1}$
 For the purpose of the phase field calculations, the free energy of the metal is taken to be zero and the other values are scaled accordingly. Additionally, sulfur is assumed to exist as a dilute solution in both the metal and the environment, therefore the chemical potential of sulfur in these phases (in J mol$^{-1}$) is given by
 
 \begin{equation*}
-  \mu_{S,i}(T) = RT\ln([S]); \quad \forall\ i \subset (\mathrm{metal,environment}) 
+  \mu_{S,i}(T) = RT\ln([S]); \quad \forall\ i \subset (\mathrm{metal,environment})
 \end{equation*}
 
 In the case of pyrrhotite and pyrite, the derivative of the molar free energy (equations \ref{g_pht} and \ref{g_pyr}) with sulfur content (or equivalently $\ \delta$ in each case) gives us the sulfur chemical potential (in J mol$^{-1}$) as shown below.
@@ -107,7 +107,7 @@ where $\mathcal{F}_{ij}$ is the expression inside the summation in equation \ref
   \begin{split}
   \mathcal{F} &= \mathcal{F}_{\mathrm{pyrrhotite,metal}} + \mathcal{F}_{\mathrm{pyrrhotite,environment}} + \mathcal{F}_{\mathrm{pyrrhotite,pyrite}} \\
               &+ \mathcal{F}_{\mathrm{environment,metal}} + \mathcal{F}_{\mathrm{environment,pyrite}} \\
-              &+ \mathcal{F}_{\mathrm{metal,pyrite}}    
+              &+ \mathcal{F}_{\mathrm{metal,pyrite}}
   \end{split}
 \end{equation}
 
@@ -245,8 +245,28 @@ Plugging equation \ref{eq:gr_pot} back into equation \ref{eq:pf_evol}, we get
 \end{center}
 
 
+\subsection{Phase properties}
 
+\subsubsection{Sulfur Density}
 
+\begin{center}
+\begin{tabular}{ | c | l | c |}
+
+\hline
+Material & Density (g/m$^3$) & Source \\
+
+\hline
+Mackinawite & 48683 & \cite{SATFAL95} \\
+
+\hline
+Pyrrhotite & 52275 & \cite{CS6PDV10} \\
+
+\hline
+Pyrite & 83334 & \cite{FPPFJM02} \\
+
+\hline
+\end{tabular}
+\end{center}
 
 \bibliographystyle{plain}
 \bibliography{references}
