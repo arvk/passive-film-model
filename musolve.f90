@@ -399,6 +399,14 @@ subroutine musolve(iter)
      sulf_rate_pyr = sulf_rate_gas_pyr
   end if
 
+!!!  Modify sulfidation rates based on electric potential of the surface (Ref: Own work -- DFT calculations of reactions at sulfide-aqueous interafaces. DOI will be added on publication in a peer-reviewd journal)
+  if (include_electro) then
+     sulf_rate_met = sulf_rate_met*exp(96500*0.08623d0*(-0.5d0-metal_potential)/(R*T))
+     sulf_rate_mkw = sulf_rate_mkw*exp(96500*0.08623d0*(-0.5d0-metal_potential)/(R*T))
+     sulf_rate_pht = sulf_rate_pht*exp(96500*0.08623d0*(-0.5d0-metal_potential)/(R*T))
+     sulf_rate_pyr = sulf_rate_pyr*exp(96500*0.08623d0*(-0.5d0-metal_potential)/(R*T))
+  end if
+
   rho_mkw = 48683.0d0 !! Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
   rho_met = 0.0015d0*140401
   rho_pht = 52275.0d0
