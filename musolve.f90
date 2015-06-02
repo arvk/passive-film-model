@@ -39,9 +39,17 @@ subroutine musolve(iter)
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: newmu
   integer :: wrap
 
+
   real*8 :: sulf_rate_gas_met, sulf_rate_gas_mkw, sulf_rate_gas_pht, sulf_rate_gas_pyr
   real*8 :: sulf_rate_liq_met, sulf_rate_liq_mkw, sulf_rate_liq_pht, sulf_rate_liq_pyr
   real*8 :: sulf_rate_met, sulf_rate_mkw, sulf_rate_pht, sulf_rate_pyr
+
+  real*8 :: threshold_met = 0.25d0
+  real*8 :: threshold_mkw = 0.40d0
+  real*8 :: threshold_pht = 0.60d0
+  real*8 :: threshold_pyr = 1.00d0
+  real*8 :: my_random_number, threshold, my_sulfidation_rate
+
 
   ! A/B/JA matrices for implicit solver
   real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
@@ -412,6 +420,9 @@ subroutine musolve(iter)
   rho_pht = 52275.0d0
   rho_pyr = 2.0d0*41667.0d0
 
+
+
+
   do x = 1,psx
      do y = 1,psy
         do z = 1+ghost_width,psz+ghost_width
@@ -422,6 +433,25 @@ subroutine musolve(iter)
               Chi = Chi + max(min(pht(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_pht
               Chi = Chi + max(min(pyr(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_pyr
               Chi = Chi + max(min(env(x,y,z-1)-0.005d0,1.0d0),0.0d0)*drho_dmu_env
+
+              if ((psx.gt.25).or.(psy.gt.25)) then
+
+                 call random_number(my_random_number)
+                 threshold = ((met(x,y,z-1)*threshold_met)+(mkw(x,y,z-1)*threshold_mkw)+(pht(x,y,z-1)*threshold_pht)+(pyr(x,y,z-1)*threshold_pyr))/(met(x,y,z-1)+mkw(x,y,z-1)+pht(x,y,z-1)+pyr(x,y,z-1))
+
+                 if (my_random_number.lt.threshold) then
+                    sulf_rate_met = sulf_rate_met/min(max(threshold,0.01d0),1.0d0)
+                    sulf_rate_mkw = sulf_rate_mkw/min(max(threshold,0.01d0),1.0d0)
+                    sulf_rate_pht = sulf_rate_pht/min(max(threshold,0.01d0),1.0d0)
+                    sulf_rate_pyr = sulf_rate_pyr/min(max(threshold,0.01d0),1.0d0)
+                 else
+                    sulf_rate_met = 0.0d0
+                    sulf_rate_mkw = 0.0d0
+                    sulf_rate_pht = 0.0d0
+                    sulf_rate_pyr = 0.0d0
+                 end if
+
+              end if          
 
               newmu(x,y,z) = mu(x,y,z-1) + ((((rho_mkw-rho_met)/drho_dmu_met)*sulf_rate_met*met(x,y,z-1)*dt)/(dpf)) 
               newmu(x,y,z) = newmu(x,y,z) + ((((rho_mkw-rho_met)/drho_dmu_mkw)*sulf_rate_mkw*mkw(x,y,z-1)*dt)/(dpf)) 
@@ -435,6 +465,8 @@ subroutine musolve(iter)
               newmu(x,y,z-1) = newmu(x,y,z-1) + ((((rho_pht-rho_mkw)/drho_dmu_pht)*sulf_rate_pht*pht(x,y,z-1)*dt)/(dpf)) 
               newmu(x,y,z-1) = newmu(x,y,z-1) + ((((rho_pyr-rho_pht)/drho_dmu_pyr)*sulf_rate_pyr*pyr(x,y,z-1)*dt)/(dpf)) 
               newmu(x,y,z-1) = newmu(x,y,z-1) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
+
+
               newmu(x,y,z-1) = min(newmu(x,y,z-1),avg_mu_env)
 
               exit
