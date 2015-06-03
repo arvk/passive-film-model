@@ -9,7 +9,6 @@ program passive_film_model
   integer :: x, y, z   ! Loop variables
   integer :: iter      ! Loop variable for current iteration 
   integer :: rank_loop
-  integer :: deallocatestatus
   integer :: ierr,status(MPI_STATUS_SIZE)   
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
