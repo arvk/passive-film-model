@@ -7,9 +7,9 @@ program passive_film_model
 
 
   integer :: x, y, z   ! Loop variables
-  integer :: iter      ! Loop variable for current iteration 
+  integer :: iter      ! Loop variable for current iteration
   integer :: rank_loop
-  integer :: ierr,status(MPI_STATUS_SIZE)   
+  integer :: ierr,status(MPI_STATUS_SIZE)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -23,7 +23,7 @@ program passive_film_model
   !! Define Root process (rank 0)
   if(rank .eq. 0)then
      isroot = .TRUE.
-  else 
+  else
      isroot = .FALSE.
   end if
 
@@ -54,7 +54,7 @@ program passive_film_model
   if (isroot) then
      if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then
         call read_geometry()
-     else 
+     else
         call system("rm -rf *.out")   ! Cleanup before running
         call initialize_geometry()
      end if
@@ -98,8 +98,8 @@ program passive_film_model
      ! if (iter.eq.nomc/10) then
      !    call voids_create()
      ! end if
-  
-  
+
+
      if (mod(iter,freq_scale).eq.0) then
 
         if (isroot) then
@@ -117,7 +117,7 @@ program passive_film_model
         call gather_opyr()
         call gather_kmc()
 
-        if (isroot) then           
+        if (isroot) then
            call couple_kmc_pf()
         end if
         call distrib_pf()
