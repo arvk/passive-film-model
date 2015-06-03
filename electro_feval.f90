@@ -65,7 +65,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   do z = 1,ghost_width
      do y = 1,psy
         do x = 1,psx
-           loc_elpot(x,y,z) = loc_elpot(x,y,1+ghost_width) ; loc_elpot(x,y,psz+z+ghost_width) = loc_elpot(x,y,psz+ghost_width) 
+           loc_elpot(x,y,z) = loc_elpot(x,y,1+ghost_width) ; loc_elpot(x,y,psz+z+ghost_width) = loc_elpot(x,y,psz+ghost_width)
         end do
      end do
   end do
@@ -82,7 +82,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
   do z = 1,psz+(2*ghost_width)
      do y = 1,psy
         do x = 1,psx
-           epsilonr(x,y,z) = epsilon_met*met(x,y,z) + epsilon_mkw*mkw(x,y,z) + epsilon_pht*pht(x,y,z) + epsilon_pyr*pyr(x,y,z) + epsilon_env*env(x,y,z) 
+           epsilonr(x,y,z) = epsilon_met*met(x,y,z) + epsilon_mkw*mkw(x,y,z) + epsilon_pht*pht(x,y,z) + epsilon_pyr*pyr(x,y,z) + epsilon_env*env(x,y,z)
            epsilonr(x,y,z) = epsilonr(x,y,z)*epsilon0*(1.0d0-voids(x,y,z))
         end do
      end do
@@ -101,7 +101,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
      do y = 1,psy
         do x = 1,psx
 
-           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x 
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
            vector_locator(linindex) = linindex-1
 
            IA(linindex) = contindex + 1
@@ -109,16 +109,16 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)-1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x 
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
            contindex = contindex + 1
            A(contindex) = (0.5d0*(epsilonr(x,wrap(y-1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x 
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x
 
            contindex = contindex + 1
            A(contindex) = (0.5d0*(epsilonr(wrap(x-1,psx),y,z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx) 
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
 
            contindex = contindex + 1
            A(contindex) = epsilonr(x,y,(z+1)+1)+epsilonr(x,y,(z+1)-1)+&
@@ -126,20 +126,20 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
                 &epsilonr(wrap(x+1,psx),y,z+1)+epsilonr(wrap(x-1,psx),y,z+1)
            A(contindex) = A(contindex) + 6*epsilonr(x,y,z+1)
            A(contindex) = A(contindex)*(-0.5d0)/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x 
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            contindex = contindex + 1
            A(contindex) = (0.5d0*(epsilonr(wrap(x+1,psx),y,z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx) 
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx)
 
            contindex = contindex + 1
            A(contindex) = (0.5d0*(epsilonr(x,wrap(y+1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x 
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
 
            if (z .lt. psz+(2*ghost_width)-2) then
               contindex = contindex + 1
               A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x 
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
         end do
@@ -195,7 +195,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
      do y = 1,psy
         do x = 1,psx
 
-           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x 
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            exponent = (loc_elpot(x,y,z+1)*96485)/(R*T)
            nonlin(linindex) = c0*el_charg*(exp(0.0d0-exponent)-exp(0.0d0+exponent))*env(x,y,z+1)
@@ -203,7 +203,7 @@ subroutine electroFunction(snes,elpot_vec,ret_vec,dummy,ierr)
         end do
      end do
   end do
-  
+
   call VecSetValues(ret_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,nonlin,ADD_VALUES,ierr)
 
   call VecAssemblyBegin(ret_vec,ierr)

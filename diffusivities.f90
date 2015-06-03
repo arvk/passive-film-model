@@ -4,7 +4,7 @@ subroutine diffusivities
   use thermo_constants
   use diffusion_constants
   implicit none
-  
+
 ! in m^2/s
 
   D_Fe_met = 7.87E-7 * exp((96500*(0.0-0.60d0))/(R*T))   ! Ref = PHYSICAL REVIEW B 80, 144111-4 2009

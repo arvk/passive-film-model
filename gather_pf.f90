@@ -6,8 +6,8 @@ subroutine gather_pf
 
   integer :: x, y, z   ! Loop variables
   integer :: rank_loop
-  integer :: ierr,status(MPI_STATUS_SIZE)   
-  
+  integer :: ierr,status(MPI_STATUS_SIZE)
+
   if (rank.eq.0) then
 
      do x = 1,psx
@@ -40,7 +40,7 @@ subroutine gather_pf
      call mpi_send(mkw(1,1,1+ghost_width),psx*psy*psz,MPI_DOUBLE_PRECISION,0,5,MPI_COMM_WORLD,ierr)
 
   end if
-  
+
 end subroutine gather_pf
 
 

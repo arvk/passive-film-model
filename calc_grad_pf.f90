@@ -8,8 +8,8 @@ subroutine calc_grad_pf
   integer :: wrap
 
 !!!! Initialize all variables to zero
-  delypyr = 0.0d0 
-  delzpyr = 0.0d0 
+  delypyr = 0.0d0
+  delzpyr = 0.0d0
 
 !!!!! Calculating y-gradient in the bulk
 

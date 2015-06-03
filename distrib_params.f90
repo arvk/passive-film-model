@@ -5,7 +5,7 @@ subroutine distrib_params()
   implicit none
   include 'mpif.h'
 
-  integer :: ierr,status(MPI_STATUS_SIZE)   
+  integer :: ierr,status(MPI_STATUS_SIZE)
 
   call mpi_bcast(psx_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(psy_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
@@ -24,5 +24,5 @@ subroutine distrib_params()
   call mpi_bcast(include_dissolve,1,MPI_LOGICAL,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(include_electro,1,MPI_LOGICAL,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(metal_potential,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-     
+
 end subroutine distrib_params

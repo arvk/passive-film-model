@@ -36,18 +36,18 @@ subroutine thermo
         mus_pht_pyr_eqb = my_mu
         min_pht_pyr = abs(my_pht-my_pyr)
      end if
-     
+
   end do
 
 
   !! Density of sulfur in each FeS_x phase (number of moles of sulfur / m^3 of phase)
 
-  rho_mkw = 48683.0d0 !! Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683 
+  rho_mkw = 48683.0d0 !! Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
   rho_met = 0.0015d0*140401
   rho_pht = 52275.0d0
   rho_pyr = 2.0d0*41667.0d0
   rho_env = 0.0015d0*(13303/T)
-           
+
 
 end subroutine thermo
 

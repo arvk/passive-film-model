@@ -223,7 +223,7 @@ subroutine musolve(iter)
            JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
 
            contindex = contindex + 1
-           A(contindex) = (D(x,y,(z+1)+1) + D(x,y,(z+1)-1) + 2*D(x,y,z+1))*interface_multiply 
+           A(contindex) = (D(x,y,(z+1)+1) + D(x,y,(z+1)-1) + 2*D(x,y,z+1))*interface_multiply
            A(contindex) = A(contindex)+&
                 &D(x,wrap(y+1,psy),z+1)+D(x,wrap(y-1,psy),z+1)+&
                 &D(wrap(x+1,psx),y,z+1)+D(wrap(x-1,psx),y,z+1)
@@ -354,7 +354,7 @@ subroutine musolve(iter)
   elseif(rank.eq.procs-1) then
      do x = 1,psx
         do y = 1,psy
-           newmu(x,y,psz+ghost_width) = mu(x,y,psz+ghost_width)       
+           newmu(x,y,psz+ghost_width) = mu(x,y,psz+ghost_width)
         end do
      end do
   end if
@@ -372,28 +372,28 @@ subroutine musolve(iter)
 
 
   sulf_rate_gas_met = 10**((0.00473*T)-5.645+(0.4*(avg_mu_env+63562)/(R*T))) !! Ref = Assessing Corrosion in Oil Refining and Petrochemical Processing, Materials Research, Vol 7, No 1, pp. 163-173, 2004
-  sulf_rate_gas_met = max(sulf_rate_gas_met*1E-9,0.0d0) 
+  sulf_rate_gas_met = max(sulf_rate_gas_met*1E-9,0.0d0)
 
   sulf_rate_gas_mkw = 0.01372 + 0.04356*(exp(avg_mu_env/(R*T))) !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
-  sulf_rate_gas_mkw = max(sulf_rate_gas_mkw*1E-9,0.0d0) 
+  sulf_rate_gas_mkw = max(sulf_rate_gas_mkw*1E-9,0.0d0)
 
   sulf_rate_gas_pht = exp(-(11766/T)-0.6478)*1E9 !! Ref = Mechanisms Governing the Growth, Reactivity and Stability of Iron Sulfides, Ph.D Thesis William Herbert, MIT
-  sulf_rate_gas_pht = max(sulf_rate_gas_pht*1E-9,0.0d0) 
+  sulf_rate_gas_pht = max(sulf_rate_gas_pht*1E-9,0.0d0)
 
-  sulf_rate_gas_pyr = 7.45E8 * exp(-(98400/(R*T))) !! Ref = Kinetics of sulfidation of chalcopyrite with gaseous sulfur. Padilla R. et. al., Met Trans B, Vol 34B, Feb 2003, 61-68, 
-  sulf_rate_gas_pyr = max(sulf_rate_gas_pyr*1E-9,0.0d0) 
+  sulf_rate_gas_pyr = 7.45E8 * exp(-(98400/(R*T))) !! Ref = Kinetics of sulfidation of chalcopyrite with gaseous sulfur. Padilla R. et. al., Met Trans B, Vol 34B, Feb 2003, 61-68,
+  sulf_rate_gas_pyr = max(sulf_rate_gas_pyr*1E-9,0.0d0)
 
   sulf_rate_liq_met = 0.0666*(1 + ((avg_mu_env+63562)/(R*T))) !! Ref = Kinetics of iron sulfiede and mixed iron sulfide/carbonate scale precipitation in CO2/H2S corrosion, Corrosion 2006, Paper 06644
-  sulf_rate_liq_met = max(sulf_rate_liq_met*1E-9,0.0d0) 
+  sulf_rate_liq_met = max(sulf_rate_liq_met*1E-9,0.0d0)
 
   sulf_rate_liq_mkw = 0.1332*(1 + (2*(avg_mu_env+63562)/(R*T))) !! Ref = Mechanistic model of H2S corrosion of mild steel
-  sulf_rate_liq_mkw = max(sulf_rate_liq_mkw*1E-9,0.0d0) 
+  sulf_rate_liq_mkw = max(sulf_rate_liq_mkw*1E-9,0.0d0)
 
   sulf_rate_liq_pht = 2.41628 !! Ref = Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
-  sulf_rate_liq_pht = max(sulf_rate_liq_pht*1E-9,0.0d0) 
+  sulf_rate_liq_pht = max(sulf_rate_liq_pht*1E-9,0.0d0)
 
   sulf_rate_liq_pyr = 0.003543 !! Ref = Crystal growth of pyrite in Aqueous solutions. Inhibition by organophosphorous compounds, Harmandas NG. et. al., Langmuir 14, 1250-1255, 1998.
-  sulf_rate_liq_pyr = max(sulf_rate_liq_pyr*1E-9,0.0d0) 
+  sulf_rate_liq_pyr = max(sulf_rate_liq_pyr*1E-9,0.0d0)
 
   if (include_dissolve) then
      sulf_rate_met = sulf_rate_liq_met
@@ -451,19 +451,19 @@ subroutine musolve(iter)
                     sulf_rate_pyr = 0.0d0
                  end if
 
-              end if          
+              end if
 
-              newmu(x,y,z) = mu(x,y,z-1) + ((((rho_mkw-rho_met)/drho_dmu_met)*sulf_rate_met*met(x,y,z-1)*dt)/(dpf)) 
-              newmu(x,y,z) = newmu(x,y,z) + ((((rho_mkw-rho_met)/drho_dmu_mkw)*sulf_rate_mkw*mkw(x,y,z-1)*dt)/(dpf)) 
-              newmu(x,y,z) = newmu(x,y,z) + ((((rho_pht-rho_mkw)/drho_dmu_pht)*sulf_rate_pht*pht(x,y,z-1)*dt)/(dpf)) 
-              newmu(x,y,z) = newmu(x,y,z) + ((((rho_pyr-rho_pht)/drho_dmu_pyr)*sulf_rate_pyr*pyr(x,y,z-1)*dt)/(dpf)) 
+              newmu(x,y,z) = mu(x,y,z-1) + ((((rho_mkw-rho_met)/drho_dmu_met)*sulf_rate_met*met(x,y,z-1)*dt)/(dpf))
+              newmu(x,y,z) = newmu(x,y,z) + ((((rho_mkw-rho_met)/drho_dmu_mkw)*sulf_rate_mkw*mkw(x,y,z-1)*dt)/(dpf))
+              newmu(x,y,z) = newmu(x,y,z) + ((((rho_pht-rho_mkw)/drho_dmu_pht)*sulf_rate_pht*pht(x,y,z-1)*dt)/(dpf))
+              newmu(x,y,z) = newmu(x,y,z) + ((((rho_pyr-rho_pht)/drho_dmu_pyr)*sulf_rate_pyr*pyr(x,y,z-1)*dt)/(dpf))
               newmu(x,y,z) = newmu(x,y,z) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
               newmu(x,y,z) = min(newmu(x,y,z),avg_mu_env)
 
-              newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_mkw-rho_met)/drho_dmu_met)*sulf_rate_met*met(x,y,z-1)*dt)/(dpf)) 
-              newmu(x,y,z-1) = newmu(x,y,z-1) + ((((rho_mkw-rho_met)/drho_dmu_mkw)*sulf_rate_mkw*mkw(x,y,z-1)*dt)/(dpf)) 
-              newmu(x,y,z-1) = newmu(x,y,z-1) + ((((rho_pht-rho_mkw)/drho_dmu_pht)*sulf_rate_pht*pht(x,y,z-1)*dt)/(dpf)) 
-              newmu(x,y,z-1) = newmu(x,y,z-1) + ((((rho_pyr-rho_pht)/drho_dmu_pyr)*sulf_rate_pyr*pyr(x,y,z-1)*dt)/(dpf)) 
+              newmu(x,y,z-1) = mu(x,y,z-1) + ((((rho_mkw-rho_met)/drho_dmu_met)*sulf_rate_met*met(x,y,z-1)*dt)/(dpf))
+              newmu(x,y,z-1) = newmu(x,y,z-1) + ((((rho_mkw-rho_met)/drho_dmu_mkw)*sulf_rate_mkw*mkw(x,y,z-1)*dt)/(dpf))
+              newmu(x,y,z-1) = newmu(x,y,z-1) + ((((rho_pht-rho_mkw)/drho_dmu_pht)*sulf_rate_pht*pht(x,y,z-1)*dt)/(dpf))
+              newmu(x,y,z-1) = newmu(x,y,z-1) + ((((rho_pyr-rho_pht)/drho_dmu_pyr)*sulf_rate_pyr*pyr(x,y,z-1)*dt)/(dpf))
               newmu(x,y,z-1) = newmu(x,y,z-1) - max((dt*D(x,y,z-2)*(mu(x,y,z-1)-mu(x,y,z-2))/dpf),0.0d0) - (((dpht_dt(x,y,z-1)*rho_pht) + (dmet_dt(x,y,z-1)*rho_met) + (dmkw_dt(x,y,z-1)*rho_mkw) + (denv_dt(x,y,z-1)*rho_env) + (dpyr_dt(x,y,z-1)*rho_pyr))/Chi)
 
 
@@ -476,7 +476,7 @@ subroutine musolve(iter)
   end do
 
 
- 
+
   do x = 1,psx
      do y = 1,psy
         do z = 1+ghost_width,psz+ghost_width

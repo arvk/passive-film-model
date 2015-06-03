@@ -48,10 +48,10 @@ subroutine swap_pf
      call mpi_irecv(env(1,1,psz+1+ghost_width),psx*psy*ghost_width,MPI_DOUBLE_PRECISION,rank+1,41,MPI_COMM_WORLD,q421,ierr)
      call mpi_irecv(mkw(1,1,psz+1+ghost_width),psx*psy*ghost_width,MPI_DOUBLE_PRECISION,rank+1,51,MPI_COMM_WORLD,q521,ierr)
 
-     call mpi_wait(q111,stat,ierr); call mpi_wait(q211,stat,ierr); call mpi_wait(q311,stat,ierr); call mpi_wait(q411,stat,ierr) ; call mpi_wait(q511,stat,ierr) 
-     call mpi_wait(q110,stat,ierr); call mpi_wait(q210,stat,ierr); call mpi_wait(q310,stat,ierr); call mpi_wait(q410,stat,ierr) ; call mpi_wait(q510,stat,ierr) 
-     call mpi_wait(q120,stat,ierr); call mpi_wait(q220,stat,ierr); call mpi_wait(q320,stat,ierr); call mpi_wait(q420,stat,ierr) ; call mpi_wait(q520,stat,ierr) 
-     call mpi_wait(q121,stat,ierr); call mpi_wait(q221,stat,ierr); call mpi_wait(q321,stat,ierr); call mpi_wait(q421,stat,ierr) ; call mpi_wait(q521,stat,ierr) 
+     call mpi_wait(q111,stat,ierr); call mpi_wait(q211,stat,ierr); call mpi_wait(q311,stat,ierr); call mpi_wait(q411,stat,ierr) ; call mpi_wait(q511,stat,ierr)
+     call mpi_wait(q110,stat,ierr); call mpi_wait(q210,stat,ierr); call mpi_wait(q310,stat,ierr); call mpi_wait(q410,stat,ierr) ; call mpi_wait(q510,stat,ierr)
+     call mpi_wait(q120,stat,ierr); call mpi_wait(q220,stat,ierr); call mpi_wait(q320,stat,ierr); call mpi_wait(q420,stat,ierr) ; call mpi_wait(q520,stat,ierr)
+     call mpi_wait(q121,stat,ierr); call mpi_wait(q221,stat,ierr); call mpi_wait(q321,stat,ierr); call mpi_wait(q421,stat,ierr) ; call mpi_wait(q521,stat,ierr)
 
   elseif (rank.eq.0) then
 
@@ -79,8 +79,8 @@ subroutine swap_pf
         end do
      end do
 
-     call mpi_wait(q111,stat,ierr); call mpi_wait(q211,stat,ierr); call mpi_wait(q311,stat,ierr); call mpi_wait(q411,stat,ierr) ; call mpi_wait(q511,stat,ierr) 
-     call mpi_wait(q121,stat,ierr); call mpi_wait(q221,stat,ierr); call mpi_wait(q321,stat,ierr); call mpi_wait(q421,stat,ierr) ; call mpi_wait(q521,stat,ierr) 
+     call mpi_wait(q111,stat,ierr); call mpi_wait(q211,stat,ierr); call mpi_wait(q311,stat,ierr); call mpi_wait(q411,stat,ierr) ; call mpi_wait(q511,stat,ierr)
+     call mpi_wait(q121,stat,ierr); call mpi_wait(q221,stat,ierr); call mpi_wait(q321,stat,ierr); call mpi_wait(q421,stat,ierr) ; call mpi_wait(q521,stat,ierr)
 
   else
 
@@ -108,8 +108,8 @@ subroutine swap_pf
         end do
      end do
 
-     call mpi_wait(q110,stat,ierr); call mpi_wait(q210,stat,ierr); call mpi_wait(q310,stat,ierr); call mpi_wait(q410,stat,ierr) ; call mpi_wait(q510,stat,ierr) 
-     call mpi_wait(q120,stat,ierr); call mpi_wait(q220,stat,ierr); call mpi_wait(q320,stat,ierr); call mpi_wait(q420,stat,ierr) ; call mpi_wait(q520,stat,ierr) 
+     call mpi_wait(q110,stat,ierr); call mpi_wait(q210,stat,ierr); call mpi_wait(q310,stat,ierr); call mpi_wait(q410,stat,ierr) ; call mpi_wait(q510,stat,ierr)
+     call mpi_wait(q120,stat,ierr); call mpi_wait(q220,stat,ierr); call mpi_wait(q320,stat,ierr); call mpi_wait(q420,stat,ierr) ; call mpi_wait(q520,stat,ierr)
 
   end if
 

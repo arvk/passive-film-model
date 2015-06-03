@@ -8,7 +8,7 @@ subroutine initialize_kmc()
 !!!! PSEUDORANDOM NUMBER GENERATOR VARIABLES   !!!!
   character(LEN=10) :: date, time              !!!!
   integer :: dates(8)                          !!!!
-  integer :: rand_seed_size                    !!!!       
+  integer :: rand_seed_size                    !!!!
   integer, dimension(12) :: rand_seed          !!!!
   real :: random                               !!!!
 !!!!-------------------------------------------!!!!
@@ -24,7 +24,7 @@ subroutine initialize_kmc()
   call DATE_AND_TIME(date,time,VALUES=dates)
   rand_seed=dates(1)+dates(2)+dates(3)+dates(5)+dates(6)+dates(7)+dates(8)
   rand_seed_size = 1
-  call random_seed(size = rand_seed_size)  
+  call random_seed(size = rand_seed_size)
   call random_seed(put = rand_seed)
   !------------------------------
 
@@ -68,7 +68,7 @@ subroutine initialize_kmc()
                     if (kg_g(((x-1)*kg_scale + i), ((y-1)*kg_scale + j)) .eq. 0) then
                        call random_number(random)
                        if (random .lt. ((pht_g(x,y,interface_loc(x,y))-sum_kg)/(1.0d0-sum_kg))) then
-                          kg_g(((x-1)*kg_scale + i), ((y-1)*kg_scale + j)) = 1                      
+                          kg_g(((x-1)*kg_scale + i), ((y-1)*kg_scale + j)) = 1
                        end if
                     end if
 
@@ -132,7 +132,7 @@ subroutine initialize_kmc()
            my_ph = my_ph + (14.0d0 - pH_in)
         end do
 
-        my_ph = my_ph/(psz_g-interface_loc(x,y))       
+        my_ph = my_ph/(psz_g-interface_loc(x,y))
 
         do i = 1,kg_scale
            do j = 1,kg_scale

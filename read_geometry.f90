@@ -20,7 +20,7 @@ subroutine read_geometry
         end do
      end do
   end do
-  close(101)  
+  close(101)
 
   open (unit=102, file="MKW.out", status="old")
   read(102,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
@@ -31,7 +31,7 @@ subroutine read_geometry
         end do
      end do
   end do
-  close(102)  
+  close(102)
 
   open (unit=103, file="PHT.out", status="old")
   read(103,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
@@ -42,18 +42,18 @@ subroutine read_geometry
         end do
      end do
   end do
-  close(103)  
+  close(103)
 
   open (unit=104, file="PYR.out", status="old")
   read(104,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
            read(104,*)  pyr_g(x,y,z)
         end do
      end do
   end do
-  close(104)  
+  close(104)
 
   open (unit=105, file="ENV.out", status="old")
   read(105,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
@@ -64,35 +64,35 @@ subroutine read_geometry
         end do
      end do
   end do
-  close(105)  
+  close(105)
 
 !! Read chemical-potential field; Units == 2XX
 
   open (unit=200, file="MUS.out", status="old")
   read(200,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
            read(200,*)  mu_g(x,y,z)
         end do
      end do
   end do
-  close(200)  
+  close(200)
 
 !! Read orientation field; Units == 3XX
 
   open (unit=303, file="OPYR.out", status="old")
   read(303,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
            read(303,*)  opyr_g(x,y,z)
         end do
      end do
   end do
-  close(303)  
+  close(303)
 
-  avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0) 
+  avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0)
 
 end subroutine read_geometry
 

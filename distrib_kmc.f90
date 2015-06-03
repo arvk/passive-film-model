@@ -6,7 +6,7 @@ subroutine distrib_kmc()
   include 'mpif.h'
 
   integer :: x, y, z   ! Loop variables
-  integer :: ierr,status(MPI_STATUS_SIZE)   
+  integer :: ierr,status(MPI_STATUS_SIZE)
 
   call mpi_bcast(kg_g(1,1),ksx_g*ksy_g,MPI_INT,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(vfe_f_g(1,1),ksx_g*ksy_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)

@@ -4,7 +4,7 @@ subroutine write_fields(iter)
   use kmc_data
   implicit none
 
-  integer, intent(in) :: iter  
+  integer, intent(in) :: iter
   integer :: x, y, z
   character*5 :: img_id
 
@@ -21,7 +21,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
-  close(101)  
+  close(101)
 
   open (unit=102, file="MKW.out", status="new")
   write(102,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
@@ -32,7 +32,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
-  close(102)  
+  close(102)
 
   open (unit=103, file="PHT.out", status="new")
   write(103,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
@@ -43,18 +43,18 @@ subroutine write_fields(iter)
         end do
      end do
   end do
-  close(103)  
+  close(103)
 
   open (unit=104, file="PYR.out", status="new")
   write(104,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
            write(104,*)  pyr_g(x,y,z)
         end do
      end do
   end do
-  close(104)  
+  close(104)
 
   open (unit=105, file="ENV.out", status="new")
   write(105,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
@@ -65,49 +65,49 @@ subroutine write_fields(iter)
         end do
      end do
   end do
-  close(105)  
+  close(105)
 
 
 
   !! Write chemical potential fields
   open (unit=200, file="MUS.out", status="new")
   write(200,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
            write(200,*)  mu_g(x,y,z)
         end do
      end do
   end do
-  close(200)  
+  close(200)
 
 
 
   !! Write orientation fields
   open (unit=304, file="OPYR.out", status="new")
   write(304,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
            write(304,*)  opyr_g(x,y,z)
         end do
      end do
   end do
-  close(304)  
+  close(304)
 
 
 
   !! Write electrical potential field
   open (unit=401, file="POT.out", status="new")
   write(401,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
-  do x = 1,psx_g 
+  do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
            write(401,*)  elpot_g(x,y,z)
         end do
      end do
   end do
-  close(401)  
+  close(401)
 
 
 

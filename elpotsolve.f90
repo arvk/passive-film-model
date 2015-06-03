@@ -37,7 +37,7 @@ subroutine elpotsolve(iter)
   integer :: iterations, solver_info
 
   real*8 :: epsilon0, epsilon_met, epsilon_mkw, epsilon_pht, epsilon_pyr, epsilon_env
-  
+
 
   PetscErrorCode ierr
   Vec elpot_vec,rhs_vec,ret_vec
@@ -63,7 +63,7 @@ subroutine elpotsolve(iter)
      do y = 1,psy
         do x = 1,psx
 
-           epsilonr(x,y,z) = epsilon_met*met(x,y,z) + epsilon_mkw*mkw(x,y,z) + epsilon_pht*pht(x,y,z) + epsilon_pyr*pyr(x,y,z) + epsilon_env*env(x,y,z) 
+           epsilonr(x,y,z) = epsilon_met*met(x,y,z) + epsilon_mkw*mkw(x,y,z) + epsilon_pht*pht(x,y,z) + epsilon_pyr*pyr(x,y,z) + epsilon_env*env(x,y,z)
            epsilonr(x,y,z) = epsilonr(x,y,z)*epsilon0*(1.0d0-voids(x,y,z))
 
         end do
@@ -73,7 +73,7 @@ subroutine elpotsolve(iter)
 
 
 
-     
+
 
 
   call VecCreate(PETSC_COMM_SELF,ret_vec,ierr)
@@ -162,7 +162,7 @@ subroutine elpotsolve(iter)
      newelpot = elpot
 
   end if
- 
+
 
   !! Apply boundary conditions to potential update
   if (rank.eq.0) then

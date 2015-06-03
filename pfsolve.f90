@@ -24,7 +24,7 @@ subroutine pfsolve(iter)
 
   !!---------------PF evolution-----------------!!
 
-  !! Bulk free energy 
+  !! Bulk free energy
   real*8 :: f_met, f_mkw, f_pht, f_pyr, f_env
   real*8 :: w_met, w_mkw, w_pht, w_pyr, w_env
 
@@ -129,7 +129,7 @@ subroutine pfsolve(iter)
 
 
 
-     
+
 
 
   call VecCreate(PETSC_COMM_SELF,ret_vec,ierr)
@@ -167,7 +167,7 @@ subroutine pfsolve(iter)
               B(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_pht_mkw(x,y,z+1)+D_pht_mkw(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
               B(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_pyr_mkw(x,y,z+1)+D_pyr_mkw(x,y,z+1-1))/(dpf*dpf))*pyr(x,y,z+1-1))
               B(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_env_mkw(x,y,z+1)+D_env_mkw(x,y,z+1-1))/(dpf*dpf))*env(x,y,z+1-1))
-              
+
               B(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_met_pht(x,y,z+1)+D_met_pht(x,y,z+1-1))/(dpf*dpf))*met(x,y,z+1-1))
               B(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_mkw_pht(x,y,z+1)+D_mkw_pht(x,y,z+1-1))/(dpf*dpf))*mkw(x,y,z+1-1))
               B(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))) = B(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2))) + ((0.5d0*(D_pht(x,y,z+1)+D_pht(x,y,z+1-1))/(dpf*dpf))*pht(x,y,z+1-1))
@@ -305,7 +305,7 @@ subroutine pfsolve(iter)
         do y = 1,psy
            newmet(x,y,ghost_width+1) = met(x,y,ghost_width+1)
            newmkw(x,y,ghost_width+1) = mkw(x,y,ghost_width+1)
-           newpht(x,y,ghost_width+1) = pht(x,y,ghost_width+1) 
+           newpht(x,y,ghost_width+1) = pht(x,y,ghost_width+1)
            newpyr(x,y,ghost_width+1) = pyr(x,y,ghost_width+1)
            newenv(x,y,ghost_width+1) = env(x,y,ghost_width+1)
         end do
@@ -315,7 +315,7 @@ subroutine pfsolve(iter)
         do y = 1,psy
            newmet(x,y,psz+ghost_width) = met(x,y,psz+ghost_width)
            newmkw(x,y,psz+ghost_width) = mkw(x,y,psz+ghost_width)
-           newpht(x,y,psz+ghost_width) = pht(x,y,psz+ghost_width) 
+           newpht(x,y,psz+ghost_width) = pht(x,y,psz+ghost_width)
            newpyr(x,y,psz+ghost_width) = pyr(x,y,psz+ghost_width)
            newenv(x,y,psz+ghost_width) = env(x,y,psz+ghost_width)
         end do
@@ -357,9 +357,9 @@ subroutine pfsolve(iter)
            denv_dt(x,y,z) = ((newenv(x,y,z) - env(x,y,z))/dt)*(1.0d0-voids(x,y,z))
         end do
         do z = 1,ghost_width
-           dmet_dt(x,y,z) = 0.0d0 ; dmkw_dt(x,y,z) = 0.0d0 ; dpht_dt(x,y,z) = 0.0d0 ; dpyr_dt(x,y,z) = 0.0d0 ; denv_dt(x,y,z) = 0.0d0 
-           dmet_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dmkw_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dpht_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dpyr_dt(x,y,psz+ghost_width+z) = 0.0d0 ; denv_dt(x,y,psz+ghost_width+z) = 0.0d0 
-        end do        
+           dmet_dt(x,y,z) = 0.0d0 ; dmkw_dt(x,y,z) = 0.0d0 ; dpht_dt(x,y,z) = 0.0d0 ; dpyr_dt(x,y,z) = 0.0d0 ; denv_dt(x,y,z) = 0.0d0
+           dmet_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dmkw_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dpht_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dpyr_dt(x,y,psz+ghost_width+z) = 0.0d0 ; denv_dt(x,y,psz+ghost_width+z) = 0.0d0
+        end do
      end do
   end do
 

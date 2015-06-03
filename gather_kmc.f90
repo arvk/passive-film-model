@@ -7,8 +7,8 @@ subroutine gather_kmc()
 
   integer :: x, y   ! Loop variables
   integer :: rank_loop
-  integer :: ierr,status(MPI_STATUS_SIZE)   
-  
+  integer :: ierr,status(MPI_STATUS_SIZE)
+
   if (rank.eq.0) then
 
      do x = 1,ksx+2
@@ -32,7 +32,7 @@ subroutine gather_kmc()
      call mpi_send(kg(1,2),(ksx+2)*ksy,MPI_INT,0,21,MPI_COMM_WORLD,ierr)
 
   end if
-  
+
 end subroutine gather_kmc
 
 

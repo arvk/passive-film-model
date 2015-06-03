@@ -309,7 +309,7 @@ double precision function odiff(or1,or2)
 
      if ((or1-or2).lt.(or2+(Pi/2.0d0)-or1)) then
         odiff = -(or1-or2)
-     else 
+     else
         odiff = (or2+(Pi/2.0d0)-or1)
      end if
 

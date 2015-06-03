@@ -13,8 +13,8 @@ subroutine initialize_geometry()
 
   met_z_end = 15*(psz_g/16)
 
-  avg_mu_met = mus_met_mkw_eqb - (R*T*0.5d0) 
-  avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0) 
+  avg_mu_met = mus_met_mkw_eqb - (R*T*0.5d0)
+  avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0)
 
 !! Initialize global phase-fraction fields
   do x = 1,psx_g

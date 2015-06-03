@@ -69,7 +69,7 @@ subroutine electroJacobian(snes,elpot_vec,elpot_jacob,elpot_precond,dummy,ierr)
 
   do y = 1,psy
      do x = 1,psx
-        loc_elpot(x,y,1) = loc_elpot(x,y,1) ; loc_elpot(x,y,psz+(2*ghost_width)) = loc_elpot(x,y,psz+1) 
+        loc_elpot(x,y,1) = loc_elpot(x,y,1) ; loc_elpot(x,y,psz+(2*ghost_width)) = loc_elpot(x,y,psz+1)
      end do
   end do
 
@@ -85,7 +85,7 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
   do z = 1,psz+(2*ghost_width)
      do y = 1,psy
         do x = 1,psx
-           epsilonr(x,y,z) = epsilon_met*met(x,y,z) + epsilon_mkw*mkw(x,y,z) + epsilon_pht*pht(x,y,z) + epsilon_pyr*pyr(x,y,z) + epsilon_env*env(x,y,z) 
+           epsilonr(x,y,z) = epsilon_met*met(x,y,z) + epsilon_mkw*mkw(x,y,z) + epsilon_pht*pht(x,y,z) + epsilon_pyr*pyr(x,y,z) + epsilon_env*env(x,y,z)
            epsilonr(x,y,z) = epsilonr(x,y,z)*epsilon0*(1.0d0-voids(x,y,z))
         end do
      end do
@@ -104,7 +104,7 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
      do y = 1,psy
         do x = 1,psx
 
-           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x 
+           linindex = ((z-1)*psx*psy) + ((y-1)*psx) + x
            vector_locator(linindex) = linindex-1
 
            exponent = (loc_elpot(x,y,z+1)*96485)/(R*T)
@@ -116,16 +116,16 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
            if (z .gt. 1) then
               contindex = contindex + 1
               A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)-1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x 
+              JA(contindex) = ((wrap(z-1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
            contindex = contindex + 1
            A(contindex) = (0.5d0*(epsilonr(x,wrap(y-1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x 
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y-1,psy)-1)*psx) + x
 
            contindex = contindex + 1
            A(contindex) = (0.5d0*(epsilonr(wrap(x-1,psx),y,z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx) 
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x-1,psx)
 
            contindex = contindex + 1
            A(contindex) = epsilonr(x,y,(z+1)+1)+epsilonr(x,y,(z+1)-1)+&
@@ -134,20 +134,20 @@ epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
            A(contindex) = A(contindex) + 6*epsilonr(x,y,z+1)
            A(contindex) = A(contindex)*(-0.5d0)/(dpf*dpf)
            A(contindex) = A(contindex) + nonlin(linindex)
-           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x 
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + x
 
            contindex = contindex + 1
            A(contindex) = (0.5d0*(epsilonr(wrap(x+1,psx),y,z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx) 
+           JA(contindex) = ((z-1)*psx*psy) + ((y-1)*psx) + wrap(x+1,psx)
 
            contindex = contindex + 1
            A(contindex) = (0.5d0*(epsilonr(x,wrap(y+1,psy),z+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x 
+           JA(contindex) = ((z-1)*psx*psy) + ((wrap(y+1,psy)-1)*psx) + x
 
            if (z .lt. psz+(2*ghost_width)-2) then
               contindex = contindex + 1
               A(contindex) = (0.5d0*(epsilonr(x,y,(z+1)+1)+epsilonr(x,y,z+1)))/(dpf*dpf)
-              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x 
+              JA(contindex) = ((wrap(z+1,psz+(2*ghost_width)-2)-1)*psx*psy) + ((y-1)*psx) + x
            end if
 
         end do

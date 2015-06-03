@@ -6,7 +6,7 @@ subroutine distrib_pf()
   include 'mpif.h'
 
   integer :: x, y, z   ! Loop variables
-  integer :: ierr,status(MPI_STATUS_SIZE)   
+  integer :: ierr,status(MPI_STATUS_SIZE)
 
 
   !! Broadcast global phase-fraction fields
