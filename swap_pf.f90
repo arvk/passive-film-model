@@ -12,6 +12,7 @@ subroutine swap_pf
   !! a) First number denotes field: 1 - Met, 2 - Pht, 3 - Pyr, 4 - Env, 5 - Mkw
   !! b) Second number denotes sending/receiving: 1 - Sending, 2 - Receiving
   !! c) Third number denotes target: 0 - Lower rank, 1 - Higher rank (Rank 0 is assumed to be higher when data is transferred to it from rank N-1)
+
   integer :: q110, q111, q120, q121
   integer :: q210, q211, q220, q221
   integer :: q310, q311, q320, q321
@@ -22,7 +23,9 @@ subroutine swap_pf
   !! a) First number denotes field: 1 - Met, 2 - Pht, 3 - Pyr, 4 - Env, 5 - Mkw
   !! b) Second number denotes sending/receiving and destination combo: 0 = Sending to higher or receiving from lower. 1 = Sending to lower rank or receiving from higher rank
 
-  if ((rank.gt.0).and.(rank.lt.procs-1)) then
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+
+  if ((rank.gt.0) .and. (rank.lt.procs-1)) then
 
      call mpi_isend(met(1,1,psz+1),psx*psy*ghost_width,MPI_DOUBLE_PRECISION,rank+1,10,MPI_COMM_WORLD,q111,ierr)
      call mpi_isend(pht(1,1,psz+1),psx*psy*ghost_width,MPI_DOUBLE_PRECISION,rank+1,20,MPI_COMM_WORLD,q211,ierr)
@@ -69,13 +72,13 @@ subroutine swap_pf
 
      do x = 1,psx
         do y = 1,psy
-        do z = 1,ghost_width
-           met(x,y,z) = met(x,y,1+ghost_width)
-           mkw(x,y,z) = mkw(x,y,1+ghost_width)
-           pht(x,y,z) = pht(x,y,1+ghost_width)
-           env(x,y,z) = env(x,y,1+ghost_width)
-           pyr(x,y,z) = pyr(x,y,1+ghost_width)
-        end do
+           do z = 1,ghost_width
+              met(x,y,z) = met(x,y,1+ghost_width)
+              mkw(x,y,z) = mkw(x,y,1+ghost_width)
+              pht(x,y,z) = pht(x,y,1+ghost_width)
+              env(x,y,z) = env(x,y,1+ghost_width)
+              pyr(x,y,z) = pyr(x,y,1+ghost_width)
+           end do
         end do
      end do
 
@@ -98,13 +101,13 @@ subroutine swap_pf
 
      do x = 1,psx
         do y = 1,psy
-        do z = 1,ghost_width
-           met(x,y,psz+ghost_width+z) = met(x,y,psz+ghost_width)
-           mkw(x,y,psz+ghost_width+z) = mkw(x,y,psz+ghost_width)
-           pht(x,y,psz+ghost_width+z) = pht(x,y,psz+ghost_width)
-           env(x,y,psz+ghost_width+z) = env(x,y,psz+ghost_width)
-           pyr(x,y,psz+ghost_width+z) = pyr(x,y,psz+ghost_width)
-        end do
+           do z = 1,ghost_width
+              met(x,y,psz+ghost_width+z) = met(x,y,psz+ghost_width)
+              mkw(x,y,psz+ghost_width+z) = mkw(x,y,psz+ghost_width)
+              pht(x,y,psz+ghost_width+z) = pht(x,y,psz+ghost_width)
+              env(x,y,psz+ghost_width+z) = env(x,y,psz+ghost_width)
+              pyr(x,y,psz+ghost_width+z) = pyr(x,y,psz+ghost_width)
+           end do
         end do
      end do
 
@@ -112,7 +115,6 @@ subroutine swap_pf
      call mpi_wait(q120,stat,ierr); call mpi_wait(q220,stat,ierr); call mpi_wait(q320,stat,ierr); call mpi_wait(q420,stat,ierr) ; call mpi_wait(q520,stat,ierr)
 
   end if
-
 
 end subroutine swap_pf
 
