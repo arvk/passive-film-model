@@ -316,6 +316,8 @@ subroutine musolve(iter)
 
   else                                ! If Solver is not converged
 
+     write(6,'(A,I2,A,I6,A,I2)') " ERROR: Chemical potential field evolution did not converge in rank ", rank, " and iteration ", iter, ". ERROR CODE: ", mu_converged_reason
+
      newmu = mu
 
   end if

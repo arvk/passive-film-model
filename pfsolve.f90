@@ -250,6 +250,8 @@ subroutine pfsolve(iter)
 
   else                                 ! if Solver is not converged
 
+     write(6,'(A,I2,A,I6,A,I2)') " ERROR: Phase field evolution did not converge in rank ", rank, " and iteration ", iter, ". ERROR CODE: ", pf_converged_reason
+
      newmet = met
      newmkw = mkw
      newpht = pht

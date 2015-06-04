@@ -260,6 +260,10 @@ subroutine orsolve(iter)
 
   call VecRestoreArrayF90(or_vec,point_or_vec,ierr)
 
+  else
+
+     write(6,'(A,I2,A,I6,A,I2)') " ERROR: Orientation field evolution did not converge in rank ", rank, " and iteration ", iter, ". ERROR CODE: ", or_converged_reason
+
   end if
 
   call VecDestroy(or_vec,ierr)
