@@ -4,7 +4,7 @@ subroutine write_parameters()
   implicit none
 
   call system("rm -rf PARAMS.out")
-  open(unit = 8000, file = "PARAMS.out", status = 'new') ;
+  open(unit = 8000, file = "PARAMS.out", status = 'new')
   write(8000,'(A10, A1)') "RESTART = ", isrestart
   write(8000,'(A9,I5,I5,I5)') "PFSIZE = ", psx_g, psy_g, psz_g
   write(8000,'(A7,I4)') "TEMP = ", T
