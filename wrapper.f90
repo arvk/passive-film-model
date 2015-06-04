@@ -85,6 +85,7 @@ program passive_film_model
         call gather_opyr()    ! Collect orientation field to the parent process
         call gather_electro() ! Collect electric potential field to the parent process
 
+        if (isroot) write(6,'(A,I5.5,A,I6.6,A,I6.6)') " INFO: Writing snapshot ",iter/max(floor(real(nomc/noimg)),1)," at iteration ",iter,"/",nomc
         if (isroot) call write_fields(iter) ! IF I am ROOT, write out simulation parameters
 
      end if
