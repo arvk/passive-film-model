@@ -18,7 +18,6 @@ subroutine pfsolve(iter)
 
 
   integer :: x, y, z   ! Loop variables
-  real*8 :: correct_rounding     ! Error correction variable used while updating fields
   integer :: status(MPI_STATUS_SIZE)
   integer, intent(in) :: iter
 
