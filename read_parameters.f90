@@ -18,6 +18,7 @@ subroutine read_parameters()
   if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then ! If it IS a restarted run
      write (6,*) 'INFO: Simulation restarted from a previous run.'
   else                                                     ! If it IS NOT a restarted run
+     call system("rm -rf *.out")
      write(6,*) 'INFO: Simulation started from scratch.'
   end if
   !! FINISH | Tag= RESTART !!
