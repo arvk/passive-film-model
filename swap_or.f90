@@ -5,8 +5,7 @@ subroutine swap_or
   include 'mpif.h'
 
   integer :: x, y, z  ! Loop variables
-  integer :: ierr
-  integer :: stat(MPI_STATUS_SIZE)
+  integer :: ierr, stat(MPI_STATUS_SIZE)
 
   !! Triple number codes for MPI request variables
   !! a) First number denotes field: 1 - opyr
@@ -17,6 +16,8 @@ subroutine swap_or
   !! Double number codes for MPI tags
   !! a) First number denotes field: 1 - opyr
   !! b) Second number denotes sending/receiving and destination combo: 0 = Sending to higher or receiving from lower. 1 = Sending to lower rank or receiving from higher rank
+
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   if ((rank.gt.0).and.(rank.lt.procs-1)) then
      call mpi_isend(opyr(1,1,psz+1),psx*psy*ghost_width,MPI_DOUBLE_PRECISION,rank+1,10,MPI_COMM_WORLD,q111,ierr)
@@ -34,8 +35,8 @@ subroutine swap_or
      do x = 1,psx
         do y = 1,psy
            do z = 1,ghost_width
-           opyr(x,y,z) = opyr(x,y,1+ghost_width)
-        end do
+              opyr(x,y,z) = opyr(x,y,1+ghost_width)
+           end do
         end do
      end do
 
@@ -49,8 +50,8 @@ subroutine swap_or
      do x = 1,psx
         do y = 1,psy
            do z = 1,ghost_width
-           opyr(x,y,psz+ghost_width+z) = opyr(x,y,psz+ghost_width)
-        end do
+              opyr(x,y,psz+ghost_width+z) = opyr(x,y,psz+ghost_width)
+           end do
         end do
      end do
 
