@@ -7,7 +7,6 @@ subroutine initialize_geometry()
 
   integer :: x,y,z
   integer :: met_z_end
-  integer :: rank_loop
   real*8 :: avg_mu_met
   real*8, parameter :: epsilon = 0.00001d0 ! A small number
 
