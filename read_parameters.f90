@@ -103,10 +103,10 @@ subroutine read_parameters()
 
      if ((isdissolve .eq. 'Y') .or. (isdissolve .eq. 'y')) then ! If dissolution SHOULD be included in the simulation
         include_dissolve = .TRUE.
-        write (6,*) 'Liquid environment. Film dissolution included.'
+        write (6,*) 'INFO: Liquid environment. Film dissolution included.'
      else                                                       ! If dissolution SHOULD NOT be included in the simulation
         include_dissolve = .FALSE.
-        write(6,*) 'Gaseous environment. No film dissolution.'
+        write(6,*) 'INFO: Gaseous environment. No film dissolution.'
      end if
 
   end if
