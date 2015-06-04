@@ -12,6 +12,46 @@ subroutine musolve(iter)
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+
+  integer, intent(in) :: iter  ! Iteration count
+  integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
+  integer :: wrap              ! Wrapping along the x-, y-, and z-direction
+  integer, dimension(psx,psy) :: interface_loc
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: newmu
+
+  !! Diffusivities
+  real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
+  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D
+  real*8 :: interface_multiply ! Flag to control interfacial diffusion
+
+  ! Derivative of sulfur density with chemical potential
+  real*8 :: drho_dmu_met, drho_dmu_mkw, drho_dmu_pht, drho_dmu_pyr, drho_dmu_env, Chi
+
+  ! Sulfidation rates
+  real*8 :: sulf_rate_gas_met, sulf_rate_gas_mkw, sulf_rate_gas_pht, sulf_rate_gas_pyr
+  real*8 :: sulf_rate_liq_met, sulf_rate_liq_mkw, sulf_rate_liq_pht, sulf_rate_liq_pyr
+  real*8 :: sulf_rate_met, sulf_rate_mkw, sulf_rate_pht, sulf_rate_pyr
+
+  ! Random sulfidation
+  real*8, parameter :: threshold_met = 0.25d0
+  real*8, parameter :: threshold_mkw = 0.40d0
+  real*8, parameter :: threshold_pht = 0.60d0
+  real*8, parameter :: threshold_pyr = 1.00d0
+  real*8 :: my_random_number, threshold, my_sulfidation_rate
+
+  ! Equation and solution matrices and vectors
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B, approxsol
+  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
+  real*8, dimension(:), allocatable :: A
+  integer, dimension(:), allocatable :: JA, IA
+  integer :: linindex, contindex
+  integer :: iterations, solver_info
+
+  ! Sorting of IA/JA matrices
+  logical :: is_sorted
+  integer :: rowindex, JAleft, JAright, JAswap
+  real*8 :: Aswap
 
   PetscErrorCode ierr
   Vec mus_vec,rhs_vec
@@ -20,58 +60,9 @@ subroutine musolve(iter)
   PetscScalar, pointer :: point_mu_vec(:)
   KSPConvergedReason mu_converged_reason
 
-  integer, intent(in) :: iter
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-  integer :: x, y, z   ! Loop variables
-  real*8 :: interface_multiply ! Flag to control interfacial diffusion
-  real*8 :: asd ! Anti-Surface-Diffusion
-
-  !! Diffusivities
-  real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
-  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D
-
-  !! Derivative of sulfur density with chemical potential
-  real*8 :: drho_dmu_met, drho_dmu_mkw, drho_dmu_pht, drho_dmu_pyr, drho_dmu_env, Chi
-
-  integer, dimension(psx,psy) :: interface_loc
-  real*8 :: noise
-
-  real*8, dimension(psx,psy,psz+(2*ghost_width)) :: newmu
-  integer :: wrap
-
-
-  real*8 :: sulf_rate_gas_met, sulf_rate_gas_mkw, sulf_rate_gas_pht, sulf_rate_gas_pyr
-  real*8 :: sulf_rate_liq_met, sulf_rate_liq_mkw, sulf_rate_liq_pht, sulf_rate_liq_pyr
-  real*8 :: sulf_rate_met, sulf_rate_mkw, sulf_rate_pht, sulf_rate_pyr
-
-  real*8 :: threshold_met = 0.25d0
-  real*8 :: threshold_mkw = 0.40d0
-  real*8 :: threshold_pht = 0.60d0
-  real*8 :: threshold_pyr = 1.00d0
-  real*8 :: my_random_number, threshold, my_sulfidation_rate
-
-
-  ! A/B/JA matrices for implicit solver
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: approxsol
-  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vecread
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: scratch1,scratch2,scratch3
-
-  real*8, dimension(:), allocatable :: A, LU
-  integer, dimension(:), allocatable :: JA, IA
-
-  integer :: linindex, contindex
-  integer :: iterations, solver_info
-
-
-  ! Sorting for A/B/JA
-  logical :: is_sorted
-  integer :: rowindex, JAleft, JAright, JAswap
-  real*8 :: Aswap
-
-
-  newmu = 0.0d0
+  newmu = mu
 
   D_inter_met = D_S_met
   D_inter_mkw = max(D_Fe_mkw,D_S_mkw)
@@ -172,27 +163,20 @@ subroutine musolve(iter)
   call VecSetUp(mus_vec,ierr)
   call VecSetValues(mus_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,approxsol,INSERT_VALUES,ierr)
 
-
   call VecCreate(PETSC_COMM_SELF,rhs_vec,ierr)
   call VecSetSizes(rhs_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2),ierr)
   call VecSetFromOptions(rhs_vec,ierr)
   call VecSetUp(rhs_vec,ierr)
   call VecSetValues(rhs_vec,psx*psy*(psz+(2*ghost_width)-2),vector_locator,B,INSERT_VALUES,ierr)
 
-
   !! Calculate the LHS (A matrix in Ax=B)
   allocate(A((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
   allocate(JA((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
-  allocate(LU((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
   allocate(IA((psx*psy*(psz+(2*ghost_width)-2))+1))
-
 
   IA=0 ; JA=0 ; A=0
   contindex = 0
   linindex = 0
-
-
-
 
   do z = 1,(psz+(2*ghost_width)-2)
      do y = 1,psy
@@ -304,7 +288,6 @@ subroutine musolve(iter)
 
   call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*(psz+(2*ghost_width)-2),psx*psy*(psz+(2*ghost_width)-2),IA,JA,A,lhs_mat,ierr)
 
-
   call KSPCreate(PETSC_COMM_SELF,ksp_mu,ierr)
   call KSPSetOperators(ksp_mu,lhs_mat,lhs_mat,ierr)
   call KSPSetInitialGuessNonzero(ksp_mu,PETSC_TRUE,ierr)
@@ -344,14 +327,14 @@ subroutine musolve(iter)
   call KSPDestroy(ksp_mu,ierr)
 
 
-  !! Apply boundary conditions to chemical-potential-field update
-  if (rank.eq.0) then
+
+  if (rank.eq.0) then          ! Apply global boundary conditions to process 0 (Metal end)
      do x = 1,psx
         do y = 1,psy
            newmu(x,y,1+ghost_width) = newmu(x,y,2+ghost_width)
         end do
      end do
-  elseif(rank.eq.procs-1) then
+  elseif(rank.eq.procs-1) then ! Apply global boundary conditions to process procs-1 (Environment end)
      do x = 1,psx
         do y = 1,psy
            newmu(x,y,psz+ghost_width) = mu(x,y,psz+ghost_width)
@@ -359,17 +342,18 @@ subroutine musolve(iter)
      end do
   end if
 
-  !! Normalize chemical potential in bulk phases
+
   do x = 1,psx
      do y = 1,psy
         do z = 2,psz+(2*ghost_width)-1
-           if (env(x,y,z).gt.0.97) then
+           if (env(x,y,z).gt.0.97) then   ! Normalize chemical potential in the environment
               newmu(x,y,z) = avg_mu_env
            end if
         end do
      end do
   end do
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   sulf_rate_gas_met = 10**((0.00473*T)-5.645+(0.4*(avg_mu_env+63562)/(R*T))) !! Ref = Assessing Corrosion in Oil Refining and Petrochemical Processing, Materials Research, Vol 7, No 1, pp. 163-173, 2004
   sulf_rate_gas_met = max(sulf_rate_gas_met*1E-9,0.0d0)
@@ -414,13 +398,6 @@ subroutine musolve(iter)
      sulf_rate_pht = sulf_rate_pht*exp(96500*0.08623d0*(-0.5d0-metal_potential)/(R*T))
      sulf_rate_pyr = sulf_rate_pyr*exp(96500*0.08623d0*(-0.5d0-metal_potential)/(R*T))
   end if
-
-  rho_mkw = 48683.0d0 !! Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
-  rho_met = 0.0015d0*140401
-  rho_pht = 52275.0d0
-  rho_pyr = 2.0d0*41667.0d0
-
-
 
 
   do x = 1,psx
@@ -475,7 +452,7 @@ subroutine musolve(iter)
      end do
   end do
 
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   do x = 1,psx
      do y = 1,psy
