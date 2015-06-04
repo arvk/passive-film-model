@@ -5,10 +5,7 @@ program passive_film_model
   implicit none
 #include <finclude/petscsys.h>
 
-
-  integer :: x, y, z   ! Loop variables
   integer :: iter      ! Loop variable for current iteration
-  integer :: rank_loop
   integer :: ierr,status(MPI_STATUS_SIZE)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -20,13 +17,13 @@ program passive_film_model
   call mpi_comm_size(MPI_COMM_WORLD,procs,ierr)
   call mpi_comm_rank(MPI_COMM_WORLD,rank,ierr)
 
+
   !! Define Root process (rank 0)
   if(rank .eq. 0)then
      isroot = .TRUE.
   else
      isroot = .FALSE.
   end if
-
 
   !=======================
   ! SYSTEM INITIALIZATION
