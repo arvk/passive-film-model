@@ -62,6 +62,8 @@ subroutine musolve(iter)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
+  call swap_mu()
+
   newmu = mu
 
   D_inter_met = D_S_met

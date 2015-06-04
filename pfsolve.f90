@@ -45,6 +45,7 @@ subroutine pfsolve(iter)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
+  call swap_pf()
   call calc_grad_pf()
 
   do z = 1,psz+(2*ghost_width)
