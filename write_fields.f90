@@ -4,20 +4,21 @@ subroutine write_fields(iter)
   use kmc_data
   implicit none
 
-  integer, intent(in) :: iter
-  integer :: x, y, z
-  character*5 :: img_id
+  integer :: x, y, z          ! Index along x-, y- and z-directions (Loop)
+  integer, intent(in) :: iter ! Iteration number
+  character*5 :: img_id       ! Index of current image (derived from current iteration number)
 
   call system("rm -rf MET.out MKW.out PHT.out PYR.out ENV.out MUS.out OPYR.out POT.out")
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-  !! Write phase fraction fields
+  ! Write phase-fraction fields; Units == 1XX
   open (unit=101, file="MET.out", status="new")
   write(101,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(101,*)  met_g(x,y,z)
+           write(101,*)  met_g(x,y,z)         ! Write metal phase fraction
         end do
      end do
   end do
@@ -28,7 +29,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(102,*)  mkw_g(x,y,z)
+           write(102,*)  mkw_g(x,y,z)         ! Write mackinawite phase fraction
         end do
      end do
   end do
@@ -39,7 +40,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(103,*)  pht_g(x,y,z)
+           write(103,*)  pht_g(x,y,z)         ! Write pyrrhotite phase fraction
         end do
      end do
   end do
@@ -50,7 +51,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(104,*)  pyr_g(x,y,z)
+           write(104,*)  pyr_g(x,y,z)         ! Write pyrite phase fraction
         end do
      end do
   end do
@@ -61,56 +62,55 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(105,*)  env_g(x,y,z)
+           write(105,*)  env_g(x,y,z)         ! Write environment phase fraction
         end do
      end do
   end do
   close(105)
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-
-  !! Write chemical potential fields
+  ! Write chemical-potential field; Units == 2XX
   open (unit=200, file="MUS.out", status="new")
   write(200,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(200,*)  mu_g(x,y,z)
+           write(200,*)  mu_g(x,y,z)          ! Write chemical potential field
         end do
      end do
   end do
   close(200)
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-
-  !! Write orientation fields
+  ! Write orientation field; Units == 3XX
   open (unit=304, file="OPYR.out", status="new")
   write(304,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(304,*)  opyr_g(x,y,z)
+           write(304,*)  opyr_g(x,y,z)        ! Write orientation field
         end do
      end do
   end do
   close(304)
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-
-  !! Write electrical potential field
+  ! Write electri potential field; Units == 4XX
   open (unit=401, file="POT.out", status="new")
   write(401,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(401,*)  elpot_g(x,y,z)
+           write(401,*)  elpot_g(x,y,z)       ! Write electric potential field
         end do
      end do
   end do
   close(401)
 
-
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   write(img_id,'(I5.5)') iter/max(floor(real(nomc/noimg)),1)
   call system("cp MET.out MET_"//img_id//".out")

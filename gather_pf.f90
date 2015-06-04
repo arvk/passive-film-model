@@ -4,9 +4,11 @@ subroutine gather_pf
   implicit none
   include 'mpif.h'
 
-  integer :: x, y, z   ! Loop variables
-  integer :: rank_loop
-  integer :: ierr,status(MPI_STATUS_SIZE)
+  integer :: x, y, z                      ! Index for x-, y-, and z-direction (Loop)
+  integer :: rank_loop                    ! Integer equal to processor rank (Loop)
+  integer :: ierr,status(MPI_STATUS_SIZE) ! MPI variables
+
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   if (rank.eq.0) then
 
