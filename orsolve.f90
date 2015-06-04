@@ -10,6 +10,35 @@ subroutine orsolve(iter)
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+
+  integer, intent(in) :: iter                 ! Iteration count
+  integer :: x, y, z                          ! Index for x-, y-, and z-direction (Loop)
+  integer :: wrap                             ! Wrapping along the x-, y-, and z-direction
+  integer :: odiff                            ! Calcualte difference in orientation between two points
+  real*8, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
+
+  ! Orientation field mobilities and diffusivities
+  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: M_opyr
+  real*8 :: M_opyr_max = 1.0E-16
+  real*8 :: M_opyr_min = 1.0E-19
+  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: D_opyr
+  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: del_opyr
+  real*8 :: D_opyr_max = 1E1   ! Truncation for the orientation field
+
+  ! Equation and solution matrices and vectors
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B, approxsol
+  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
+  real*8, dimension(:), allocatable :: A
+  integer, dimension(:), allocatable :: JA, IA
+  integer :: linindex, contindex
+  real*8 :: orc,orc1,orc2,orc3,orc4,orc5,orc6
+
+  ! Sorting of IA/JA matrices
+  logical :: is_sorted
+  integer :: rowindex, JAleft, JAright, JAswap
+  real*8 :: Aswap
+
   PetscErrorCode ierr
   Vec or_vec,rhs_vec
   Mat lhs_mat
@@ -17,43 +46,9 @@ subroutine orsolve(iter)
   PetscScalar, pointer :: point_or_vec(:)
   KSPConvergedReason or_converged_reason
 
-  integer :: x, y, z   ! Loop variables
-  integer, intent(in) :: iter
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: M_opyr
-  real*8 :: M_opyr_max = 1.0E-16
-  real*8 :: M_opyr_min = 1.0E-19
-
-  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: D_opyr
-  real*8, dimension(psx,psy,(psz+(2*ghost_width)-2)) :: del_opyr
-  real*8 :: D_opyr_max = 1E1   !! Truncation for the orientation field
-
-  real*8 :: delx,dely,delz
-  real*8 :: epsilon = 1E-15
-
-  real*8 :: odiff
-  integer :: wrap
-
-  integer :: linindex
-
-  real*8 :: orc,orc1,orc2,orc3,orc4,orc5,orc6
-
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: B
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: approxsol
-  integer, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vector_locator
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: vecread
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)) :: scratch1,scratch2,scratch3
-
-  real*8, dimension(:), allocatable :: A, LU
-  integer, dimension(:), allocatable :: JA, IA
-  integer :: contindex
-  integer :: iterations, solver_info
-
-  logical :: is_sorted
-  integer :: rowindex, JAleft, JAright, JAswap
-  real*8 :: Aswap
-
-     call swap_or()
+  call swap_or()
 
   M_opyr = 0.0d0   !! Initialize to 0
 
@@ -61,7 +56,7 @@ subroutine orsolve(iter)
      do y = 1,psy
         do z = 1,(psz+(2*ghost_width)-2)
 
-           M_opyr(x,y,z) = min(M_opyr_min/(((pyr(x,y,z+1))**4)+epsilon),M_opyr_max)
+           M_opyr(x,y,z) = min(M_opyr_min/(((pyr(x,y,z+1))**4)+infinitesimal),M_opyr_max)
            D_opyr(x,y,z) = D_opyr_max
 
         end do
@@ -139,7 +134,6 @@ subroutine orsolve(iter)
   !! Calculate the LHS (A matrix in Ax=B)
   allocate(A((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
   allocate(JA((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
-  allocate(LU((7*psx*psy*(psz+(2*ghost_width)-2))-(2*psx*psy)))
   allocate(IA((psx*psy*(psz+(2*ghost_width)-2))+1))
 
   IA=0 ; JA=0 ; A=0
@@ -198,7 +192,7 @@ subroutine orsolve(iter)
 
   IA((psx*psy*(psz+(2*ghost_width)-2))+1)= IA(psx*psy*(psz+(2*ghost_width)-2))+6
 
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   do linindex = 1,psx*psy*(psz+(2*ghost_width)-2)
      is_sorted = .FALSE.
@@ -233,10 +227,10 @@ subroutine orsolve(iter)
 
   end do
 
-
-
   IA = IA - 1
   JA = JA - 1
+
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   call MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,psx*psy*(psz+(2*ghost_width)-2),psx*psy*(psz+(2*ghost_width)-2),IA,JA,A,lhs_mat,ierr)
 
@@ -249,7 +243,7 @@ subroutine orsolve(iter)
 
   call KSPGetConvergedReason(ksp_or,or_converged_reason,ierr)
 
-  if (or_converged_reason.gt.0) then
+  if (or_converged_reason.gt.0) then     ! If Solver is converged
 
   call VecGetArrayF90(or_vec,point_or_vec,ierr)
 
@@ -268,20 +262,17 @@ subroutine orsolve(iter)
 
   end if
 
-
-
   call VecDestroy(or_vec,ierr)
   call VecDestroy(rhs_vec,ierr)
   call MatDestroy(lhs_mat,ierr)
   call KSPDestroy(ksp_or,ierr)
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-
-  !! Identify the iron(sulfide)/environment boundary and set the gradient of the OPYR field to zero there
   do x = 1,psx
      do y = 1,psy
         do z = 3,psz+(2*ghost_width)-2
-           if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then
+           if ((env(x,y,z) .lt. 5.0E-1).and.(env(x,y,z+1) .gt. 5.0E-1)) then  ! If it is iron(sulfide)/environment boundary, set the gradient of the OPYR field to zero there
               opyr(x,y,z-2) = opyr(x,y,z)
               opyr(x,y,z-1) = opyr(x,y,z)
               opyr(x,y,z+1) = opyr(x,y,z)
