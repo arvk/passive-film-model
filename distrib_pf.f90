@@ -8,6 +8,7 @@ subroutine distrib_pf()
   integer :: x, y, z   ! Loop variables
   integer :: ierr,status(MPI_STATUS_SIZE)
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   !! Broadcast global phase-fraction fields
   call mpi_bcast(met_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
@@ -25,6 +26,10 @@ subroutine distrib_pf()
   !! Broadcast global pyrite orientation field
   call mpi_bcast(opyr_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
+  !! Broadcast the chemical potential of the environment
+  call mpi_bcast(avg_mu_env,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   !! Copy relevant portions of the global matrices onto local matrices
   do x = 1,psx
@@ -44,7 +49,5 @@ subroutine distrib_pf()
         end do
      end do
   end do
-
-  call mpi_bcast(avg_mu_env,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
 end subroutine distrib_pf
