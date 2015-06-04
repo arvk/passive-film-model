@@ -5,8 +5,7 @@ subroutine swap_mu
   include 'mpif.h'
 
   integer :: x, y, z  ! Loop variables
-  integer :: ierr
-  integer :: stat(MPI_STATUS_SIZE)
+  integer :: ierr, stat(MPI_STATUS_SIZE)
 
   !! Triple number codes for MPI request variables
   !! a) First number denotes field: 1 - Mu
@@ -17,6 +16,8 @@ subroutine swap_mu
   !! Double number codes for MPI tags
   !! a) First number denotes field: 1 - Mu
   !! b) Second number denotes sending/receiving and destination combo: 0 = Sending to higher or receiving from lower. 1 = Sending to lower rank or receiving from higher rank
+
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   if ((rank.gt.0).and.(rank.lt.procs-1)) then
      call mpi_isend(mu(1,1,psz+1),psx*psy*ghost_width,MPI_DOUBLE_PRECISION,rank+1,10,MPI_COMM_WORLD,q111,ierr)
@@ -34,8 +35,8 @@ subroutine swap_mu
      do x = 1,psx
         do y = 1,psy
            do z = 1,ghost_width
-           mu(x,y,z) = mu(x,y,1+ghost_width)
-        end do
+              mu(x,y,z) = mu(x,y,1+ghost_width)
+           end do
         end do
      end do
 
@@ -49,8 +50,8 @@ subroutine swap_mu
      do x = 1,psx
         do y = 1,psy
            do z = 1,ghost_width
-           mu(x,y,psz+ghost_width+z) = mu(x,y,psz+ghost_width)
-        end do
+              mu(x,y,psz+ghost_width+z) = mu(x,y,psz+ghost_width)
+           end do
         end do
      end do
 
