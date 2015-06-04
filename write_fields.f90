@@ -22,6 +22,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
+  write(101,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(101)
 
   open (unit=102, file="MKW.out", status="new")
@@ -33,6 +34,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
+  write(102,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(102)
 
   open (unit=103, file="PHT.out", status="new")
@@ -44,6 +46,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
+  write(103,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(103)
 
   open (unit=104, file="PYR.out", status="new")
@@ -55,6 +58,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
+  write(104,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(104)
 
   open (unit=105, file="ENV.out", status="new")
@@ -66,6 +70,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
+  write(105,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(105)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
@@ -80,6 +85,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
+  write(200,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(200)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
@@ -94,6 +100,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
+  write(304,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(304)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
@@ -108,6 +115,7 @@ subroutine write_fields(iter)
         end do
      end do
   end do
+  write(401,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(401)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
