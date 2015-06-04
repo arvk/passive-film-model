@@ -5,10 +5,10 @@ subroutine initialize_geometry()
   use kmc_data
   implicit none
 
-  integer :: x,y,z                         ! Index for x-, y- and z-direction (Loop)
-  integer :: met_z_end                     ! Location of boundary between metal and environment
-  real*8 :: avg_mu_met                     ! Chemical potential in the metal region
-  real*8, parameter :: epsilon = 0.00001d0 ! A hard-coded 'small' number
+  integer :: x,y,z                               ! Index for x-, y- and z-direction (Loop)
+  integer :: met_z_end                           ! Location of boundary between metal and environment
+  real*8 :: avg_mu_met                           ! Chemical potential in the metal region
+  real*8, parameter :: infinitesimal = 0.00001d0 ! A hard-coded 'small' number
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
@@ -18,19 +18,19 @@ subroutine initialize_geometry()
      do y = 1,psy_g
 
         do z = 1,met_z_end         ! Initialize metal region
-           met_g(x,y,z) = 1.0d0-epsilon
-           mkw_g(x,y,z) = 0.0d0+epsilon
-           pht_g(x,y,z) = 0.0d0+epsilon
-           pyr_g(x,y,z) = 0.0d0+epsilon
-           env_g(x,y,z) = 0.0d0+epsilon
+           met_g(x,y,z) = 1.0d0-infinitesimal
+           mkw_g(x,y,z) = 0.0d0+infinitesimal
+           pht_g(x,y,z) = 0.0d0+infinitesimal
+           pyr_g(x,y,z) = 0.0d0+infinitesimal
+           env_g(x,y,z) = 0.0d0+infinitesimal
         end do
 
         do z = met_z_end+1,psz_g   ! Initialize environmental region
-           met_g(x,y,z) = 0.0d0+epsilon
-           mkw_g(x,y,z) = 0.0d0+epsilon
-           pht_g(x,y,z) = 0.0d0+epsilon
-           pyr_g(x,y,z) = 0.0d0+epsilon
-           env_g(x,y,z) = 1.0d0-epsilon
+           met_g(x,y,z) = 0.0d0+infinitesimal
+           mkw_g(x,y,z) = 0.0d0+infinitesimal
+           pht_g(x,y,z) = 0.0d0+infinitesimal
+           pyr_g(x,y,z) = 0.0d0+infinitesimal
+           env_g(x,y,z) = 1.0d0-infinitesimal
         end do
 
      end do
