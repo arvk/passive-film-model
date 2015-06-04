@@ -17,10 +17,10 @@ subroutine thermo
   do mu_x_10k = -300000,300000
      my_mu = R*T*(dble(mu_x_10k)/10000.0d0)   ! my_mu = -30RT to 30 RT
 
-     my_met = 0.0d0 - (my_mu*0.0015)
-     my_mkw = (1E-6*my_mu*my_mu) + (20.53*T) - 65060 - (my_mu*0.80d0)
-     my_pht = (1E-6*my_mu*my_mu) + (20.53*T) - 72050 - (my_mu*1.0d0)
-     my_pyr = (1E-9*my_mu*my_mu) + (50.355*T) - 98710 - (my_mu*2.0d0)
+     my_met = 0.0d0 - (my_mu*0.0015)                                  ! F_met in J/mol
+     my_mkw = (1E-6*my_mu*my_mu) + (20.53*T) - 65060 - (my_mu*0.80d0) ! F_mkw in J/mol
+     my_pht = (1E-6*my_mu*my_mu) + (20.53*T) - 72050 - (my_mu*1.0d0)  ! F_pht in J/mol
+     my_pyr = (1E-9*my_mu*my_mu) + (50.355*T) - 98710 - (my_mu*2.0d0) ! F_pyr in J/mol
 
      if (abs(my_met-my_mkw) .lt. min_met_mkw) then
         mus_met_mkw_eqb = my_mu
