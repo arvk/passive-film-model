@@ -14,31 +14,17 @@ subroutine pfsolve(iter)
 #include <finclude/petscksp.h>
 #include <finclude/petscsnes.h>
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-
-
-  integer :: x, y, z   ! Loop variables
-  integer :: status(MPI_STATUS_SIZE)
-  integer, intent(in) :: iter
-
-  !!---------------PF evolution-----------------!!
-
-  !! Bulk free energy
-  real*8 :: f_met, f_mkw, f_pht, f_pyr, f_env
-  real*8 :: w_met, w_mkw, w_pht, w_pyr, w_env
+  integer :: x, y, z                  ! Index for x-, y- and z-direction (Loop)
+  integer :: status(MPI_STATUS_SIZE)  ! MPI variable
+  integer, intent(in) :: iter         ! Iteration count
+  integer :: linindex
+  integer, parameter :: no_fields = 5
+  integer, parameter :: imet = 1, imkw = 2, ipht = 3, ipyr = 4, ienv = 5
 
   real*8 :: sigma_pyr_met, sigma_pyr_mkw, sigma_pyr_pht, sigma_pyr_env
   real*8 :: sigma_met_pyr, sigma_mkw_pyr, sigma_pht_pyr, sigma_env_pyr
-
-  real*8 :: sumfields
-
-  integer, parameter :: imet = 1
-  integer, parameter :: imkw = 2
-  integer, parameter :: ipht = 3
-  integer, parameter :: ipyr = 4
-  integer, parameter :: ienv = 5
-
-  integer, parameter :: no_fields = 5
 
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_met, D_met_mkw, D_met_pht, D_met_pyr, D_met_env
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_mkw_met, D_mkw, D_mkw_pht, D_mkw_pyr, D_mkw_env
@@ -46,16 +32,9 @@ subroutine pfsolve(iter)
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_pyr_met, D_pyr_mkw, D_pyr_pht, D_pyr, D_pyr_env
   real*8, dimension(psx,psy,psz+(2*ghost_width)) :: D_env_met, D_env_mkw, D_env_pht, D_env_pyr, D_env
 
-  ! A/B/JA matrices for implicit solver
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: B
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: approxsol
+  ! Implicit solver variables
+  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: B, approxsol
   integer, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: vector_locator
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: vecread
-  real*8, dimension(psx*psy*(psz+(2*ghost_width)-2)*no_fields) :: scratch1,scratch2,scratch3
-
-  integer :: linindex, contindex
-  integer :: iterations, solver_info
-
 
   PetscErrorCode ierr
   Vec pf_vec,rhs_vec,ret_vec
@@ -64,16 +43,7 @@ subroutine pfsolve(iter)
   SNES snes_pf
   SNESConvergedReason pf_converged_reason
 
-
-
-
-
-
-
-
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   call calc_grad_pf()
 
@@ -126,19 +96,10 @@ subroutine pfsolve(iter)
   end do
 
 
-
-
-
-
-
   call VecCreate(PETSC_COMM_SELF,ret_vec,ierr)
   call VecSetSizes(ret_vec,PETSC_DECIDE,psx*psy*(psz+(2*ghost_width)-2)*no_fields,ierr)
   call VecSetFromOptions(ret_vec,ierr)
   call VecSetUp(ret_vec,ierr)
-
-
-
-
 
 
   do z = 1,psz+(2*ghost_width)-2
@@ -267,7 +228,7 @@ subroutine pfsolve(iter)
 
   call SNESGetConvergedReason(snes_pf,pf_converged_reason,ierr)
 
-  if (pf_converged_reason.gt.0) then
+  if (pf_converged_reason.gt.0) then   ! if Solver is converged
 
      call VecGetArrayF90(pf_vec,point_pf_vec,ierr)
      do z = 1,psz+(2*ghost_width)-2
@@ -280,14 +241,14 @@ subroutine pfsolve(iter)
               newmkw(x,y,z+1) = point_pf_vec(linindex+((imkw-1)*psx*psy*(psz+(2*ghost_width)-2)))
               newpht(x,y,z+1) = point_pf_vec(linindex+((ipht-1)*psx*psy*(psz+(2*ghost_width)-2)))
               newpyr(x,y,z+1) = point_pf_vec(linindex+((ipyr-1)*psx*psy*(psz+(2*ghost_width)-2)))
-              newenv(x,y,z+1) = env(x,y,z+1) !point_pf_vec(linindex+((ienv-1)*psx*psy*(psz+(2*ghost_width)-2))),1.0d0),0.0d0)
+              newenv(x,y,z+1) = env(x,y,z+1)
 
            end do
         end do
      end do
      call VecRestoreArrayF90(pf_vec,point_pf_vec,ierr)
 
-  else ! if pf_converged_reason < 0
+  else                                 ! if Solver is not converged
 
      newmet = met
      newmkw = mkw
@@ -298,8 +259,8 @@ subroutine pfsolve(iter)
   end if
 
 
-  !! Apply boundary conditions to phase field(s) update
-  if (rank.eq.0) then
+
+  if (rank.eq.0) then             ! Apply global boundary conditions to rank 0 (Metal end)
      do x = 1,psx
         do y = 1,psy
            newmet(x,y,ghost_width+1) = met(x,y,ghost_width+1)
@@ -309,7 +270,7 @@ subroutine pfsolve(iter)
            newenv(x,y,ghost_width+1) = env(x,y,ghost_width+1)
         end do
      end do
-  elseif(rank.eq.procs-1) then
+  elseif(rank.eq.procs-1) then   ! Apply global boundary conditions to rank procs-1 (Environment end)
      do x = 1,psx
         do y = 1,psy
            newmet(x,y,psz+ghost_width) = met(x,y,psz+ghost_width)
@@ -322,11 +283,10 @@ subroutine pfsolve(iter)
   end if
 
 
-  !! Apply boundary conditions to the environment
   do x = 1,psx
      do y = 1,psy
         do z = 1+ghost_width,psz+ghost_width
-           if (env(x,y,z).gt.0.99) then
+           if (env(x,y,z).gt.0.99) then    ! Normalize environment-rich regions
               newmet(x,y,z) = 0.0d0
               newmkw(x,y,z) = 0.0d0
               newpht(x,y,z) = 0.0d0
@@ -337,39 +297,34 @@ subroutine pfsolve(iter)
      end do
   end do
 
-
-
-
-
-
-
-!!! Update phase fields
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   do x = 1,psx
      do y = 1,psy
-        do z = 1+ghost_width,psz+ghost_width
+
+        do z = 1+ghost_width,psz+ghost_width      ! Calcualte evolution in the non-boundary region in each domain
            dmet_dt(x,y,z) = ((newmet(x,y,z) - met(x,y,z))/dt)*(1.0d0-voids(x,y,z))
            dmkw_dt(x,y,z) = ((newmkw(x,y,z) - mkw(x,y,z))/dt)*(1.0d0-voids(x,y,z))
            dpht_dt(x,y,z) = ((newpht(x,y,z) - pht(x,y,z))/dt)*(1.0d0-voids(x,y,z))
            dpyr_dt(x,y,z) = ((newpyr(x,y,z) - pyr(x,y,z))/dt)*(1.0d0-voids(x,y,z))
            denv_dt(x,y,z) = ((newenv(x,y,z) - env(x,y,z))/dt)*(1.0d0-voids(x,y,z))
         end do
-        do z = 1,ghost_width
-           dmet_dt(x,y,z) = 0.0d0 ; dmkw_dt(x,y,z) = 0.0d0 ; dpht_dt(x,y,z) = 0.0d0 ; dpyr_dt(x,y,z) = 0.0d0 ; denv_dt(x,y,z) = 0.0d0
-           dmet_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dmkw_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dpht_dt(x,y,psz+ghost_width+z) = 0.0d0 ; dpyr_dt(x,y,psz+ghost_width+z) = 0.0d0 ; denv_dt(x,y,psz+ghost_width+z) = 0.0d0
+
+        do z = 1,ghost_width                     ! No evolution in the boundary region in each domain
+           dmet_dt(x,y,z) = 0.0d0 ; dmet_dt(x,y,psz+ghost_width+z) = 0.0d0
+           dmkw_dt(x,y,z) = 0.0d0 ; dmkw_dt(x,y,psz+ghost_width+z) = 0.0d0
+           dpht_dt(x,y,z) = 0.0d0 ; dpht_dt(x,y,psz+ghost_width+z) = 0.0d0
+           dpyr_dt(x,y,z) = 0.0d0 ; dpyr_dt(x,y,psz+ghost_width+z) = 0.0d0
+           denv_dt(x,y,z) = 0.0d0 ; denv_dt(x,y,psz+ghost_width+z) = 0.0d0
         end do
+
      end do
   end do
-
-  !###########################################################
-  !##################--UPDATE ALL FIELDS--####################
-  !###########################################################
 
   do x = 1,psx
      do y = 1,psy
         do z = 1+ghost_width,psz+ghost_width
-           met(x,y,z) = newmet(x,y,z)
+           met(x,y,z) = newmet(x,y,z)        ! Time-step phase fields
            mkw(x,y,z) = newmkw(x,y,z)
            pht(x,y,z) = newpht(x,y,z)
            pyr(x,y,z) = newpyr(x,y,z)
@@ -384,8 +339,6 @@ subroutine pfsolve(iter)
   call VecDestroy(ret_vec,ierr)
   call MatDestroy(jac,ierr)
   call SNESDestroy(snes_pf,ierr)
-
-
 
 end subroutine pfsolve
 
