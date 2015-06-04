@@ -5,139 +5,104 @@ program passive_film_model
   implicit none
 #include <finclude/petscsys.h>
 
-  integer :: iter      ! Loop variable for current iteration
-  integer :: ierr,status(MPI_STATUS_SIZE)
+  integer :: iter  ! Current iteration number (Loop)
+  integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   !! Initialize Parallelization
   call mpi_init(ierr)
   call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
-
   call mpi_comm_size(MPI_COMM_WORLD,procs,ierr)
   call mpi_comm_rank(MPI_COMM_WORLD,rank,ierr)
 
 
-  !! Define Root process (rank 0)
-  if(rank .eq. 0)then
+  if (rank .eq. 0) then ! If I am the parent process (rank == 0)
      isroot = .TRUE.
-  else
+  else                  ! If I am NOT the parent process (rank =/= 0)
      isroot = .FALSE.
   end if
 
-  !=======================
-  ! SYSTEM INITIALIZATION
-  !=======================
 
+  if (isroot) call read_parameters()  ! IF I am ROOT, read in input parameters
+  if (isroot) call write_parameters() ! IF I am ROOT, write out simulation parameters
 
-  !! Read in input parameters -- Root only
+  call distrib_params()    ! MPI-Distribute input parameters to non-parent processors
+  call thermo()            ! Calculate phase stabilities
+  call diffusivities()     ! Calculate phase diffusivities
+  call estimate_timestep() ! Estimate timestep for all field evolution equations
+  call seed_prng()         ! Seed the Pseudo-random-number-generator
+  call allocate_matrices() ! Allocate all field matrices
+
   if (isroot) then
-     call read_parameters()
-  end if
-
-  !! Distribute input parameters -- MPI Broadcast by Root
-  call distrib_params()
-
-  !! Import the thermodynamic module -- All processors
-  call thermo()
-  call diffusivities()
-  call estimate_timestep()
-  call seed_prng()
-
-  !! Allocate all matrices -- All processors
-  call allocate_matrices()
-
-  !! Construct/read the system -- All processors
-  if (isroot) then
-     if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then
+     if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then   ! If it is a restarted run, read PF matrices
         call read_geometry()
-     else
-        call system("rm -rf *.out")   ! Cleanup before running
+     else                                                       ! If it is a fresh calculation
         call initialize_geometry()
      end if
   end if
 
-  call distrib_pf()
+  call distrib_pf()    ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
+  call swap_pf()       ! Swap phase-field matrix boundaries
+  call swap_mu()       ! Swap mu-field matrix boundaries
+  call swap_or()       ! Swap orientation-field matrix boundaries
+  call swap_electro()  ! Swap electric-potential-field matrix boundaries
 
-  call swap_pf()
-  call swap_mu()
-  call swap_or()
-  call swap_electro()
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-  if(isroot) then
-     call write_parameters()
-  end if
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
 
-  !! Barrier before beginning time loop
-  call mpi_barrier(MPI_COMM_WORLD,ierr)
+  do iter = 1,nomc  ! TIME LOOP
 
-  ! =========
-  ! TIME LOOP
-  ! =========
+     call pfsolve(iter)  ! Solve PF evolution equations
+     call swap_pf()      ! Swap solved phase field boundaries
 
-  do iter = 1,nomc
+     call musolve(iter)  ! Solve MU evolution equations
+     call swap_mu()      ! Swap solved mu field boundaries
 
-     !! Solve PF equations
-     call pfsolve(iter)
-     call swap_pf()
-     call musolve(iter)
-     call swap_mu()
-     call orsolve(iter)
+     call orsolve(iter)  ! Solve OR evolution equations
 
-     if (include_dissolve) then
-        call dissolve_film()
-     end if
-
-     if (include_electro) then
-        call elpotsolve(iter)
-     end if
-
-     ! if (iter.eq.nomc/10) then
-     !    call voids_create()
-     ! end if
+     if (include_dissolve) call dissolve_film() ! If dissolve tag is set, dissolve film
+     if (include_electro) call elpotsolve(iter) ! If electro tag is set, solve the electric potential field evolution
+     ! if (iter.eq.nomc/10) call voids_create() ! Create voids every nomc/10 steps
 
 
-     if (mod(iter,freq_scale).eq.0) then
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-        if (isroot) then
-           call initialize_kmc()
-        end if
+     if (mod(iter,freq_scale).eq.0) then   ! Start kMC routines every freq_scale steps
 
-        call distrib_kmc()
+        if (isroot) call initialize_kmc() ! If you are the parent processor, initialize the kMC process
+        call distrib_kmc()                ! Distribute the kMC grid to different process
+        call kmcsolve(iter)               ! Perform kMC
 
-        call kmcsolve(iter)
-
-!!!! Couple KMC surface to PF
-
-        call gather_pf()
-        call gather_mu()
-        call gather_opyr()
-        call gather_kmc()
-
-        if (isroot) then
-           call couple_kmc_pf()
-        end if
-        call distrib_pf()
+        call gather_pf()                  ! Collect phase field to the parent process
+        call gather_mu()                  ! Collect mu field to the parent process
+        call gather_opyr()                ! Collect orientation field to the parent process
+        call gather_kmc()                 ! Collect kmc grid to the parent process
+        if (isroot) call couple_kmc_pf()  ! Couple the kMC grid to the Phase Field
+        call distrib_pf()                 ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
 
      end if
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-!!!         Write output files at fixed times
-     if (mod(iter,max(floor(real(nomc/noimg)),1)).eq.0) then
+     if (mod(iter,max(floor(real(nomc/noimg)),1)).eq.0) then   ! Write output files
 
-        call gather_pf()
-        call gather_mu()
-        call gather_opyr()
-        call gather_electro()
+        call gather_pf()      ! Collect phase field to the parent process
+        call gather_mu()      ! Collect mu field to the parent process
+        call gather_opyr()    ! Collect orientation field to the parent process
+        call gather_electro() ! Collect electric potential field to the parent process
 
-        if(isroot)then
-           call write_fields(iter)
-        end if
+        if (isroot) call write_fields(iter) ! IF I am ROOT, write out simulation parameters
 
      end if
+
 
   end do
 
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+
+  !! Finalize Parallelization
   call PetscFinalize(ierr)
   call mpi_finalize(ierr)
 
