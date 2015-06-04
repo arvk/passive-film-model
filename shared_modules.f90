@@ -1,45 +1,41 @@
-!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
 module fields
   implicit none
   save
 
-  !! Define the extent of phase fields
   integer :: psx_g,psy_g,psz_g ! Number of PF gridpoints in 3 directions
   integer :: psx,psy,psz       ! Number of PF gridpoints in 3 directions
 
-  !! Define local phase fields
-  real*8, dimension(:,:,:), allocatable :: met,mkw,pht,pyr,env ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
-  real*8, dimension(:,:,:), allocatable :: mu  ! Local mu_S grid
-  real*8, dimension(:,:,:), allocatable :: opyr  ! Local orientation field for pyrite
-  real*8, dimension(:,:,:), allocatable :: voids ! Local void fraction
-  real*8, dimension(:,:,:), allocatable :: elpot ! Local electrical potential
+  ! Local phase fields
+  real*8, dimension(:,:,:), allocatable :: met,mkw,pht,pyr,env ! Local PF grid for metal, pyrrhotite, pyrite and environment
+  real*8, dimension(:,:,:), allocatable :: mu                  ! Local mu_S grid
+  real*8, dimension(:,:,:), allocatable :: opyr                ! Local orientation field for pyrite
+  real*8, dimension(:,:,:), allocatable :: voids               ! Local void fraction
+  real*8, dimension(:,:,:), allocatable :: elpot               ! Local electrical potential
 
-  !! Define global phase fields
-  real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g ! Local PF grid for metal, pyrrhotite, pyrite and environment respectively
-  real*8, dimension(:,:,:), allocatable :: mu_g ! Local mu_S grid
-  real*8, dimension(:,:,:), allocatable :: opyr_g  ! Global orientation field for pyrite
-  real*8, dimension(:,:,:), allocatable :: elpot_g ! Global electrical potential
+  ! Global phase fields
+  real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g ! Global PF grid for metal, pyrrhotite, pyrite and environment
+  real*8, dimension(:,:,:), allocatable :: mu_g                              ! Global mu_S grid
+  real*8, dimension(:,:,:), allocatable :: opyr_g                            ! Global orientation field for pyrite
+  real*8, dimension(:,:,:), allocatable :: elpot_g                           ! Global electrical potential
 
   real*8, dimension(:,:,:), allocatable :: dmet_dt, dmkw_dt, dpht_dt, dpyr_dt, denv_dt, dmu_dt
   real*8, dimension(:,:,:), allocatable :: newmet, newmkw, newpht, newpyr, newenv
 
 end module fields
 
-
-!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
 module commondata
   implicit none
   save
 
-  ! MPI PARAMETERS
+  ! MPI parameters
   logical :: isroot
   integer :: rank, procs
 
-  ! INPUT PARAMETERS
+  ! Input parameters
   character*1 :: isrestart     ! Is the calculation a restarted one?
   integer :: nomc              ! Number of PF iterations
   integer :: T                 ! Temperature of the simulation box
@@ -50,7 +46,7 @@ module commondata
   logical :: include_electro   ! Include potential distribution
 
 
-  ! INTERNAL PARAMETERS
+  ! Simulation parameters
   real*8, parameter :: dpf = 5E-9       ! Phase-field grid size
   real*8 :: dt                          ! Timestep for PF evolution
   real*8 :: avg_mu_env                  ! Sulfur chemical potential in the environment
@@ -65,44 +61,42 @@ module commondata
 
 end module commondata
 
-
-!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
 module thermo_constants
   implicit none
   save
 
-  real*8 :: mus_met_mkw_eqb, mus_mkw_pht_eqb, mus_pht_pyr_eqb
-  real*8 :: rho_met, rho_mkw, rho_pht, rho_pyr, rho_env    !! Sulfur density in different phases
+  real*8 :: mus_met_mkw_eqb, mus_mkw_pht_eqb, mus_pht_pyr_eqb ! mu_S boundary between phases
+  real*8 :: rho_met, rho_mkw, rho_pht, rho_pyr, rho_env       ! Sulfur density
   real*8, parameter :: R = 8.3144621
 
-  !! Surface energy sigmas
-  real*8 :: sigma_mkw_env= 1E-12, sigma_env_mkw= 1E-12
-  real*8 :: sigma_mkw_met= 1E-12, sigma_met_mkw= 1E-12
-  real*8 :: sigma_mkw_pht= 1E-12, sigma_pht_mkw= 1E-12
-  real*8 :: sigma_mkw_pyr_0 = 1E-12, sigma_pyr_mkw_0 = 1E-12
-  real*8 :: sigma_pht_env= 1E-12, sigma_env_pht= 1E-12
-  real*8 :: sigma_pht_met= 1E-12, sigma_met_pht= 1E-12
-  real*8 :: sigma_pht_pyr_0 = 1E-12, sigma_pyr_pht_0 = 1E-12
-  real*8 :: sigma_met_env= 1E-12, sigma_env_met= 1E-12
-  real*8 :: sigma_met_pyr_0 = 1E-12, sigma_pyr_met_0 = 1E-12
-  real*8 :: sigma_env_pyr_0 = 1E-12, sigma_pyr_env_0 = 1E-12
+  ! Surface energy sigmas
+  real*8, parameter :: sigma_mkw_env= 1E-12, sigma_env_mkw= 1E-12
+  real*8, parameter :: sigma_mkw_met= 1E-12, sigma_met_mkw= 1E-12
+  real*8, parameter :: sigma_mkw_pht= 1E-12, sigma_pht_mkw= 1E-12
+  real*8, parameter :: sigma_mkw_pyr_0 = 1E-12, sigma_pyr_mkw_0 = 1E-12
+  real*8, parameter :: sigma_pht_env= 1E-12, sigma_env_pht= 1E-12
+  real*8, parameter :: sigma_pht_met= 1E-12, sigma_met_pht= 1E-12
+  real*8, parameter :: sigma_pht_pyr_0 = 1E-12, sigma_pyr_pht_0 = 1E-12
+  real*8, parameter :: sigma_met_env= 1E-12, sigma_env_met= 1E-12
+  real*8, parameter :: sigma_met_pyr_0 = 1E-12, sigma_pyr_met_0 = 1E-12
+  real*8, parameter :: sigma_env_pyr_0 = 1E-12, sigma_pyr_env_0 = 1E-12
 
-  !! Field mobilities
-  real*8 :: M_pht_met = 0.75E-8, M_met_pht = 0.75E-8
-  real*8 :: M_mkw_met = 0.35E-6, M_met_mkw = 0.35E-6
-  real*8 :: M_met_pyr = 0.75E-8, M_pyr_met = 0.75E-8
-  real*8 :: M_pht_pyr = 1.25E-7, M_pyr_pht = 1.25E-7
-  real*8 :: M_mkw_pyr = 0.75E-8, M_pyr_mkw = 0.75E-8
-  real*8 :: M_pht_mkw = 0.15E-6, M_mkw_pht = 0.15E-6
-  real*8 :: M_pht_env = 1.0E-15, M_env_pht = 1.0E-15
-  real*8 :: M_mkw_env = 1.0E-15, M_env_mkw = 1.0E-15
-  real*8 :: M_met_env = 1.0E-15, M_env_met = 1.0E-15
-  real*8 :: M_env_pyr = 1.0E-15, M_pyr_env = 1.0E-15
+  ! Field mobilities
+  real*8, parameter :: M_pht_met = 0.75E-8, M_met_pht = 0.75E-8
+  real*8, parameter :: M_mkw_met = 0.35E-6, M_met_mkw = 0.35E-6
+  real*8, parameter :: M_met_pyr = 0.75E-8, M_pyr_met = 0.75E-8
+  real*8, parameter :: M_pht_pyr = 1.25E-7, M_pyr_pht = 1.25E-7
+  real*8, parameter :: M_mkw_pyr = 0.75E-8, M_pyr_mkw = 0.75E-8
+  real*8, parameter :: M_pht_mkw = 0.15E-6, M_mkw_pht = 0.15E-6
+  real*8, parameter :: M_pht_env = 1.0E-15, M_env_pht = 1.0E-15
+  real*8, parameter :: M_mkw_env = 1.0E-15, M_env_mkw = 1.0E-15
+  real*8, parameter :: M_met_env = 1.0E-15, M_env_met = 1.0E-15
+  real*8, parameter :: M_env_pyr = 1.0E-15, M_pyr_env = 1.0E-15
 
-  !! Double well potential heights
-  real*8 :: double_well_barrier = 100.0d0 ! in J/mol
+  ! Double well potential heights
+  real*8, parameter :: double_well_barrier = 100.0d0 ! in J/mol
   real*8 :: hill_met_mkw, hill_met_pht, hill_met_pyr, hill_met_env
   real*8 :: hill_mkw_met, hill_mkw_pht, hill_mkw_pyr, hill_mkw_env
   real*8 :: hill_pht_met, hill_pht_mkw, hill_pht_pyr, hill_pht_env
@@ -111,9 +105,7 @@ module thermo_constants
 
 end module thermo_constants
 
-
-!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
 module kmc_data
   implicit none
@@ -122,10 +114,9 @@ module kmc_data
   integer :: ksx,ksy           ! Number of local kMC gridpoints
   integer :: ksx_g,ksy_g       ! Number of global kMC gridpoints
 
-
   integer, dimension(:,:), allocatable :: kg      ! Global kMC grid
   integer, dimension(:,:), allocatable :: kg_g    ! Local kMC grid
-  integer, dimension(:,:), allocatable :: kg_recv
+  integer, dimension(:,:), allocatable :: kg_recv ! Empty array to receive MPI requests
 
   type :: prol
      integer :: fx,fy,tx,ty,from,to
@@ -136,12 +127,12 @@ module kmc_data
 
 !!!!------------------------------------------------------!!!!
 !!!!              KMC Process probabilities               !!!!
-  !! GLOBAL
+  ! Global                                                !!!!
   real*8, dimension(:,:), allocatable :: vfe_f_g,vfe_a_g  !!!!
   real*8, dimension(:,:), allocatable :: vs_f_g,vs_a_g    !!!!
   real*8, dimension(:,:), allocatable :: fes_diss_g       !!!!
   real*8, dimension(:,:), allocatable :: v_diff_g         !!!!
-  !! LOCAL
+  ! Local                                                 !!!!
   real*8, dimension(:,:), allocatable :: vfe_f,vfe_a      !!!!
   real*8, dimension(:,:), allocatable :: vs_f,vs_a        !!!!
   real*8, dimension(:,:), allocatable :: fes_diss         !!!!
@@ -150,9 +141,7 @@ module kmc_data
 
 end module kmc_data
 
-
-!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
 module diffusion_constants
   implicit none
@@ -163,9 +152,7 @@ module diffusion_constants
 
 end module diffusion_constants
 
-
-!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
-
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
 module gradients
   implicit none
@@ -175,5 +162,4 @@ module gradients
 
 end module gradients
 
-
-!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
