@@ -43,10 +43,6 @@ program passive_film_model
   end if
 
   call distrib_pf()    ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
-  call swap_pf()       ! Swap phase-field matrix boundaries
-  call swap_mu()       ! Swap mu-field matrix boundaries
-  call swap_or()       ! Swap orientation-field matrix boundaries
-  call swap_electro()  ! Swap electric-potential-field matrix boundaries
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
@@ -55,11 +51,7 @@ program passive_film_model
   do iter = 1,nomc  ! TIME LOOP
 
      call pfsolve(iter)  ! Solve PF evolution equations
-     call swap_pf()      ! Swap solved phase field boundaries
-
      call musolve(iter)  ! Solve MU evolution equations
-     call swap_mu()      ! Swap solved mu field boundaries
-
      call orsolve(iter)  ! Solve OR evolution equations
 
      if (include_dissolve) call dissolve_film() ! If dissolve tag is set, dissolve film
@@ -69,7 +61,7 @@ program passive_film_model
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-     if (mod(iter,freq_scale).eq.0) then   ! Start kMC routines every freq_scale steps
+     if (mod(iter,freq_scale).eq.0) then  ! Start kMC routines every freq_scale steps
 
         if (isroot) call initialize_kmc() ! If you are the parent processor, initialize the kMC process
         call distrib_kmc()                ! Distribute the kMC grid to different process
