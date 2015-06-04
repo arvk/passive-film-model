@@ -297,7 +297,7 @@ subroutine musolve(iter)
 
   call KSPGetConvergedReason(ksp_mu,mu_converged_reason,ierr)
 
-  if (mu_converged_reason.gt.0) then
+  if (mu_converged_reason.gt.0) then  ! If Solver is converged
 
      call VecGetArrayF90(mus_vec,point_mu_vec,ierr)
 
@@ -314,7 +314,7 @@ subroutine musolve(iter)
 
      call VecRestoreArrayF90(mus_vec,point_mu_vec,ierr)
 
-  else  ! if mu_converged_reason < 0
+  else                                ! If Solver is not converged
 
      newmu = mu
 
