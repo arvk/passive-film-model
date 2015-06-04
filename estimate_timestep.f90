@@ -6,7 +6,7 @@ subroutine estimate_timestep
 
   real*8 :: dt_stable_diffusion    ! Maximum stable forward-euler timestep for integrating the mu field
   real*8 :: dt_stable_phase_field  ! Maximum stable forward-euler timestep for integrating the phase field
-  real*8 :: max_M_sigma
+  real*8 :: max_M_sigma            ! Maximum of Mobility*sigma for all the phases
 
   dt_stable_diffusion = (dpf*dpf)/(2*max(D_S_pht, D_S_pyr, D_S_mkw, D_Fe_pht, D_Fe_pyr, D_Fe_mkw)) ! Standard Forward-Euler criterion
 
