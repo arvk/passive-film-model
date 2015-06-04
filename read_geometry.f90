@@ -3,20 +3,20 @@ subroutine read_geometry
   use fields
   use kmc_data
   use thermo_constants
-
   implicit none
 
-  integer :: x, y, z   ! Loop variables
-  character*1 :: hash
+  integer :: x, y, z   ! Index along x-, y- and z-directions (Loop)
+  character*1 :: hash  ! Hash character
 
-!! Read phase-fraction fields; Units == 1XX
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
+  ! Read phase-fraction fields; Units == 1XX
   open (unit=101, file="MET.out", status="old")
   read(101,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(101,*)  met_g(x,y,z)
+           read(101,*)  met_g(x,y,z)          ! Read metal phase fraction
         end do
      end do
   end do
@@ -27,7 +27,7 @@ subroutine read_geometry
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(102,*)  mkw_g(x,y,z)
+           read(102,*)  mkw_g(x,y,z)         ! Read mackinawite phase fraction
         end do
      end do
   end do
@@ -38,7 +38,7 @@ subroutine read_geometry
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(103,*)  pht_g(x,y,z)
+           read(103,*)  pht_g(x,y,z)         ! Read pyrrhotite phase fraction
         end do
      end do
   end do
@@ -49,7 +49,7 @@ subroutine read_geometry
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(104,*)  pyr_g(x,y,z)
+           read(104,*)  pyr_g(x,y,z)         ! Read pyrite phase fraction
         end do
      end do
   end do
@@ -60,33 +60,35 @@ subroutine read_geometry
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(105,*)  env_g(x,y,z)
+           read(105,*)  env_g(x,y,z)        ! Read environment phase fraction
         end do
      end do
   end do
   close(105)
 
-!! Read chemical-potential field; Units == 2XX
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
+  ! Read chemical-potential field; Units == 2XX
   open (unit=200, file="MUS.out", status="old")
   read(200,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(200,*)  mu_g(x,y,z)
+           read(200,*)  mu_g(x,y,z)         ! Read chemical potential field
         end do
      end do
   end do
   close(200)
 
-!! Read orientation field; Units == 3XX
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
+  ! Read orientation field; Units == 3XX
   open (unit=303, file="OPYR.out", status="old")
   read(303,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           read(303,*)  opyr_g(x,y,z)
+           read(303,*)  opyr_g(x,y,z)       ! Read orientation field
         end do
      end do
   end do
