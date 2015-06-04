@@ -18,7 +18,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(101,*)  met_g(x,y,z)         ! Write metal phase fraction
+           write(101,'(F9.6)')  met_g(x,y,z)         ! Write metal phase fraction
         end do
      end do
   end do
@@ -30,7 +30,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(102,*)  mkw_g(x,y,z)         ! Write mackinawite phase fraction
+           write(102,'(F9.6)')  mkw_g(x,y,z)         ! Write mackinawite phase fraction
         end do
      end do
   end do
@@ -42,7 +42,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(103,*)  pht_g(x,y,z)         ! Write pyrrhotite phase fraction
+           write(103,'(F9.6)')  pht_g(x,y,z)         ! Write pyrrhotite phase fraction
         end do
      end do
   end do
@@ -54,7 +54,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(104,*)  pyr_g(x,y,z)         ! Write pyrite phase fraction
+           write(104,'(F9.6)')  pyr_g(x,y,z)         ! Write pyrite phase fraction
         end do
      end do
   end do
@@ -66,7 +66,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(105,*)  env_g(x,y,z)         ! Write environment phase fraction
+           write(105,'(F9.6)')  env_g(x,y,z)         ! Write environment phase fraction
         end do
      end do
   end do
@@ -81,7 +81,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(200,*)  mu_g(x,y,z)          ! Write chemical potential field
+           write(200,'(F9.0)')  mu_g(x,y,z)          ! Write chemical potential field
         end do
      end do
   end do
@@ -96,7 +96,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(304,*)  opyr_g(x,y,z)        ! Write orientation field
+           write(304,'(F9.6)')  opyr_g(x,y,z)        ! Write orientation field
         end do
      end do
   end do
@@ -111,7 +111,7 @@ subroutine write_fields(iter)
   do x = 1,psx_g
      do y = 1,psy_g
         do z = 1,psz_g
-           write(401,*)  elpot_g(x,y,z)       ! Write electric potential field
+           write(401,'(F6.3)')  elpot_g(x,y,z)       ! Write electric potential field
         end do
      end do
   end do
