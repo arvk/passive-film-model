@@ -7,11 +7,6 @@ subroutine write_fields(iter)
   integer :: x, y, z          ! Index along x-, y- and z-directions (Loop)
   integer, intent(in) :: iter ! Iteration number
   character*5 :: img_id       ! Index of current image (derived from current iteration number)
-  real*8 :: sum_met = 0.0d0   ! Variable for metal phase fraction statistics
-  real*8 :: sum_mkw = 0.0d0   ! Variable for mackinawite phase fraction statistics
-  real*8 :: sum_pht = 0.0d0   ! Variable for pyrrhotite phase fraction statistics
-  real*8 :: sum_pyr = 0.0d0   ! Variable for pyrite phase fraction statistics
-  real*8 :: sum_env = 0.0d0   ! Variable for environment phase fraction statistics
 
   call system("rm -rf MET.out MKW.out PHT.out PYR.out ENV.out MUS.out OPYR.out POT.out")
 
@@ -24,7 +19,6 @@ subroutine write_fields(iter)
      do y = 1,psy_g
         do z = 1,psz_g
            write(101,'(F9.6)')  met_g(x,y,z)         ! Write metal phase fraction
-           sum_met = sum_met + met_g(x,y,z)
         end do
      end do
   end do
@@ -37,7 +31,6 @@ subroutine write_fields(iter)
      do y = 1,psy_g
         do z = 1,psz_g
            write(102,'(F9.6)')  mkw_g(x,y,z)         ! Write mackinawite phase fraction
-           sum_mkw = sum_mkw + mkw_g(x,y,z)
         end do
      end do
   end do
@@ -50,7 +43,6 @@ subroutine write_fields(iter)
      do y = 1,psy_g
         do z = 1,psz_g
            write(103,'(F9.6)')  pht_g(x,y,z)         ! Write pyrrhotite phase fraction
-           sum_pht = sum_pht + pht_g(x,y,z)
         end do
      end do
   end do
@@ -63,7 +55,6 @@ subroutine write_fields(iter)
      do y = 1,psy_g
         do z = 1,psz_g
            write(104,'(F9.6)')  pyr_g(x,y,z)         ! Write pyrite phase fraction
-           sum_pyr = sum_pyr + pyr_g(x,y,z)
         end do
      end do
   end do
@@ -76,14 +67,13 @@ subroutine write_fields(iter)
      do y = 1,psy_g
         do z = 1,psz_g
            write(105,'(F9.6)')  env_g(x,y,z)         ! Write environment phase fraction
-           sum_env = sum_env + env_g(x,y,z)
         end do
      end do
   end do
   write(105,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
   close(105)
 
-  write(6,'(A,F9.0,A,F10.2,A,F10.2,A,F10.2,A,F10.2,A,F10.2)') " INFO: TIME= ", iter*dt, " s. MET= ", sum_met, " MKW= ", sum_mkw, " PHT= ", sum_pht, " PYR= ", sum_pyr, " ENV= ", sum_env
+  write(6,'(A,F9.0,A,F10.2,A,F10.2,A,F10.2,A,F10.2,A,F10.2)') " INFO: TIME= ", iter*dt, " s. MET= ", sum(met_g), " MKW= ", sum(mkw_g), " PHT= ", sum(pht_g), " PYR= ", sum(pyr_g), " ENV= ", sum(env_g)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
