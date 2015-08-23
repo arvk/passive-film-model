@@ -93,6 +93,9 @@ program passive_film_model
 
   end do
 
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS
+  call spparks_filmenv()
+
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   !! Finalize Parallelization
