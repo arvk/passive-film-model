@@ -63,16 +63,8 @@ program passive_film_model
 
      if (mod(iter,freq_scale).eq.0) then  ! Start kMC routines every freq_scale steps
 
-        if (isroot) call initialize_kmc() ! If you are the parent processor, initialize the kMC process
-        call distrib_kmc()                ! Distribute the kMC grid to different process
-        call kmcsolve(iter)               ! Perform kMC
-
-        call gather_pf()                  ! Collect phase field to the parent process
-        call gather_mu()                  ! Collect mu field to the parent process
-        call gather_opyr()                ! Collect orientation field to the parent process
-        call gather_kmc()                 ! Collect kmc grid to the parent process
-        if (isroot) call couple_kmc_pf()  ! Couple the kMC grid to the Phase Field
-        call distrib_pf()                 ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
+        call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS
+        call spparks_filmenv()
 
      end if
 
@@ -92,9 +84,6 @@ program passive_film_model
 
 
   end do
-
-  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS
-  call spparks_filmenv()
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
