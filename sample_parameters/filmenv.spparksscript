@@ -1,0 +1,30 @@
+## TEST SCRIPT
+
+seed 1273
+
+app_style filmenv 1.0
+
+dimension 2
+boundary p p p
+lattice sq/4n 1.0
+
+temperature 0.04723590744
+
+region cell block 0 150 0 150 -0.5 0.5
+
+region subcell block 10 20 10 20 -0.5 0.5
+
+create_box cell
+
+create_sites box
+#read_sites toberead
+
+solve_style tree
+sector yes
+
+diag_style energy stats yes
+stats 5000
+
+dump myxyzids text 110000 myxyzids id x y z
+dump myvalues text 110000 myvalues id i1 i2
+run 120000
