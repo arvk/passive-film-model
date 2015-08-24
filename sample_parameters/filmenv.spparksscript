@@ -2,7 +2,7 @@
 
 seed 1273
 
-app_style filmenv 1.0
+app_style filmenv 0.25
 
 dimension 2
 boundary p p p
@@ -21,6 +21,11 @@ solve_style tree
 sector yes
 
 diag_style energy stats yes
-stats 5000
+stats 5
 
-run 1200
+dump couplingfe text 15 couplingfe x y i2
+
+run 90
+
+undump couplingfe
+
