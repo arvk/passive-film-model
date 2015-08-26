@@ -1,0 +1,43 @@
+## TEST SCRIPT
+
+seed 1273
+
+app_style metfilm
+
+dimension 2
+boundary p p p
+lattice mkw 1.0
+
+temperature 0.04723590744
+
+region cell block 0 150 0 150 -0.5 0.5
+create_box cell
+
+# BASIS : 1=Fe, 2=Fe, 3=S_up, 4=S_down
+# SITE IDS (I2) : 1=Fe, 2=Sup-H, 3=Fe-H2, 4=V_Fe, 5=S_up, 6=S_down
+
+create_sites box value i2 2 basis 1 1 basis 2 1 basis 3 5 basis 4 5 
+set i1 value 2
+set i2 value 2 if i2 = 5 fraction 0.1
+set i2 value 4 if i2 = 1 fraction 0.01
+
+solve_style tree
+sector yes 
+
+event 2 oct oct fe sup 0.32355940 fe h  # Adsorption
+event 2 oct oct fe h 0.10 fe sup  # Desorption
+
+event 2 oct oct h sup 0.47584796 sup h  # H glide along plane
+
+event 3 oct oct oct fe h h 0.68543162 fe sup sup
+event 3 oct oct oct fe sup sup 0.58708402 fe h h
+
+event 3 oct oct oct vac h h 0.73076749 vac sup sup
+event 3 oct oct oct vac sup sup 0.79569354 vac h h 
+
+diag_style metfilm stats yes list events d1 d2 d3 t1 t2 t3 t4
+
+dump myxyzids text 10000 myxyzids id i1 i2 i3
+dump_modify myxyzids delay 10000
+run 10000
+undump myxyzids
