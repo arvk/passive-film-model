@@ -76,7 +76,7 @@ subroutine spparks_metfilm()
      call system('cp metfilm.spparksscript.template metfilm.spparksscript')
 
      if (already_run_once) then
-!        call system('echo "read_sites input.metfilm" >> metfilm.spparksscript')
+        call system('echo "read_sites input.metfilm" >> metfilm.spparksscript')
      end if
 
      call system('echo "run 10000" >> metfilm.spparksscript')
