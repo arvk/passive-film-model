@@ -65,7 +65,7 @@ program passive_film_model
 
         call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS
         call spparks_filmenv()
-
+        call spparks_metfilm()
      end if
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!

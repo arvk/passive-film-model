@@ -37,7 +37,5 @@ event 3 oct oct oct vac sup sup 0.79569354 vac h h
 
 diag_style metfilm stats yes list events d1 d2 d3 t1 t2 t3 t4
 
-dump myxyzids text 10000 myxyzids id i1 i2 i3
-dump_modify myxyzids delay 10000
-run 10000
-undump myxyzids
+dump raw_metfilm_output text 10000 raw_metfilm_output id x y i1 i2 i3
+dump_modify raw_metfilm_output delay 10000
