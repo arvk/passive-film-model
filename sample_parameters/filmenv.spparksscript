@@ -25,7 +25,7 @@ stats 5
 
 dump couplingfe text 15 couplingfe x y i2
 
-run 90
+run 3600
 
 undump couplingfe
 
