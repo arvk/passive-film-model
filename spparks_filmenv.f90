@@ -73,7 +73,7 @@ subroutine spparks_filmenv()
            do z = 1,psz_g
               if ((env_g(x,y,z) .lt. 5.0E-1).and.(env_g(x,y,z+1) .gt. 5.0E-1)) then
                  interface_loc(x,y) = z
-                 vac_form_bias(x,y) = (sin(x*y/50.0d0)+2.0d0)
+                 vac_form_bias(x,y) = (1.0d0-sin(3.14d0*x*y/800.0d0))*0.20d0
                  exit
               end if
            end do
