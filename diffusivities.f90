@@ -26,9 +26,15 @@ subroutine diffusivities
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   !! Hydrogen diffusivity in m^2/s
-   !D_H_env = 9.31E-9                      ! REF= http://mail.sci.ccny.cuny.edu/~pzhang/EAS44600/EAS446lec16.pdf
-   !D_H_met = 1.5E-7 * exp(0-(8492/(R*T))) ! REF= Physical Review B 70 , 064102-7 (2004)
-   !D_H_pht = 1.75E-9                      ! REF= Int. J. Electrochem. Sci.,8, (2013) 2880-2891
-   !D_H_pyr = D_H_met                      ! Assumed. Cannot find reference
+  D_H_env = 9.31E-11                     ! REF= http://mail.sci.ccny.cuny.edu/~pzhang/EAS44600/EAS446lec16.pdf
+  D_H_met = 1.5E-9 * exp(0-(8492/(R*T))) ! REF= Physical Review B 70 , 064102-7 (2004)
+  D_H_pht = 1.75E-11                     ! REF= Int. J. Electrochem. Sci.,8, (2013) 2880-2891
+  D_H_pyr = D_H_met                      ! Assumed. Cannot find reference
+
+
+!   D_H_env = 9.31E-9                      ! REF= http://mail.sci.ccny.cuny.edu/~pzhang/EAS44600/EAS446lec16.pdf
+!   D_H_met = 1.5E-7 * exp(0-(8492/(R*T))) ! REF= Physical Review B 70 , 064102-7 (2004)
+!   D_H_pht = 1.75E-9                      ! REF= Int. J. Electrochem. Sci.,8, (2013) 2880-2891
+!   D_H_pyr = D_H_met                      ! Assumed. Cannot find reference
 
 end subroutine diffusivities

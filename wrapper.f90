@@ -52,6 +52,7 @@ program passive_film_model
 
      call pfsolve(iter)  ! Solve PF evolution equations
      call musolve(iter)  ! Solve MU evolution equations
+     call pHsolve(iter)  ! Solve MU evolution equations
      call orsolve(iter)  ! Solve OR evolution equations
 
      if (include_dissolve) call dissolve_film() ! If dissolve tag is set, dissolve film

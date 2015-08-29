@@ -36,6 +36,8 @@ subroutine initialize_geometry()
      end do
   end do
 
+  metal_amount = sum(met_g)
+
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   avg_mu_met = mus_met_mkw_eqb - (R*T*0.5d0)
@@ -58,6 +60,10 @@ subroutine initialize_geometry()
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   elpot_g = metal_potential            ! Initialize global electrical potential
+
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+
+  pH_g = pH_in                         ! Initialize global pH field
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 

@@ -17,10 +17,14 @@ subroutine spparks_filmenv()
   real*8, dimension(psx,psy) :: vac_form_bias
   integer :: x,y,z,xfine,yfine
   integer :: nint
+  real*8 :: log10
 
   character*24 :: kmc_numel_string
   integer, dimension(psx*kg_scale,psy*kg_scale) :: fine_kmc_array
   real*8 :: average_from_fine
+  real*8 :: metal_amount_last_timestep
+  real*8 :: ratio_proton_fe
+  real*8 :: new_proton_amount
 
   interface
 
@@ -73,7 +77,7 @@ subroutine spparks_filmenv()
            do z = 1,psz_g
               if ((env_g(x,y,z) .lt. 5.0E-1).and.(env_g(x,y,z+1) .gt. 5.0E-1)) then
                  interface_loc(x,y) = z
-                 vac_form_bias(x,y) = (1.0d0-sin(3.14d0*x*y/800.0d0))*0.20d0
+                 vac_form_bias(x,y) = (1.0d0-sin(3.14d0*x*y/800.0d0))*0.02d0
                  exit
               end if
            end do
@@ -144,6 +148,10 @@ subroutine spparks_filmenv()
         end do
      end do
 
+     metal_amount_last_timestep = metal_amount
+     metal_amount = sum(met_g)
+     ratio_proton_fe = (7.874d0/55.845d0)
+
      do x = 1,psx_g
         do y = 1,psy_g
            do z = interface_loc(x,y)+1,psz_g
@@ -154,7 +162,19 @@ subroutine spparks_filmenv()
                  env_g(x,y,z) = 1.0d0
                  mu_g(x,y,z) = avg_mu_env
            end do
+
            met_g(x,y,interface_loc(x,y)) = met_g(x,y,interface_loc(x,y))*(1.0d0-mod(distance_interface_moved(x,y),kg_scale*1.0d0)/kg_scale)
+           mkw_g(x,y,interface_loc(x,y)) = mkw_g(x,y,interface_loc(x,y))*(1.0d0-mod(distance_interface_moved(x,y),kg_scale*1.0d0)/kg_scale)
+           pht_g(x,y,interface_loc(x,y)) = pht_g(x,y,interface_loc(x,y))*(1.0d0-mod(distance_interface_moved(x,y),kg_scale*1.0d0)/kg_scale)
+           pyr_g(x,y,interface_loc(x,y)) = pyr_g(x,y,interface_loc(x,y))*(1.0d0-mod(distance_interface_moved(x,y),kg_scale*1.0d0)/kg_scale)
+
+           if (metal_amount .lt. metal_amount_last_timestep) then
+              new_proton_amount = ratio_proton_fe*((metal_amount_last_timestep-metal_amount)/(psx*psy)) + 10**(pH_g(x,y,interface_loc(x,y)+1))
+              pH_g(x,y,interface_loc(x,y)+1) = log10(new_proton_amount)
+              new_proton_amount = ratio_proton_fe*((metal_amount_last_timestep-metal_amount)/(psx*psy)) + 10**(pH_g(x,y,interface_loc(x,y)+2))
+              pH_g(x,y,interface_loc(x,y)+2) = log10(new_proton_amount)
+           end if        
+
         end do
      end do
 

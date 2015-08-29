@@ -22,6 +22,8 @@ subroutine read_geometry
   end do
   close(101)
 
+  metal_amount = sum(met_g)
+
   open (unit=102, file="MKW.out", status="old")
   read(102,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
@@ -95,6 +97,20 @@ subroutine read_geometry
   close(303)
 
   avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0)
+
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+
+  ! Read pH field; Units == 4XX
+  open (unit=400, file="MUS.out", status="old")
+  read(400,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
+  do x = 1,psx_g
+     do y = 1,psy_g
+        do z = 1,psz_g
+           read(400,*)  pH_g(x,y,z)         ! Read pH field
+        end do
+     end do
+  end do
+  close(400)
 
 end subroutine read_geometry
 

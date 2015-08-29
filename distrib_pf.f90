@@ -20,6 +20,9 @@ subroutine distrib_pf()
   !! Broadcast global chemical-potential fields
   call mpi_bcast(mu_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
+  !! Broadcast global pH fields
+  call mpi_bcast(pH_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
   !! Broadcast global electrical potential
   call mpi_bcast(elpot_g(1,1,1),psx_g*psy_g*psz_g,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
@@ -28,6 +31,9 @@ subroutine distrib_pf()
 
   !! Broadcast the chemical potential of the environment
   call mpi_bcast(avg_mu_env,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
+  !! Broadcast the metal amount in the simulation cell
+  call mpi_bcast(metal_amount,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
@@ -42,6 +48,8 @@ subroutine distrib_pf()
            env(x,y,z+ghost_width) = env_g(x,y,z+(rank*psz_g/procs))
 
            mu(x,y,z+ghost_width) = mu_g(x,y,z+(rank*psz_g/procs))
+
+           pH(x,y,z+ghost_width) = pH_g(x,y,z+(rank*psz_g/procs))
 
            opyr(x,y,z+ghost_width) = opyr_g(x,y,z+(rank*psz_g/procs))
 

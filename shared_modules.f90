@@ -10,6 +10,7 @@ module fields
   ! Local phase fields
   real*8, dimension(:,:,:), allocatable :: met,mkw,pht,pyr,env ! Local PF grid for metal, pyrrhotite, pyrite and environment
   real*8, dimension(:,:,:), allocatable :: mu                  ! Local mu_S grid
+  real*8, dimension(:,:,:), allocatable :: pH                  ! Local pH grid
   real*8, dimension(:,:,:), allocatable :: opyr                ! Local orientation field for pyrite
   real*8, dimension(:,:,:), allocatable :: voids               ! Local void fraction
   real*8, dimension(:,:,:), allocatable :: elpot               ! Local electrical potential
@@ -17,6 +18,7 @@ module fields
   ! Global phase fields
   real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g ! Global PF grid for metal, pyrrhotite, pyrite and environment
   real*8, dimension(:,:,:), allocatable :: mu_g                              ! Global mu_S grid
+  real*8, dimension(:,:,:), allocatable :: pH_g                              ! Global pH grid
   real*8, dimension(:,:,:), allocatable :: opyr_g                            ! Global orientation field for pyrite
   real*8, dimension(:,:,:), allocatable :: elpot_g                           ! Global electrical potential
 
@@ -50,6 +52,7 @@ module commondata
   real*8, parameter :: dpf = 5E-9       ! Phase-field grid size
   real*8 :: dt                          ! Timestep for PF evolution
   real*8 :: avg_mu_env                  ! Sulfur chemical potential in the environment
+  real*8 :: metal_amount                ! Amount of metal in the simulation cell
   real*8 :: sulfidation_rate            ! Sulfidation rate / Film growth rate in m/s
   integer, parameter :: ghost_width = 2 ! Number of ghost nodes (in the z direction)
   integer :: swap_freq_pf = 5           ! Frequency with which MPI swaps are conducted for PF solving
@@ -149,6 +152,7 @@ module diffusion_constants
 
   real*8 :: D_S_met, D_S_mkw, D_S_pht, D_S_pyr, D_S_env
   real*8 :: D_Fe_met, D_Fe_mkw, D_Fe_pht, D_Fe_pyr, D_Fe_env
+  real*8 :: D_H_met, D_H_mkw, D_H_pht, D_H_pyr, D_H_env
 
 end module diffusion_constants
 
