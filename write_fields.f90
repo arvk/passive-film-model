@@ -8,7 +8,7 @@ subroutine write_fields(iter)
   integer, intent(in) :: iter ! Iteration number
   character*5 :: img_id       ! Index of current image (derived from current iteration number)
 
-  call system("rm -rf MET.out MKW.out PHT.out PYR.out ENV.out MUS.out OPYR.out POT.out")
+  call system("rm -rf MET.out MKW.out PHT.out PYR.out ENV.out MUS.out OPYR.out POT.out PH.out")
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
@@ -122,6 +122,22 @@ subroutine write_fields(iter)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
+  ! Write pH field; Units == 5XX
+  open (unit=500, file="PH.out", status="new")
+  write(500,*) "#", psx_g, psy_g, psz_g, ksx_g, ksy_g
+  do x = 1,psx_g
+     do y = 1,psy_g
+        do z = 1,psz_g
+           write(500,'(F9.6)')  pH_g(x,y,z)          ! Write pH field
+        end do
+     end do
+  end do
+  write(500,'(A,F9.0,A)') "# TIME: ", iter*dt, " s"
+  close(500)
+
+!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+
+
   write(img_id,'(I5.5)') iter/max(floor(real(nomc/noimg)),1)
   call system("cp MET.out MET_"//img_id//".out")
   call system("cp MKW.out MKW_"//img_id//".out")
@@ -130,6 +146,8 @@ subroutine write_fields(iter)
   call system("cp ENV.out ENV_"//img_id//".out")
 
   call system("cp MUS.out MUS_"//img_id//".out")
+
+  call system("cp PH.out PH_"//img_id//".out")
 
   call system("cp OPYR.out OPYR_"//img_id//".out")
 

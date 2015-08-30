@@ -101,7 +101,7 @@ subroutine read_geometry
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   ! Read pH field; Units == 4XX
-  open (unit=400, file="MUS.out", status="old")
+  open (unit=400, file="PH.out", status="old")
   read(400,*) hash, psx_g, psy_g, psz_g, ksx_g, ksy_g
   do x = 1,psx_g
      do y = 1,psy_g
