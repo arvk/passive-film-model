@@ -2,7 +2,6 @@ subroutine spparks_metfilm()
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
-  use kmc_data
   implicit none
   include 'mpif.h'
 
@@ -136,7 +135,7 @@ subroutine spparks_metfilm()
 
      ! do x = 1,psx*psy*kg_scale*kg_scale*4
      !    fine_kmc_array(partial_x(x)+1,partial_y(x)+1) = fine_kmc_array(partial_x(x),partial_y(x)) + no_h2_already_evolved(x)
-     ! end do    
+     ! end do
 
 
   end if

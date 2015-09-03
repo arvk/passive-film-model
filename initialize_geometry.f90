@@ -2,7 +2,6 @@ subroutine initialize_geometry()
   use commondata
   use fields
   use thermo_constants
-  use kmc_data
   implicit none
 
   integer :: x,y,z                               ! Index for x-, y- and z-direction (Loop)

@@ -3,7 +3,6 @@ subroutine allocate_matrices()
   use fields
   use gradients
   use thermo_constants
-  use kmc_data
   implicit none
   include 'mpif.h'
 
@@ -63,31 +62,5 @@ subroutine allocate_matrices()
   allocate(newpht(psx,psy,psz+(2*ghost_width)))
   allocate(newpyr(psx,psy,psz+(2*ghost_width)))
   allocate(newenv(psx,psy,psz+(2*ghost_width)))
-
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
-
-  ! Allocate kMC grids
-  allocate(kg_g(psx_g*kg_scale, psy_g*kg_scale))                  ! Global kMC grid on Root
-  allocate(kg((psx*kg_scale)+2, (psy*kg_scale/procs)+2)) ; kg = 1 ! Local kMC grid slices
-  allocate(kg_recv((psx_g*kg_scale)+2, psy_g*kg_scale))           ! Global matric to gather local kMC grids
-
-  allocate(plist((ksx+2)*(ksy+2),12)) ! Allocate process-list
-
-!! Allocate process probabilities
-  allocate(vfe_f_g(ksx_g, ksy_g))    ; vfe_f_g = 0    ! V_Fe formation
-  allocate(vfe_a_g(ksx_g, ksy_g))    ; vfe_a_g = 0    ! V_Fe annihilation
-  allocate(vs_f_g(ksx_g, ksy_g))     ; vs_f_g = 0     ! V_S formation
-  allocate(vs_a_g(ksx_g, ksy_g))     ; vs_a_g = 0     ! V_S annihilation
-  allocate(fes_diss_g(ksx_g, ksy_g)) ; fes_diss_g = 0 ! Fe+S dissolution
-  allocate(v_diff_g(ksx_g, ksy_g))   ; v_diff_g = 0   ! V_Fe/V_S diffusion
-
-  allocate(vfe_f(ksx+2, ksy+2))      ; vfe_f = 0      ! V_Fe formation
-  allocate(vfe_a(ksx+2, ksy+2))      ; vfe_a = 0      ! V_Fe annihilation
-  allocate(vs_f(ksx+2, ksy+2))       ; vs_f = 0       ! V_S formation
-  allocate(vs_a(ksx+2, ksy+2))       ; vs_a = 0       ! V_S annihilation
-  allocate(fes_diss(ksx+2, ksy+2))   ; fes_diss = 0   ! Fe+S dissolution
-  allocate(v_diff(ksx+2, ksy+2))     ; v_diff = 0     ! V_Fe/V_S diffusion
-
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
 end subroutine allocate_matrices

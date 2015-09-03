@@ -107,42 +107,6 @@ end module thermo_constants
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-module kmc_data
-  implicit none
-  save
-
-  integer :: ksx,ksy           ! Number of local kMC gridpoints
-  integer :: ksx_g,ksy_g       ! Number of global kMC gridpoints
-
-  integer, dimension(:,:), allocatable :: kg      ! Global kMC grid
-  integer, dimension(:,:), allocatable :: kg_g    ! Local kMC grid
-  integer, dimension(:,:), allocatable :: kg_recv ! Empty array to receive MPI requests
-
-  type :: prol
-     integer :: fx,fy,tx,ty,from,to
-     real*8 :: prob
-  end type prol
-
-  type(prol), dimension(:,:), allocatable :: plist
-
-!!!!------------------------------------------------------!!!!
-!!!!              KMC Process probabilities               !!!!
-  ! Global                                                !!!!
-  real*8, dimension(:,:), allocatable :: vfe_f_g,vfe_a_g  !!!!
-  real*8, dimension(:,:), allocatable :: vs_f_g,vs_a_g    !!!!
-  real*8, dimension(:,:), allocatable :: fes_diss_g       !!!!
-  real*8, dimension(:,:), allocatable :: v_diff_g         !!!!
-  ! Local                                                 !!!!
-  real*8, dimension(:,:), allocatable :: vfe_f,vfe_a      !!!!
-  real*8, dimension(:,:), allocatable :: vs_f,vs_a        !!!!
-  real*8, dimension(:,:), allocatable :: fes_diss         !!!!
-  real*8, dimension(:,:), allocatable :: v_diff           !!!!
-!!!!------------------------------------------------------!!!!
-
-end module kmc_data
-
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
-
 module diffusion_constants
   implicit none
   save

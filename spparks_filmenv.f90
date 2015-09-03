@@ -2,7 +2,6 @@ subroutine spparks_filmenv()
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
-  use kmc_data
   implicit none
   include 'mpif.h'
 

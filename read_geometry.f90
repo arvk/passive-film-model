@@ -1,7 +1,6 @@
 subroutine read_geometry
   use commondata
   use fields
-  use kmc_data
   use thermo_constants
   implicit none
 

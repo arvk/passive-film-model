@@ -1,7 +1,6 @@
 subroutine write_fields(iter)
   use commondata
   use fields
-  use kmc_data
   implicit none
 
   integer :: x, y, z          ! Index along x-, y- and z-directions (Loop)

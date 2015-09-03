@@ -1,7 +1,6 @@
 subroutine read_parameters()
   use commondata
   use fields
-  use kmc_data
   implicit none
 
   integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl, error_snapshots
@@ -35,8 +34,6 @@ subroutine read_parameters()
   end if
 
   psx = psx_g ; psy = psy_g ; psz = psz_g/procs
-  ksx_g = psx_g*kg_scale ; ksy_g = psy_g*kg_scale
-  ksx = ksx_g ; ksy = ksy_g/procs
   !! FINISH | Tag= PFSIZE !!
 
 !!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
