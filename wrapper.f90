@@ -15,8 +15,7 @@ program passive_film_model
   DM da
   KSP ksp_mu, ksp_pH, ksp_theta
   SNES snes_pf
-  Vec state,state_natural
-  Vec temp
+  Vec state
   integer :: iter  ! Current iteration number (Loop)
   integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
 
@@ -106,14 +105,8 @@ program passive_film_model
   call VecStrideNorm(state,nmet,NORM_1,mysum,ierr)
   write(6,*) 'SUM', mysum, rank
 
-  call VecCreate(MPI_COMM_WORLD,temp,ierr)
-  call VecSetSizes(temp,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(temp,ierr)
-  call DMDACreateNaturalVector(da,state_natural,ierr)
-  call DMDAGlobalToNaturalBegin(da,state,INSERT_VALUES,state_natural,ierr)
-  call DMDAGlobalToNaturalEnd(da,state,INSERT_VALUES,state_natural,ierr)
-  call VecStrideGather(state_natural,nmus,temp,INSERT_VALUES,ierr)
-  call VecView(temp,PETSC_NULL_OBJECT,ierr)
+  call para_musolve(iter,ksp_mu)
+
 
 
 
