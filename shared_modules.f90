@@ -59,6 +59,17 @@ module commondata
 
   integer, dimension(:), allocatable :: seed  ! Seed for PRNG
 
+  integer, parameter :: nfields = 9
+  integer, parameter :: nmet = 0
+  integer, parameter :: nmkw = 1
+  integer, parameter :: npht = 2
+  integer, parameter :: npyr = 3
+  integer, parameter :: nenv = 4
+  integer, parameter :: nmus = 5
+  integer, parameter :: npH = 6
+  integer, parameter :: nang = 7
+  integer, parameter :: npot = 8
+
 end module commondata
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
