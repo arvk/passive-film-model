@@ -124,6 +124,7 @@ module diffusion_constants
 
   real*8 :: D_S_met, D_S_mkw, D_S_pht, D_S_pyr, D_S_env
   real*8 :: D_Fe_met, D_Fe_mkw, D_Fe_pht, D_Fe_pyr, D_Fe_env
+  real*8 :: D_H_env, D_H_met, D_H_pht, D_H_pyr
 
 end module diffusion_constants
 

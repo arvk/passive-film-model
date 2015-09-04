@@ -109,6 +109,7 @@ program passive_film_model
 
   do iter = 1,nomc
      call para_musolve(iter,ksp_mu)
+     call para_pHsolve(iter,ksp_mu)
   end do
 
 
