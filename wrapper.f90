@@ -15,7 +15,7 @@ program passive_film_model
   DM da
   KSP ksp_mu, ksp_pH, ksp_theta
   SNES snes_pf
-  Vec state
+  Vec state, onlymus
   integer :: iter  ! Current iteration number (Loop)
   integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
 
@@ -59,6 +59,8 @@ program passive_film_model
   call KSPSetDM(ksp_pH,da,ierr)
   call KSPSetDM(ksp_theta,da,ierr)
   call SNESSetDM(snes_pf,da,ierr)
+
+  call KSPSetFromOptions(ksp_mu,ierr)
 
   call thermo()            ! Calculate phase stabilities
   call diffusivities()     ! Calculate phase diffusivities
@@ -105,10 +107,20 @@ program passive_film_model
   call VecStrideNorm(state,nmet,NORM_1,mysum,ierr)
   write(6,*) 'SUM', mysum, rank
 
-  call para_musolve(iter,ksp_mu)
+  do iter = 1,nomc
+     call para_musolve(iter,ksp_mu)
+  end do
 
 
+  ! call VecCreate(MPI_COMM_WORLD,onlymus,ierr)
+  ! call VecSetSizes(onlymus,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
+  ! call VecSetUp(onlymus,ierr)
 
+  ! call DMGetGlobalVector(da,state,ierr)
+  ! call VecStrideGather(state,nmus,onlymus,INSERT_VALUES,ierr)
+  ! call DMRestoreGlobalVector(da,state,ierr)
+
+  ! call VecView(onlymus,PETSC_NULL_OBJECT,ierr)
 
 !   do iter = 1,nomc  ! TIME LOOP
 
