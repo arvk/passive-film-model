@@ -22,6 +22,8 @@ subroutine para_musolve(iter,ksp_mu)
   DM da
   Vec temp
   Vec state,state_natural
+  PetscInt ctx
+  external computeRHS_mu, computeMatrix_mu
 
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
@@ -30,6 +32,17 @@ subroutine para_musolve(iter,ksp_mu)
   call KSPGetDM(ksp_mu,da,ierr)
 
   call DMGetGlobalVector(da,state,ierr)
+
+
+  call KSPSetComputeRHS(ksp_mu,computeRHS_mu,ctx,ierr)
+  call KSPSetComputeOperators(ksp_mu,computeMatrix_mu,ctx,ierr)
+
+
+  call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
+
+
+
+
   call VecCreate(MPI_COMM_WORLD,temp,ierr)
   call VecSetSizes(temp,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(temp,ierr)
@@ -39,6 +52,7 @@ subroutine para_musolve(iter,ksp_mu)
   call VecStrideGather(state_natural,nmus,temp,INSERT_VALUES,ierr)
   call DMRestoreGlobalVector(da,state,ierr)
   call VecView(temp,PETSC_NULL_OBJECT,ierr)
+
 
 
 
@@ -509,3 +523,218 @@ subroutine para_musolve(iter,ksp_mu)
 
 
 end subroutine para_musolve
+
+
+
+
+
+
+subroutine computeRHS_mu(ksp_mu,b,ctx,ierr)
+  use commondata
+  use fields
+  use thermo_constants
+  use diffusion_constants
+  implicit none
+#include <finclude/petscsys.h>
+#include <finclude/petscvec.h>
+#include <finclude/petscmat.h>
+#include <finclude/petscpc.h>
+#include <finclude/petscksp.h>
+#include <finclude/petscsnes.h>
+#include <finclude/petscdm.h>
+#include <finclude/petscdmda.h>
+#include <finclude/petscdmda.h90>
+
+  KSP ksp_mu
+  PetscInt ctx
+  PetscErrorCode ierr
+  DM da
+  Vec state, b
+
+  call KSPGetDM(ksp_mu,da,ierr)
+
+  call DMGetGlobalVector(da,state,ierr)
+  call VecCreate(MPI_COMM_WORLD,b,ierr)
+  call VecSetSizes(b,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
+  call VecSetUp(b,ierr)
+  call VecStrideGather(state,nmus,b,INSERT_VALUES,ierr)
+  call DMRestoreGlobalVector(da,state,ierr)
+  call VecScale(b,(1.0d0/dt),ierr)
+
+  return
+end subroutine computeRHS_mu
+
+
+
+subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,ctx,ierr)
+  use commondata
+  use fields
+  use thermo_constants
+  use diffusion_constants
+  implicit none
+#include <finclude/petscsys.h>
+#include <finclude/petscvec.h>
+#include <finclude/petscmat.h>
+#include <finclude/petscpc.h>
+#include <finclude/petscksp.h>
+#include <finclude/petscsnes.h>
+#include <finclude/petscdm.h>
+#include <finclude/petscdmda.h>
+#include <finclude/petscdmda.h90>
+
+  KSP ksp_mu
+  PetscInt ctx
+  PetscErrorCode ierr
+  DM da
+  Vec state,statelocal
+  Mat matoper, matprecond
+  PetscInt     i,j,k,mx,my,mz,xm
+  PetscInt     ym,zm,xs,ys,zs,i1,i7
+  PetscScalar  v(7)
+  MatStencil   row(4),col(4,7)
+  PetscScalar, pointer :: statepointer(:,:,:,:)
+  integer :: startx,starty,startz,widthx,widthy,widthz
+  real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
+
+
+  D_inter_met = D_S_met
+  D_inter_mkw = max(D_Fe_mkw,D_S_mkw)
+  D_inter_pht = max(D_Fe_pht,D_S_pht)
+  D_inter_pyr = max(D_Fe_pyr,D_S_pyr)
+  D_inter_env = D_S_env
+
+
+  call KSPGetDM(ksp_mu,da,ierr)
+
+  call DMGetGlobalVector(da,state,ierr)
+  call DMCreateLocalVector(da,statelocal,ierr)
+  call DMGlobalToLocalBegin(da,state,INSERT_VALUES,statelocal,ierr)
+  call DMGlobalToLocalEnd(da,state,INSERT_VALUES,statelocal,ierr)
+  call DMRestoreGlobalVector(da,state,ierr)
+
+  call DMDAVecGetArrayF90(da,statelocal,statepointer,ierr)
+  call DMDAGetCorners(da,startx,starty,startz,widthx,widthy,widthz,ierr)
+
+
+  do k=startz,startz+widthz-1
+     do j=starty,starty+widthy-1
+        do i=startx,startx+widthx-1
+
+           row(MatStencil_i) = i
+           row(MatStencil_j) = j
+           row(MatStencil_k) = k
+
+           if (k.gt.0) then
+              v(1) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j,k-1)) - &
+                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j,k-1)) - &
+                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j,k-1)) - &
+                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j,k-1)) - &
+                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j,k-1))
+              else
+                 v(1) = 0.0d0
+           end if
+              col(MatStencil_i,1) = i
+              col(MatStencil_j,1) = j
+              col(MatStencil_k,1) = k-1
+
+
+           if (j.gt.0) then
+              v(2) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j-1,k)) - &
+                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j-1,k)) - &
+                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j-1,k)) - &
+                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j-1,k)) - &
+                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j-1,k))
+              else
+                 v(2) = 0.0d0
+           end if
+              col(MatStencil_i,2) = i
+              col(MatStencil_j,2) = j-1
+              col(MatStencil_k,2) = k
+
+
+           if (i.gt.0) then
+              v(3) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i-1,j,k)) - &
+                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i-1,j,k)) - &
+                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i-1,j,k)) - &
+                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i-1,j,k)) - &
+                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i-1,j,k))
+              else
+                 v(3) = 0.0d0
+           end if
+              col(MatStencil_i,3) = i-1
+              col(MatStencil_j,3) = j
+              col(MatStencil_k,3) = k
+
+
+              v(4) = (1.0d0/dt)
+              col(MatStencil_i,4) = i
+              col(MatStencil_j,4) = j
+              col(MatStencil_k,4) = k
+
+
+
+           if (i.lt.psx_g-1) then
+              v(5) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i+1,j,k)) - &
+                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i+1,j,k)) - &
+                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i+1,j,k)) - &
+                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i+1,j,k)) - &
+                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i+1,j,k))
+              else
+                 v(5) = 0.0d0
+           end if
+              col(MatStencil_i,5) = i+1
+              col(MatStencil_j,5) = j
+              col(MatStencil_k,5) = k
+
+
+           if (j.lt.psy_g-1) then
+              v(6) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j+1,k)) - &
+                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j+1,k)) - &
+                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j+1,k)) - &
+                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j+1,k)) - &
+                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j+1,k))
+              else
+                 v(6) = 0.0d0
+           end if
+              col(MatStencil_i,6) = i
+              col(MatStencil_j,6) = j+1
+              col(MatStencil_k,6) = k
+
+
+           if (k.lt.psz_g-1) then
+              v(7) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j,k+1)) - &
+                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j,k+1)) - &
+                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j,k+1)) - &
+                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j,k+1)) - &
+                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j,k+1))
+              else
+                 v(7) = 0.0d0
+           end if
+              col(MatStencil_i,7) = i
+              col(MatStencil_j,7) = j
+              col(MatStencil_k,7) = k+1
+
+
+              if (k.eq.0) then
+                 v(4) = v(4) - v(1) - v(2) - v(3) - v(5) - v(6)
+              else if (k.eq.psz_g-1) then
+                 v(4) = v(4) - v(2) - v(3) - v(5) - v(6) - v(7)
+              else
+                 v(4) = v(4) - v(1) - v(2) - v(3) - v(5) - v(6) - v(7)
+              end if
+
+              call MatSetValuesStencil(matprecond,i1,row,i7,col,v,INSERT_VALUES,ierr)
+
+        end do
+     end do
+  end do
+
+
+  call DMDAVecRestoreArrayF90(da,statelocal,statepointer,ierr)
+
+
+  call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
+  call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
+  return
+end subroutine ComputeMatrix_mu
+
