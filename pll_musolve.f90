@@ -23,7 +23,7 @@ subroutine para_musolve(iter,ksp_mu)
   Vec solved_mu_vector
   Vec state,state_solved
   PetscInt ctx
-  external computeRHS_mu, computeMatrix_mu
+  external computeRHS_mu, computeMatrix_mu, computeInitialGuess_mu
 
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
@@ -32,6 +32,8 @@ subroutine para_musolve(iter,ksp_mu)
 
   call KSPSetComputeRHS(ksp_mu,computeRHS_mu,ctx,ierr)
   call KSPSetComputeOperators(ksp_mu,computeMatrix_mu,ctx,ierr)
+  call KSPSetComputeInitialGuess(ksp_mu,computeInitialGuess_mu,ctx,ierr)
+
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)
 
@@ -46,6 +48,51 @@ subroutine para_musolve(iter,ksp_mu)
   call DMRestoreGlobalVector(da,state,ierr)
 
 end subroutine para_musolve
+
+
+
+
+
+
+
+
+subroutine computeInitialGuess_mu(ksp_mu,b,ctx,ierr)
+  use commondata
+  use fields
+  use thermo_constants
+  use diffusion_constants
+  implicit none
+#include <finclude/petscsys.h>
+#include <finclude/petscvec.h>
+#include <finclude/petscmat.h>
+#include <finclude/petscpc.h>
+#include <finclude/petscksp.h>
+#include <finclude/petscsnes.h>
+#include <finclude/petscdm.h>
+#include <finclude/petscdmda.h>
+#include <finclude/petscdmda.h90>
+
+  KSP ksp_mu
+  PetscInt ctx
+  PetscErrorCode ierr
+  DM da
+  Vec state, b, onlymu
+
+  call KSPGetDM(ksp_mu,da,ierr)
+
+  call DMGetGlobalVector(da,state,ierr)
+  call VecDuplicate(state,b,ierr)
+  call VecCopy(state,b,ierr)
+  call DMRestoreGlobalVector(da,state,ierr)
+
+  call VecAssemblyBegin(b,ierr)
+  call VecAssemblyEnd(b,ierr)
+
+  return
+end subroutine computeInitialGuess_mu
+
+
+
 
 
 
