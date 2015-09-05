@@ -20,7 +20,7 @@ subroutine para_pfsolve(iter,snes_pf)
   SNES snes_pf
   SNESConvergedReason pf_converged_reason
   DM da
-  Vec vec_feval
+  Vec vec_feval, single_phase_vector
   Vec state,state_unknown,rhs_vec
   Mat mat_jacob
   PetscInt ctx
@@ -28,6 +28,7 @@ subroutine para_pfsolve(iter,snes_pf)
 
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
+  integer :: fesphase
 
   call SNESGetDM(snes_pf,da,ierr)
 
@@ -46,6 +47,21 @@ subroutine para_pfsolve(iter,snes_pf)
 
 
   call SNESSolve(snes_pf,rhs_vec,state_unknown,ierr)
+
+
+
+
+  call VecCreate(MPI_COMM_WORLD,single_phase_vector,ierr)
+  call VecSetSizes(single_phase_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
+  call VecSetUp(single_phase_vector,ierr)
+
+  call DMGetGlobalVector(da,state,ierr)
+  do fesphase = 0,4     !!!!! FIX THIS
+     call VecStrideGather(state_unknown,fesphase,single_phase_vector,INSERT_VALUES,ierr)
+     call VecStrideScatter(single_phase_vector,fesphase,state,INSERT_VALUES,ierr)
+  end do
+  call DMRestoreGlobalVector(da,state,ierr)
+
 
 !  call VecAXPY(state_unknown,-1.0d0,state,ierr)
 !  call VecView(state_unknown,PETSC_NULL_OBJECT,ierr)
