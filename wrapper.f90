@@ -13,7 +13,7 @@ program passive_film_model
 #include <finclude/petscdmda.h90>
 
   DM da
-  KSP ksp_mu, ksp_pH, ksp_theta
+  KSP ksp_mu, ksp_pH, ksp_ang
   SNES snes_pf
   Vec state, onlymus
   integer :: iter  ! Current iteration number (Loop)
@@ -52,16 +52,17 @@ program passive_film_model
 
   call KSPCreate(MPI_COMM_WORLD,ksp_mu,ierr)
   call KSPCreate(MPI_COMM_WORLD,ksp_pH,ierr)
-  call KSPCreate(MPI_COMM_WORLD,ksp_theta,ierr)
+  call KSPCreate(MPI_COMM_WORLD,ksp_ang,ierr)
   call SNESCreate(MPI_COMM_WORLD,snes_pf,ierr)
 
   call KSPSetDM(ksp_mu,da,ierr)
   call KSPSetDM(ksp_pH,da,ierr)
-  call KSPSetDM(ksp_theta,da,ierr)
+  call KSPSetDM(ksp_ang,da,ierr)
   call SNESSetDM(snes_pf,da,ierr)
 
   call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSetFromOptions(ksp_pH,ierr)
+  call KSPSetFromOptions(ksp_ang,ierr)
   call SNESSetFromOptions(snes_pf,ierr)
 
   call allocate_matrices() ! Allocate all field matrices
@@ -113,6 +114,7 @@ program passive_film_model
      call para_musolve(iter,ksp_mu)
      call para_pHsolve(iter,ksp_pH)
      call para_pfsolve(iter,snes_pf)
+     call para_angsolve(iter,ksp_ang)
   end do
 
 
@@ -121,7 +123,7 @@ program passive_film_model
   ! call VecSetUp(onlymus,ierr)
 
   ! call DMGetGlobalVector(da,state,ierr)
-  ! call VecStrideGather(state,nmus,onlymus,INSERT_VALUES,ierr)
+  ! call VecStrideGather(state,nmet,onlymus,INSERT_VALUES,ierr)
   ! call DMRestoreGlobalVector(da,state,ierr)
 
   ! call VecView(onlymus,PETSC_NULL_OBJECT,ierr)
@@ -168,7 +170,7 @@ program passive_film_model
   !! Destroy Unused objects
   call KSPDestroy(ksp_mu,ierr)
   call KSPDestroy(ksp_pH,ierr)
-  call KSPDestroy(ksp_theta,ierr)
+  call KSPDestroy(ksp_ang,ierr)
   call SNESDestroy(snes_pf,ierr)
   call DMDestroy(da,ierr)
 
