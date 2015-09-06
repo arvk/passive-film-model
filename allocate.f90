@@ -63,4 +63,7 @@ subroutine allocate_matrices()
   allocate(newpyr(psx,psy,psz+(2*ghost_width)))
   allocate(newenv(psx,psy,psz+(2*ghost_width)))
 
+  ! Allocate field mobilities
+  allocate(Mob_pf(0:(nphases-1),0:(nphases-1)))
+
 end subroutine allocate_matrices
