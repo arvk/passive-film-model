@@ -119,6 +119,10 @@ module thermo_constants
   ! Field mobilities
   real*8, allocatable :: Mob_pf(:,:)
 
+  ! Phase surface energies
+  real*8, allocatable :: sigma(:,:)
+  real*8, parameter :: sigma_pyr_0 = 1E-12
+
   ! Relative phase stabilities
   real*8, allocatable :: w_pf(:)
 

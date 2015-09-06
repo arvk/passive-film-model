@@ -64,6 +64,20 @@ subroutine thermo
   Mob_pf(nenv,npyr) = 4.00E-15 ; Mob_pf(npyr,nenv) = 4.00E-15
 
 
+  !! Assign surface energies
+
+  sigma(nmkw,nenv) = 1E-12 ; sigma(nenv,nmkw) = 1E-12
+  sigma(nmkw,nmet) = 1E-12 ; sigma(nmet,nmkw) = 1E-12
+  sigma(nmkw,npht) = 1E-12 ; sigma(npht,nmkw) = 1E-12
+  sigma(npht,nenv) = 1E-12 ; sigma(nenv,npht) = 1E-12
+  sigma(npht,nmet) = 1E-12 ; sigma(nmet,npht) = 1E-12
+  sigma(nmet,nenv) = 1E-12 ; sigma(nenv,nmet) = 1E-12
+
+
+  ! sigma(nmet,npyr,n0 ) = 1E-12 ;  sigma(npyr,nmet,n0 ) = 1E-12
+  ! sigma(nenv,npyr,n0 ) = 1E-12 ;  sigma(npyr,nenv,n0 ) = 1E-12
+  ! sigma(npht,npyr,n0 ) = 1E-12 ;  sigma(npyr,npht,n0 ) = 1E-12
+  ! sigma(nmkw,npyr,n0 ) = 1E-12 ;  sigma(npyr,nmkw,n0 ) = 1E-12
 
 end subroutine thermo
 
