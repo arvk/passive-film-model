@@ -109,6 +109,7 @@ module thermo_constants
 
   ! Double well potential heights
   real*8, parameter :: double_well_barrier = 100.0d0 ! in J/mol
+  real*8, parameter :: hill = (16.0d0/3.0d0)*double_well_barrier
   real*8 :: hill_met_mkw, hill_met_pht, hill_met_pyr, hill_met_env
   real*8 :: hill_mkw_met, hill_mkw_pht, hill_mkw_pyr, hill_mkw_env
   real*8 :: hill_pht_met, hill_pht_mkw, hill_pht_pyr, hill_pht_env
@@ -120,6 +121,9 @@ module thermo_constants
 
   ! Relative phase stabilities
   real*8, allocatable :: w_pf(:)
+
+  ! Grain boundary stability
+  real*8 :: gb_S = 0.0d0
 
 end module thermo_constants
 

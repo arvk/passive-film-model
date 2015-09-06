@@ -106,7 +106,7 @@ subroutine FormRHS_pf(input_state,rhs_vec)
   real*8 :: myD, sum6myD
   real*8, parameter :: myM = 1.0d0
   real*8, parameter :: mysigma = 2.0d0
-  real*8 :: Mobility, hill, S
+  real*8 :: Mobility
   real*8 :: w(0:nfields), delo(0:nfields)
 
   call VecCreate(MPI_COMM_WORLD,single_phase_vector,ierr)
@@ -183,7 +183,7 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,ctx,ierr)
   real*8 :: myD, sum6myD
   real*8, parameter :: myM = 1.0d0
   real*8, parameter :: mysigma = 2.0d0
-  real*8 :: Mobility, hill, S
+  real*8 :: Mobility
   real*8 :: w(0:nfields), delo(0:nfields)
 
 
@@ -263,7 +263,7 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,ctx,ierr)
                      !! LINEAR
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z)*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (6.0d0*Mob_pf(fesphase,fesphase2)*hill*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (S*Mob_pf(fesphase,fesphase2)*hill*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (gb_S*Mob_pf(fesphase,fesphase2)*hill*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
 
                      !! QUADRATIC
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)*statepointer(fesphase,x,y,z)
@@ -316,7 +316,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
   real*8 :: myD, sum6myD
   real*8, parameter :: myM = 1.0d0
   real*8, parameter :: mysigma = 2.0d0
-  real*8 :: Mobility, hill, S
+  real*8 :: Mobility
   real*8 :: w(0:nfields), delo(0:nfields)
   PetscScalar  v((9*2*(nfields-1))+1)
   MatStencil   row(4,1),col(4,(9*2*(nfields-1))+1)
@@ -496,7 +496,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
                      nocols = nocols + 1
                      v(nocols) = 0.0d0 - (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase,x,y,z)*statepointer(fesphase,x,y,z)) + &
                           & (6.0d0*Mob_pf(fesphase,fesphase2)*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase,x,y,z)) + &
-                          & (S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase,x,y,z))
+                          & (gb_S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase,x,y,z))
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z
@@ -506,7 +506,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
                      nocols = nocols + 1
                      v(nocols) = (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z)*statepointer(fesphase2,x,y,z)) + &
                           & (6.0d0*Mob_pf(fesphase,fesphase2)*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase2,x,y,z)) + &
-                          & (S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))
+                          & (gb_S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z
