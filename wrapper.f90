@@ -61,6 +61,8 @@ program passive_film_model
   call SNESSetDM(snes_pf,da,ierr)
 
   call KSPSetFromOptions(ksp_mu,ierr)
+  call KSPSetFromOptions(ksp_pH,ierr)
+  call SNESSetFromOptions(snes_pf,ierr)
 
   call thermo()            ! Calculate phase stabilities
   call diffusivities()     ! Calculate phase diffusivities
@@ -109,7 +111,8 @@ program passive_film_model
 
   do iter = 1,nomc
      call para_musolve(iter,ksp_mu)
-     call para_pHsolve(iter,ksp_mu)
+     call para_pHsolve(iter,ksp_pH)
+     call para_pfsolve(iter,snes_pf)
   end do
 
 
