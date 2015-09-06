@@ -208,6 +208,15 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,ctx,ierr)
      do y=starty,starty+widthy-1
         do x=startx,startx+widthx-1
 
+
+           !! Calculate phase stabilities
+           w_pf(nmet) =  0.0d0 - (statepointer(nmus,x,y,z)*0.0015d0)
+           w_pf(nmkw) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 65060) - (statepointer(nmus,x,y,z)*0.80d0)
+           w_pf(npht) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 72050) - (statepointer(nmus,x,y,z))
+           w_pf(npyr) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-9)) + 50.355*T - 98710) - (statepointer(nmus,x,y,z)*2)
+           w_pf(nenv) = 0.0d0
+
+
            do fesphase = nmet,nenv   ! Row
               do fesphase2 = nmet,nenv  ! Column
                if (fesphase .ne. fesphase2) then
@@ -253,7 +262,7 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,ctx,ierr)
 
                      !! LINEAR
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z)*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (6.0d0*Mob_pf(fesphase,fesphase2)*hill*(w(fesphase)-w(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (6.0d0*Mob_pf(fesphase,fesphase2)*hill*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (S*Mob_pf(fesphase,fesphase2)*hill*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
 
                      !! QUADRATIC
@@ -329,6 +338,15 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
   do z=startz,startz+widthz-1
      do y=starty,starty+widthy-1
         do x=startx,startx+widthx-1
+
+
+          !! Calculate phase stabilities
+           w_pf(nmet) =  0.0d0 - (statepointer(nmus,x,y,z)*0.0015d0)
+           w_pf(nmkw) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 65060) - (statepointer(nmus,x,y,z)*0.80d0)
+           w_pf(npht) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 72050) - (statepointer(nmus,x,y,z))
+           w_pf(npyr) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-9)) + 50.355*T - 98710) - (statepointer(nmus,x,y,z)*2)
+           w_pf(nenv) = 0.0d0
+
 
            do fesphase = nmet,nenv   ! Row
 
@@ -477,7 +495,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
 
                      nocols = nocols + 1
                      v(nocols) = 0.0d0 - (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase,x,y,z)*statepointer(fesphase,x,y,z)) + &
-                          & (6.0d0*Mob_pf(fesphase,fesphase2)*(w(fesphase)-w(fesphase2))*statepointer(fesphase,x,y,z)) + &
+                          & (6.0d0*Mob_pf(fesphase,fesphase2)*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase,x,y,z)) + &
                           & (S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase,x,y,z))
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y
@@ -487,7 +505,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
 
                      nocols = nocols + 1
                      v(nocols) = (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z)*statepointer(fesphase2,x,y,z)) + &
-                          & (6.0d0*Mob_pf(fesphase,fesphase2)*(w(fesphase)-w(fesphase2))*statepointer(fesphase2,x,y,z)) + &
+                          & (6.0d0*Mob_pf(fesphase,fesphase2)*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase2,x,y,z)) + &
                           & (S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y

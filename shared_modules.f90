@@ -118,6 +118,9 @@ module thermo_constants
   ! Field mobilities
   real*8, allocatable :: Mob_pf(:,:)
 
+  ! Relative phase stabilities
+  real*8, allocatable :: w_pf(:)
+
 end module thermo_constants
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
