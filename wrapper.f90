@@ -14,7 +14,7 @@ program passive_film_model
 
   DM da
   KSP ksp_mu, ksp_pH, ksp_ang
-  SNES snes_pf
+  SNES snes_pf, snes_pot
   Vec state, onlymus
   integer :: iter  ! Current iteration number (Loop)
   integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
@@ -54,16 +54,19 @@ program passive_film_model
   call KSPCreate(MPI_COMM_WORLD,ksp_pH,ierr)
   call KSPCreate(MPI_COMM_WORLD,ksp_ang,ierr)
   call SNESCreate(MPI_COMM_WORLD,snes_pf,ierr)
+  call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr)
 
   call KSPSetDM(ksp_mu,da,ierr)
   call KSPSetDM(ksp_pH,da,ierr)
   call KSPSetDM(ksp_ang,da,ierr)
   call SNESSetDM(snes_pf,da,ierr)
+  call SNESSetDM(snes_pot,da,ierr)
 
   call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSetFromOptions(ksp_pH,ierr)
   call KSPSetFromOptions(ksp_ang,ierr)
   call SNESSetFromOptions(snes_pf,ierr)
+  call SNESSetFromOptions(snes_pot,ierr)
 
   call allocate_matrices() ! Allocate all field matrices
   call thermo()            ! Calculate phase stabilities
@@ -111,22 +114,23 @@ program passive_film_model
   write(6,*) 'SUM', mysum, rank
 
   do iter = 1,nomc
-     call para_musolve(iter,ksp_mu)
-     call para_pHsolve(iter,ksp_pH)
-     call para_pfsolve(iter,snes_pf)
-     call para_angsolve(iter,ksp_ang)
+!     call para_musolve(iter,ksp_mu)
+!     call para_pHsolve(iter,ksp_pH)
+!     call para_pfsolve(iter,snes_pf)
+!     call para_angsolve(iter,ksp_ang)
+     call para_potsolve(iter,snes_pot,state)
   end do
 
 
-  ! call VecCreate(MPI_COMM_WORLD,onlymus,ierr)
-  ! call VecSetSizes(onlymus,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  ! call VecSetUp(onlymus,ierr)
+  call VecCreate(MPI_COMM_WORLD,onlymus,ierr)
+  call VecSetSizes(onlymus,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
+  call VecSetUp(onlymus,ierr)
 
-  ! call DMGetGlobalVector(da,state,ierr)
-  ! call VecStrideGather(state,nmet,onlymus,INSERT_VALUES,ierr)
-  ! call DMRestoreGlobalVector(da,state,ierr)
+  call DMGetGlobalVector(da,state,ierr)
+  call VecStrideGather(state,npot,onlymus,INSERT_VALUES,ierr)
+  call DMRestoreGlobalVector(da,state,ierr)
 
-  ! call VecView(onlymus,PETSC_NULL_OBJECT,ierr)
+!  call VecView(onlymus,PETSC_NULL_OBJECT,ierr)
 
 !   do iter = 1,nomc  ! TIME LOOP
 

@@ -63,15 +63,23 @@ subroutine thermo
   Mob_pf(nmet,nenv) = 4.00E-15 ; Mob_pf(nenv,nmet) = 4.00E-15
   Mob_pf(nenv,npyr) = 4.00E-15 ; Mob_pf(npyr,nenv) = 4.00E-15
 
-
   !! Assign surface energies
-
   sigma(nmkw,nenv) = 1E-12 ; sigma(nenv,nmkw) = 1E-12
   sigma(nmkw,nmet) = 1E-12 ; sigma(nmet,nmkw) = 1E-12
   sigma(nmkw,npht) = 1E-12 ; sigma(npht,nmkw) = 1E-12
   sigma(npht,nenv) = 1E-12 ; sigma(nenv,npht) = 1E-12
   sigma(npht,nmet) = 1E-12 ; sigma(nmet,npht) = 1E-12
   sigma(nmet,nenv) = 1E-12 ; sigma(nenv,nmet) = 1E-12
+
+  !! Assign relative permittivity to FeS phases
+  epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
+  permittivity(nmet) = 500.0d0
+  permittivity(nmkw) = 500.0d0
+  permittivity(npht) = 2.0d0
+  permittivity(npyr) = 11.0d0
+  permittivity(nenv) = 80.0d0
+
+
 
 end subroutine thermo
 

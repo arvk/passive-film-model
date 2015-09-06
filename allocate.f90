@@ -72,4 +72,7 @@ subroutine allocate_matrices()
   ! Allocate realtive phase stabilities
   allocate(w_pf(0:(nphases-1)))
 
+  ! Allocate realtive phase permittivities
+  allocate(permittivity(0:(nphases-1)))
+
 end subroutine allocate_matrices

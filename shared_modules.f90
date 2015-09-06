@@ -129,6 +129,10 @@ module thermo_constants
   ! Grain boundary stability
   real*8 :: gb_S = 0.0d0
 
+  ! Relative permittivities of FeS phases
+  real*8 :: epsilon0
+  real*8, allocatable :: permittivity(:)
+
 end module thermo_constants
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
