@@ -73,11 +73,5 @@ subroutine thermo
   sigma(npht,nmet) = 1E-12 ; sigma(nmet,npht) = 1E-12
   sigma(nmet,nenv) = 1E-12 ; sigma(nenv,nmet) = 1E-12
 
-
-  ! sigma(nmet,npyr,n0 ) = 1E-12 ;  sigma(npyr,nmet,n0 ) = 1E-12
-  ! sigma(nenv,npyr,n0 ) = 1E-12 ;  sigma(npyr,nenv,n0 ) = 1E-12
-  ! sigma(npht,npyr,n0 ) = 1E-12 ;  sigma(npyr,npht,n0 ) = 1E-12
-  ! sigma(nmkw,npyr,n0 ) = 1E-12 ;  sigma(npyr,nmkw,n0 ) = 1E-12
-
 end subroutine thermo
 
