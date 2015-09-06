@@ -64,11 +64,11 @@ program passive_film_model
   call KSPSetFromOptions(ksp_pH,ierr)
   call SNESSetFromOptions(snes_pf,ierr)
 
+  call allocate_matrices() ! Allocate all field matrices
   call thermo()            ! Calculate phase stabilities
   call diffusivities()     ! Calculate phase diffusivities
   call estimate_timestep() ! Estimate timestep for all field evolution equations
   call seed_prng()         ! Seed the Pseudo-random-number-generator
-  call allocate_matrices() ! Allocate all field matrices
 
   if (isroot) then
      if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then   ! If it is a restarted run, read PF matrices

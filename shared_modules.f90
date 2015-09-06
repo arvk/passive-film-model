@@ -60,6 +60,7 @@ module commondata
   integer, dimension(:), allocatable :: seed  ! Seed for PRNG
 
   integer, parameter :: nfields = 9
+  integer, parameter :: nphases = 5
   integer, parameter :: nmet = 0
   integer, parameter :: nmkw = 1
   integer, parameter :: npht = 2
@@ -113,6 +114,9 @@ module thermo_constants
   real*8 :: hill_pht_met, hill_pht_mkw, hill_pht_pyr, hill_pht_env
   real*8 :: hill_pyr_met, hill_pyr_mkw, hill_pyr_pht, hill_pyr_env
   real*8 :: hill_env_met, hill_env_mkw, hill_env_pht, hill_env_pyr
+
+  ! Field mobilities
+  real*8, allocatable :: Mob_pf(:,:)
 
 end module thermo_constants
 
