@@ -59,13 +59,12 @@ program passive_film_model
   call KSPSetDM(ksp_mu,da,ierr)
   call KSPSetDM(ksp_pH,da,ierr)
   call KSPSetDM(ksp_ang,da,ierr)
-  call SNESSetDM(snes_pf,da,ierr)
+!  call SNESSetDM(snes_pf,da,ierr)
   call SNESSetDM(snes_pot,da,ierr)
 
   call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSetFromOptions(ksp_pH,ierr)
   call KSPSetFromOptions(ksp_ang,ierr)
-  call SNESSetFromOptions(snes_pf,ierr)
   call SNESSetFromOptions(snes_pot,ierr)
 
   call allocate_matrices() ! Allocate all field matrices
@@ -110,15 +109,18 @@ program passive_film_model
   call DMRestoreGlobalVector(da,state,ierr)
 
 
-  call VecStrideNorm(state,nmet,NORM_1,mysum,ierr)
-  write(6,*) 'SUM', mysum, rank
-
   do iter = 1,nomc
+!     write(6,*) 'In iteration',iter
 !     call para_musolve(iter,ksp_mu)
 !     call para_pHsolve(iter,ksp_pH)
      call para_pfsolve(iter,snes_pf,da)
 !     call para_angsolve(iter,ksp_ang)
-     call para_potsolve(iter,snes_pot,state)
+!     call para_potsolve(iter,snes_pot,state)
+
+
+!  call VecStrideNorm(state,nmet,NORM_1,mysum,ierr)
+!  write(6,*) 'SUM', mysum, rank
+
   end do
 
 
@@ -127,10 +129,10 @@ program passive_film_model
   call VecSetUp(onlymus,ierr)
 
   call DMGetGlobalVector(da,state,ierr)
-  call VecStrideGather(state,npot,onlymus,INSERT_VALUES,ierr)
+  call VecStrideGather(state,nmet,onlymus,INSERT_VALUES,ierr)
   call DMRestoreGlobalVector(da,state,ierr)
 
-!  call VecView(onlymus,PETSC_NULL_OBJECT,ierr)
+  call VecView(onlymus,PETSC_NULL_OBJECT,ierr)
 
 !   do iter = 1,nomc  ! TIME LOOP
 
