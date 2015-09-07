@@ -23,6 +23,14 @@ module fields
   real*8, dimension(:,:,:), allocatable :: dmet_dt, dmkw_dt, dpht_dt, dpyr_dt, denv_dt, dmu_dt
   real*8, dimension(:,:,:), allocatable :: newmet, newmkw, newpht, newpyr, newenv
 
+
+      type context
+#include <finclude/petscdmdef.h>
+         DM lattval
+         integer :: startx,starty,startz
+         integer :: widthx,widthy,widthz
+      end type context
+
 end module fields
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!

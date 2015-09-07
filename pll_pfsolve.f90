@@ -1,4 +1,4 @@
-subroutine para_pfsolve(iter,snes_pf,da)
+subroutine para_pfsolve(iter,snes_pf,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -27,30 +27,29 @@ subroutine para_pfsolve(iter,snes_pf,da)
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
   integer :: fesphase
+  type(context) simstate
   external FormFunction_pf, FormJacobian_pf
 
-!  call SNESGetDM(snes_pf,da,ierr)
-
-  call DMGetGlobalVector(da,state,ierr)
+  call DMGetGlobalVector(simstate%lattval,state,ierr)
   call VecDuplicate(state,function_value,ierr)
   call VecDuplicate(state,state_unknown,ierr)
   call VecCopy(state,state_unknown,ierr)
   call VecScale(state_unknown,0.99999d0, ierr)
 
 
-  call DMCreateMatrix(da,mat_jcb,ierr)
-  call DMSetMatType(da,MATAIJ,ierr)
+  call DMCreateMatrix(simstate%lattval,mat_jcb,ierr)
+  call DMSetMatType(simstate%lattval,MATAIJ,ierr)
 
-  call DMCreateGlobalVector(da,function_value,ierr)
+  call DMCreateGlobalVector(simstate%lattval,function_value,ierr)
   call VecSet(function_value,0.0d0,ierr)
 
-  call SNESSetJacobian(snes_pf,mat_jcb,mat_jcb,FormJacobian_pf,PETSC_NULL_OBJECT,ierr)
-  call SNESSetFunction(snes_pf,function_value,FormFunction_pf,ctx,ierr)
+  call SNESSetJacobian(snes_pf,mat_jcb,mat_jcb,FormJacobian_pf,simstate,ierr)
+  call SNESSetFunction(snes_pf,function_value,FormFunction_pf,simstate,ierr)
   call FormRHS_pf(state,rhs_vec)
 
-  call DMRestoreGlobalVector(da,state,ierr)
+  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
-  call SNESSetDM(snes_pf,da,ierr)
+  call SNESSetDM(snes_pf,simstate%lattval,ierr)
   call SNESSetFromOptions(snes_pf,ierr)
 
   call SNESSolve(snes_pf,rhs_vec,state_unknown,ierr)
@@ -58,7 +57,7 @@ subroutine para_pfsolve(iter,snes_pf,da)
 
 
   if (pf_converged_reason .ge. 0) then
-     call DMGetGlobalVector(da,state,ierr)
+     call DMGetGlobalVector(simstate%lattval,state,ierr)
      call VecCreate(MPI_COMM_WORLD,single_phase_vector,ierr)
      call VecSetSizes(single_phase_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
      call VecSetUp(single_phase_vector,ierr)
@@ -66,7 +65,7 @@ subroutine para_pfsolve(iter,snes_pf,da)
         call VecStrideGather(state_unknown,fesphase,single_phase_vector,INSERT_VALUES,ierr)
         call VecStrideScatter(single_phase_vector,fesphase,state,INSERT_VALUES,ierr)
      end do
-     call DMRestoreGlobalVector(da,state,ierr)
+     call DMRestoreGlobalVector(simstate%lattval,state,ierr)
   else
      write(6,*) 'Not converged'
   end if
@@ -111,7 +110,6 @@ subroutine FormRHS_pf(input_state,rhs_vec)
   Vec input_state, rhs_vec
   Vec single_phase_vector
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  integer :: startx,starty,startz,widthx,widthy,widthz
   integer :: fesphase,fesphase2
   integer :: x,y,z
   real*8 :: myD, sum6myD
@@ -167,7 +165,7 @@ end subroutine FormRHS_pf
 
 
 
-subroutine FormFunction_pf(snes_pf,input_state,function_value,ctx,ierr)
+subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
   use commondata
   use fields
   use thermo_constants
@@ -189,7 +187,6 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,ctx,ierr)
   DM da
   Vec input_state, function_value, state_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  integer :: startx,starty,startz,widthx,widthy,widthz
   integer :: fesphase,fesphase2
   integer :: x,y,z
   real*8 :: myD, sum6myD
@@ -197,24 +194,22 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,ctx,ierr)
   real*8 :: Mobility
   real*8 :: w(0:nfields), delo(0:nfields)
   real*8 :: grady, gradz
+  type(context) simstate
 
   w = 0.0d0
   delo = 0.0d0
 
-  call SNESGetDM(snes_pf,da,ierr)
-  call DMGetLocalVector(da,state_local,ierr)
-  call DMGlobalToLocalBegin(da,input_state,INSERT_VALUES,state_local,ierr)
-  call DMGlobalToLocalEnd(da,input_state,INSERT_VALUES,state_local,ierr)
+  call DMGetLocalVector(simstate%lattval,state_local,ierr)
+  call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
+  call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
 
-  call DMDAGetCorners(da,startx,starty,startz,widthx,widthy,widthz,ierr)
-
-  call DMDAVecGetArrayF90(da,state_local,statepointer,ierr)
-  call DMDAVecGetArrayF90(da,function_value,functionpointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,function_value,functionpointer,ierr)
 
 
-  do z=startz,startz+widthz-1
-     do y=starty,starty+widthy-1
-        do x=startx,startx+widthx-1
+  do z=simstate%startz,simstate%startz+simstate%widthz-1
+     do y=simstate%starty,simstate%starty+simstate%widthy-1
+        do x=simstate%startx,simstate%startx+simstate%widthx-1
 
 
            !! Calculate phase stabilities
@@ -300,8 +295,8 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,ctx,ierr)
      end do
   end do
 
-  call DMDAVecRestoreArrayF90(da,state_local,statepointer,ierr)
-  call DMDAVecRestoreArrayF90(da,function_value,functionpointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,function_value,functionpointer,ierr)
 
   call VecAssemblyBegin(function_value,ierr)
   call VecAssemblyEnd(function_value,ierr)
@@ -340,7 +335,7 @@ end subroutine FormFunction_pf
 
 
 
-subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
+subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr)
   use commondata
   use fields
   use thermo_constants
@@ -362,7 +357,6 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
   DM da
   Vec input_state, function_value, state_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  integer :: startx,starty,startz,widthx,widthy,widthz
   real*8, allocatable :: D_pf(:,:,:,:,:)
   integer :: fesphase,fesphase2
   integer :: x,y,z
@@ -373,21 +367,20 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
   integer :: nocols
   Mat pf_jacob, pf_precond
   real*8 :: grady, gradz
+  type(context) simstate
 
   w = 0.0d0
   delo = 0.0d0
 
-  call SNESGetDM(snes_pf,da,ierr)
-  call DMGetLocalVector(da,state_local,ierr)
-  call DMGlobalToLocalBegin(da,input_state,INSERT_VALUES,state_local,ierr)
-  call DMGlobalToLocalEnd(da,input_state,INSERT_VALUES,state_local,ierr)
-  call DMDAGetCorners(da,startx,starty,startz,widthx,widthy,widthz,ierr)
-  call DMDAVecGetArrayF90(da,state_local,statepointer,ierr)
+  call DMGetLocalVector(simstate%lattval,state_local,ierr)
+  call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
+  call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
 
 
-  do z=startz,startz+widthz-1
-     do y=starty,starty+widthy-1
-        do x=startx,startx+widthx-1
+  do z=simstate%startz,simstate%startz+simstate%widthz-1
+     do y=simstate%starty,simstate%starty+simstate%widthy-1
+        do x=simstate%startx,simstate%startx+simstate%widthx-1
 
 
           !! Calculate phase stabilities
@@ -604,7 +597,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,ctx,ierr)
      end do
   end do
 
-  call DMDAVecRestoreArrayF90(da,state_local,statepointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
 
   call MatAssemblyBegin(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
