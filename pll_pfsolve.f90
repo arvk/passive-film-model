@@ -108,7 +108,7 @@ subroutine FormRHS_pf(input_state,rhs_vec)
   PetscInt ctx
   PetscErrorCode ierr
   DM da
-  Vec input_state, rhs_vec, state_local
+  Vec input_state, rhs_vec
   Vec single_phase_vector
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
   integer :: startx,starty,startz,widthx,widthy,widthz
@@ -134,6 +134,8 @@ subroutine FormRHS_pf(input_state,rhs_vec)
 
   call VecAssemblyBegin(rhs_vec,ierr)
   call VecAssemblyEnd(rhs_vec,ierr)
+
+  call VecDestroy(single_phase_vector,ierr)
   return
 end subroutine FormRHS_pf
 
