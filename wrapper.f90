@@ -116,7 +116,7 @@ program passive_film_model
   do iter = 1,nomc
 !     call para_musolve(iter,ksp_mu)
 !     call para_pHsolve(iter,ksp_pH)
-!     call para_pfsolve(iter,snes_pf)
+     call para_pfsolve(iter,snes_pf,da)
 !     call para_angsolve(iter,ksp_ang)
      call para_potsolve(iter,snes_pot,state)
   end do
