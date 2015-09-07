@@ -37,15 +37,20 @@ subroutine para_musolve(iter,ksp_mu)
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)
 
+  call KSPGetConvergedReason(ksp_mu,mu_converged_reason,ierr)
 
-  call VecCreate(MPI_COMM_WORLD,solved_mu_vector,ierr)
-  call VecSetSizes(solved_mu_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(solved_mu_vector,ierr)
-  call VecStrideGather(state_solved,nmus,solved_mu_vector,INSERT_VALUES,ierr)
+  if (mu_converged_reason .gt. 0) then
+     call DMGetGlobalVector(da,state,ierr)
+     call VecCreate(MPI_COMM_WORLD,solved_mu_vector,ierr)
+     call VecSetSizes(solved_mu_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
+     call VecSetUp(solved_mu_vector,ierr)
+     call VecStrideGather(state_solved,nmus,solved_mu_vector,INSERT_VALUES,ierr)
+     call VecStrideScatter(solved_mu_vector,nmus,state,INSERT_VALUES,ierr)
+     call DMRestoreGlobalVector(da,state,ierr)
+  else
+     write(6,*) 'Chemical potential field evolution did not converge. Reason: ', mu_converged_reason
+  end if
 
-  call DMGetGlobalVector(da,state,ierr)
-  call VecStrideScatter(solved_mu_vector,nmus,state,INSERT_VALUES,ierr)
-  call DMRestoreGlobalVector(da,state,ierr)
 
 end subroutine para_musolve
 
