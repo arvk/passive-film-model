@@ -72,6 +72,9 @@ subroutine para_pfsolve(iter,snes_pf,da)
   end if
 
 
+  call MatDestroy(mat_jcb,ierr)
+
+
 end subroutine para_pfsolve
 
 
