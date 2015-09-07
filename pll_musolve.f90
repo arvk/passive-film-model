@@ -1,4 +1,4 @@
-subroutine para_musolve(iter,ksp_mu)
+subroutine para_musolve(iter,ksp_mu,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -19,20 +19,17 @@ subroutine para_musolve(iter,ksp_mu)
   PetscErrorCode ierr
   KSP ksp_mu
   KSPConvergedReason mu_converged_reason
-  DM da
   Vec solved_mu_vector
   Vec state,state_solved
   PetscInt ctx
-  external computeRHS_mu, computeMatrix_mu, computeInitialGuess_mu
-
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
+  type(context) simstate
+  external computeRHS_mu, computeMatrix_mu, computeInitialGuess_mu
 
-  call KSPGetDM(ksp_mu,da,ierr)
-
-  call KSPSetComputeRHS(ksp_mu,computeRHS_mu,ctx,ierr)
-  call KSPSetComputeOperators(ksp_mu,computeMatrix_mu,ctx,ierr)
-  call KSPSetComputeInitialGuess(ksp_mu,computeInitialGuess_mu,ctx,ierr)
+  call KSPSetComputeRHS(ksp_mu,computeRHS_mu,simstate,ierr)
+  call KSPSetComputeOperators(ksp_mu,computeMatrix_mu,simstate,ierr)
+  call KSPSetComputeInitialGuess(ksp_mu,computeInitialGuess_mu,simstate,ierr)
 
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)
@@ -40,13 +37,13 @@ subroutine para_musolve(iter,ksp_mu)
   call KSPGetConvergedReason(ksp_mu,mu_converged_reason,ierr)
 
   if (mu_converged_reason .gt. 0) then
-     call DMGetGlobalVector(da,state,ierr)
+     call DMGetGlobalVector(simstate%lattval,state,ierr)
      call VecCreate(MPI_COMM_WORLD,solved_mu_vector,ierr)
      call VecSetSizes(solved_mu_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
      call VecSetUp(solved_mu_vector,ierr)
      call VecStrideGather(state_solved,nmus,solved_mu_vector,INSERT_VALUES,ierr)
      call VecStrideScatter(solved_mu_vector,nmus,state,INSERT_VALUES,ierr)
-     call DMRestoreGlobalVector(da,state,ierr)
+     call DMRestoreGlobalVector(simstate%lattval,state,ierr)
   else
      write(6,*) 'Chemical potential field evolution did not converge. Reason: ', mu_converged_reason
   end if
@@ -61,7 +58,7 @@ end subroutine para_musolve
 
 
 
-subroutine computeInitialGuess_mu(ksp_mu,b,ctx,ierr)
+subroutine computeInitialGuess_mu(ksp_mu,b,simstate,ierr)
   use commondata
   use fields
   use thermo_constants
@@ -82,13 +79,12 @@ subroutine computeInitialGuess_mu(ksp_mu,b,ctx,ierr)
   PetscErrorCode ierr
   DM da
   Vec state, b, onlymu
+  type(context) simstate
 
-  call KSPGetDM(ksp_mu,da,ierr)
-
-  call DMGetGlobalVector(da,state,ierr)
+  call DMGetGlobalVector(simstate%lattval,state,ierr)
   call VecDuplicate(state,b,ierr)
   call VecCopy(state,b,ierr)
-  call DMRestoreGlobalVector(da,state,ierr)
+  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
@@ -104,7 +100,7 @@ end subroutine computeInitialGuess_mu
 
 
 
-subroutine computeRHS_mu(ksp_mu,b,ctx,ierr)
+subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   use commondata
   use fields
   use thermo_constants
@@ -123,19 +119,15 @@ subroutine computeRHS_mu(ksp_mu,b,ctx,ierr)
   KSP ksp_mu
   PetscInt ctx
   PetscErrorCode ierr
-  DM da
   Vec state, b, onlymu
+  type(context) simstate
 
-  call KSPGetDM(ksp_mu,da,ierr)
-
-  call DMGetGlobalVector(da,state,ierr)
-
+  call DMGetGlobalVector(simstate%lattval,state,ierr)
   call VecCreate(MPI_COMM_WORLD,onlymu,ierr)
   call VecSetSizes(onlymu,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(onlymu,ierr)
   call VecStrideGather(state,nmus,onlymu,INSERT_VALUES,ierr)
-
-  call DMRestoreGlobalVector(da,state,ierr)
+  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
   call VecScale(onlymu,(1.0d0/dt),ierr)
   call VecStrideScatter(onlymu,nmus,b,INSERT_VALUES,ierr)
@@ -151,7 +143,7 @@ end subroutine computeRHS_mu
 
 
 
-subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,ctx,ierr)
+subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   use commondata
   use fields
   use thermo_constants
@@ -170,7 +162,6 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,ctx,ierr)
   KSP ksp_mu
   PetscInt ctx
   PetscErrorCode ierr
-  DM da
   Vec state,statelocal
   Mat matoper, matprecond
   PetscInt     i,j,k
@@ -181,6 +172,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,ctx,ierr)
   real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
   integer :: nocols, nox, noy, noz
   real*8 :: add_to_v_ij
+  type(context) simstate
 
   write(6,*) "In mat comp", rank
 
@@ -191,17 +183,15 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,ctx,ierr)
   D_inter_env = D_S_env
 
 
-  call KSPGetDM(ksp_mu,da,ierr)
-
-  call DMGetGlobalVector(da,state,ierr)
-  call DMCreateLocalVector(da,statelocal,ierr)
-  call DMGlobalToLocalBegin(da,state,INSERT_VALUES,statelocal,ierr)
-  call DMGlobalToLocalEnd(da,state,INSERT_VALUES,statelocal,ierr)
-  call DMRestoreGlobalVector(da,state,ierr)
+  call DMGetGlobalVector(simstate%lattval,state,ierr)
+  call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
+  call DMGlobalToLocalBegin(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
+  call DMGlobalToLocalEnd(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
+  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
 
-  call DMDAVecGetArrayF90(da,statelocal,statepointer,ierr)
-  call DMDAGetCorners(da,startx,starty,startz,widthx,widthy,widthz,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,statelocal,statepointer,ierr)
+  call DMDAGetCorners(simstate%lattval,startx,starty,startz,widthx,widthy,widthz,ierr)
 
 
   do k=startz,startz+widthz-1
@@ -349,7 +339,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,ctx,ierr)
      end do
   end do
 
-  call DMDAVecRestoreArrayF90(da,statelocal,statepointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,statelocal,statepointer,ierr)
 
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
