@@ -110,9 +110,9 @@ program passive_film_model
 
   do iter = 1,nomc
 !     write(6,*) 'In iteration',iter
-!     call para_musolve(iter,ksp_mu)
-!     call para_pHsolve(iter,ksp_pH)
      call para_pfsolve(iter,snes_pf,simstate)
+     call para_musolve(iter,ksp_mu,simstate)
+     call para_pHsolve(iter,ksp_pH,simstate)
 !     call para_angsolve(iter,ksp_ang)
 !     call para_potsolve(iter,snes_pot,state)
 

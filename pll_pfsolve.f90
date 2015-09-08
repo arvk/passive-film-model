@@ -19,11 +19,9 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
   PetscErrorCode ierr
   SNES snes_pf
   SNESConvergedReason pf_converged_reason
-  DM da
   Vec function_value, single_phase_vector
   Vec state,state_unknown,rhs_vec
   Mat mat_jcb
-  PetscInt ctx,ctx1
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
   integer :: fesphase
@@ -67,15 +65,15 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
      end do
      call DMRestoreGlobalVector(simstate%lattval,state,ierr)
   else
-     write(6,*) 'Not converged'
+     write(6,*) 'Phase field evolution did not converge. Reason: ', pf_converged_reason
   end if
 
 
   call MatDestroy(mat_jcb,ierr)
-  call VecDestroy(function_value,ierr)
+  ! call VecDestroy(function_value,ierr)
   call VecDestroy(single_phase_vector,ierr)
-  call VecDestroy(state_unknown,ierr)
-  call VecDestroy(rhs_vec,ierr)
+  ! call VecDestroy(state_unknown,ierr)
+  ! call VecDestroy(rhs_vec,ierr)
 
 end subroutine para_pfsolve
 
@@ -607,7 +605,6 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
      call MatAssemblyEnd(pf_jacob,MAT_FINAL_ASSEMBLY,ierr)
   end if
 
-  write(6,*) 'Yo'
   return
 end subroutine FormJacobian_pf
 
