@@ -57,12 +57,11 @@ program passive_film_model
   call SNESCreate(MPI_COMM_WORLD,snes_pf,ierr)
   call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr)
 
-  call KSPSetDM(ksp_pH,simstate%lattval,ierr)
   call SNESSetDM(snes_pot,simstate%lattval,ierr)
 
-  call KSPSetFromOptions(ksp_mu,ierr)
-  call KSPSetFromOptions(ksp_pH,ierr)
-  call KSPSetFromOptions(ksp_ang,ierr)
+
+
+
   call SNESSetFromOptions(snes_pot,ierr)
 
   call allocate_matrices() ! Allocate all field matrices

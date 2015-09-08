@@ -31,6 +31,7 @@ subroutine para_angsolve(iter,ksp_ang,simstate)
   call KSPSetComputeInitialGuess(ksp_ang,computeInitialGuess_ang,simstate,ierr)
 
   call KSPSetDM(ksp_ang,simstate%lattval,ierr)
+  call KSPSetFromOptions(ksp_ang,ierr)
   call KSPSolve(ksp_ang,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_ang,state_solved,ierr)
 

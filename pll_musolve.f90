@@ -32,6 +32,7 @@ subroutine para_musolve(iter,ksp_mu,simstate)
   call KSPSetComputeInitialGuess(ksp_mu,computeInitialGuess_mu,simstate,ierr)
 
   call KSPSetDM(ksp_mu,simstate%lattval,ierr)
+  call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)
 

@@ -32,6 +32,8 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
   call KSPSetComputeOperators(ksp_pH,computeMatrix_pH,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_pH,computeInitialGuess_pH,simstate,ierr)
 
+  call KSPSetDM(ksp_pH,simstate%lattval,ierr)
+  call KSPSetFromOptions(ksp_pH,ierr)
   call KSPSolve(ksp_pH,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_pH,state_solved,ierr)
 
