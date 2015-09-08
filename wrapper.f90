@@ -57,7 +57,6 @@ program passive_film_model
   call SNESCreate(MPI_COMM_WORLD,snes_pf,ierr)
   call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr)
 
-  call KSPSetDM(ksp_mu,simstate%lattval,ierr)
   call KSPSetDM(ksp_pH,simstate%lattval,ierr)
   call KSPSetDM(ksp_ang,simstate%lattval,ierr)
   call SNESSetDM(snes_pot,simstate%lattval,ierr)
