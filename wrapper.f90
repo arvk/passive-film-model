@@ -58,7 +58,6 @@ program passive_film_model
   call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr)
 
   call KSPSetDM(ksp_pH,simstate%lattval,ierr)
-  call KSPSetDM(ksp_ang,simstate%lattval,ierr)
   call SNESSetDM(snes_pot,simstate%lattval,ierr)
 
   call KSPSetFromOptions(ksp_mu,ierr)
@@ -113,7 +112,7 @@ program passive_film_model
      call para_pfsolve(iter,snes_pf,simstate)
      call para_musolve(iter,ksp_mu,simstate)
      call para_pHsolve(iter,ksp_pH,simstate)
-!     call para_angsolve(iter,ksp_ang)
+     call para_angsolve(iter,ksp_ang,simstate)
 !     call para_potsolve(iter,snes_pot,state)
 
 
