@@ -167,6 +167,9 @@ program passive_film_model
   call SNESDestroy(snes_pot,ierr)
 
 
+  call VecDestroy(onlymus,ierr)
+  call VecDestroy(state,ierr)
+
   !! Finalize Parallelization
   call PetscFinalize(ierr)
   call mpi_finalize(ierr)

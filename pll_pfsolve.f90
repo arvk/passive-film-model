@@ -352,7 +352,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   PetscInt ctx
   PetscErrorCode ierr
   DM da
-  Vec input_state, function_value, state_local
+  Vec input_state, state_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
   real*8, allocatable :: D_pf(:,:,:,:,:)
   integer :: fesphase,fesphase2
