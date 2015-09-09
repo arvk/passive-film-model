@@ -46,6 +46,8 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
   call VecStrideScatter(solved_pH_vector,npH,state,INSERT_VALUES,ierr)
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
+
+  call VecDestroy(solved_pH_vector,ierr)
 end subroutine para_pHsolve
 
 
@@ -164,6 +166,9 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
+
+  call VecDestroy(onlyenv,ierr)
+  call VecDestroy(onlypH,ierr)
   return
 end subroutine computeRHS_pH
 
@@ -324,6 +329,7 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
+  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_pH
 

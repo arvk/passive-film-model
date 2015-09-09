@@ -70,11 +70,8 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
 
 
   call MatDestroy(mat_jcb,ierr)
-  ! call VecDestroy(function_value,ierr)
+  call VecDestroy(function_value,ierr)
   call VecDestroy(single_phase_vector,ierr)
-  ! call VecDestroy(state_unknown,ierr)
-  ! call VecDestroy(rhs_vec,ierr)
-
 end subroutine para_pfsolve
 
 

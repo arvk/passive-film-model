@@ -50,7 +50,7 @@ subroutine para_musolve(iter,ksp_mu,simstate)
      write(6,*) 'Chemical potential field evolution did not converge. Reason: ', mu_converged_reason
   end if
 
-
+  call VecDestroy(solved_mu_vector,ierr)
 end subroutine para_musolve
 
 
@@ -137,6 +137,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
 
+  call VecDestroy(onlymu,ierr)
   return
 end subroutine computeRHS_mu
 
@@ -346,6 +347,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
+  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_mu
 

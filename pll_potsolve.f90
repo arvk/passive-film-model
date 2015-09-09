@@ -64,6 +64,9 @@ subroutine para_potsolve(iter,snes_pot,simstate)
      write(6,*) 'Potential field did not converge. Reason: ', pot_converged_reason
   end if
 
+  call MatDestroy(mat_jacob,ierr)
+  call VecDestroy(vec_feval,ierr)
+  call VecDestroy(elpot_vector,ierr)
 end subroutine para_potsolve
 
 
@@ -373,7 +376,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   MatNullSpace nullspace
 
 
-  call DMCreateMatrix(simstate%lattval,pf_jacob,ierr)
+!  call DMCreateMatrix(simstate%lattval,pf_jacob,ierr)
 
   call DMGetLocalVector(simstate%lattval,state_local,ierr)
   call DMGetGlobalVector(simstate%lattval,state,ierr)

@@ -49,7 +49,7 @@ subroutine para_angsolve(iter,ksp_ang,simstate)
      write(6,*) 'Orientation field evolution did not converge. Reason: ', ang_converged_reason
   end if
 
-
+  call VecDestroy(solved_ang_vector,ierr)
 end subroutine para_angsolve
 
 
@@ -154,6 +154,7 @@ subroutine computeRHS_ang(ksp_ang,b,simstate,ierr)
 
   ! orc = (orc1+orc3+orc5)-(orc2+orc4+orc6)
 
+  call VecDestroy(onlyang,ierr)
  return
 end subroutine computeRHS_ang
 
@@ -305,6 +306,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
+  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_ang
 
