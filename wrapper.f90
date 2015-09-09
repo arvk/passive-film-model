@@ -12,20 +12,14 @@ program passive_film_model
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  DM da
   KSP ksp_mu, ksp_pH, ksp_ang
   SNES snes_pf, snes_pot
   Vec state, onlymus
-  integer :: iter  ! Current iteration number (Loop)
-  integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
-
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscViewer :: viewer
-
-  integer :: startx,starty,startz,widthx,widthy,widthz
+  integer :: iter  ! Current iteration number (Loop)
+  integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
   integer :: x,y,z
-  real*8 :: mysum
-
   type(context) simstate
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
@@ -113,11 +107,6 @@ program passive_film_model
      call para_pHsolve(iter,ksp_pH,simstate)
      call para_angsolve(iter,ksp_ang,simstate)
      call para_potsolve(iter,snes_pot,simstate)
-
-
-!  call VecStrideNorm(state,nmet,NORM_1,mysum,ierr)
-!  write(6,*) 'SUM', mysum, rank
-
   end do
 
 
@@ -126,7 +115,7 @@ program passive_film_model
   call VecSetUp(onlymus,ierr)
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecStrideGather(state,nmet,onlymus,INSERT_VALUES,ierr)
+  call VecStrideGather(state,npot,onlymus,INSERT_VALUES,ierr)
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
 !  call VecView(onlymus,PETSC_NULL_OBJECT,ierr)
@@ -175,12 +164,10 @@ program passive_film_model
   call KSPDestroy(ksp_pH,ierr)
   call KSPDestroy(ksp_ang,ierr)
   call SNESDestroy(snes_pf,ierr)
-  call DMDestroy(da,ierr)
+  call SNESDestroy(snes_pot,ierr)
 
 
   !! Finalize Parallelization
   call PetscFinalize(ierr)
   call mpi_finalize(ierr)
-
-
 end program passive_film_model

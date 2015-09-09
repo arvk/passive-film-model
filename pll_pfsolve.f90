@@ -293,6 +293,8 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,function_value,functionpointer,ierr)
 
+  call DMRestoreLocalVector(simstate%lattval,state_local,ierr)
+
   call VecAssemblyBegin(function_value,ierr)
   call VecAssemblyEnd(function_value,ierr)
   return
