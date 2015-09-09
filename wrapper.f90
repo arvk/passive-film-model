@@ -57,12 +57,12 @@ program passive_film_model
   call SNESCreate(MPI_COMM_WORLD,snes_pf,ierr)
   call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr)
 
-  call SNESSetDM(snes_pot,simstate%lattval,ierr)
 
 
 
 
-  call SNESSetFromOptions(snes_pot,ierr)
+
+
 
   call allocate_matrices() ! Allocate all field matrices
   call thermo()            ! Calculate phase stabilities
@@ -112,7 +112,7 @@ program passive_film_model
      call para_musolve(iter,ksp_mu,simstate)
      call para_pHsolve(iter,ksp_pH,simstate)
      call para_angsolve(iter,ksp_ang,simstate)
-!     call para_potsolve(iter,snes_pot,state)
+     call para_potsolve(iter,snes_pot,simstate)
 
 
 !  call VecStrideNorm(state,nmet,NORM_1,mysum,ierr)
