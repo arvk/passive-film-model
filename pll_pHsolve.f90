@@ -19,35 +19,35 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
   PetscErrorCode ierr
   KSP ksp_pH
   KSPConvergedReason pH_converged_reason
-  Vec solved_pH_vector
-  Vec state,state_solved
-  PetscInt ctx
+  Vec state, solved_pH_vector, state_solved
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
   type(context) simstate
   external computeRHS_pH, computeMatrix_pH, computeInitialGuess_pH
 
-
+  call KSPSetDM(ksp_pH,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_pH,computeRHS_pH,simstate,ierr)
   call KSPSetComputeOperators(ksp_pH,computeMatrix_pH,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_pH,computeInitialGuess_pH,simstate,ierr)
 
-  call KSPSetDM(ksp_pH,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_pH,ierr)
   call KSPSolve(ksp_pH,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_pH,state_solved,ierr)
+  call KSPGetConvergedReason(ksp_pH,pH_converged_reason,ierr)
 
-  call VecCreate(MPI_COMM_WORLD,solved_pH_vector,ierr)
-  call VecSetSizes(solved_pH_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(solved_pH_vector,ierr)
-  call VecStrideGather(state_solved,npH,solved_pH_vector,INSERT_VALUES,ierr)
+  if (pH_converged_reason .gt. 0) then
+     call DMGetGlobalVector(simstate%lattval,state,ierr)
+     call VecCreate(MPI_COMM_WORLD,solved_pH_vector,ierr)
+     call VecSetSizes(solved_pH_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
+     call VecSetUp(solved_pH_vector,ierr)
+     call VecStrideGather(state_solved,npH,solved_pH_vector,INSERT_VALUES,ierr)
+     call VecStrideScatter(solved_pH_vector,npH,state,INSERT_VALUES,ierr)
+     call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+     call VecDestroy(solved_pH_vector,ierr)
+  else
+     write(6,*) 'pH field evolution did not converge. Reason: ', pH_converged_reason
+  end if
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecStrideScatter(solved_pH_vector,npH,state,INSERT_VALUES,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-
-
-  call VecDestroy(solved_pH_vector,ierr)
 end subroutine para_pHsolve
 
 
@@ -80,9 +80,8 @@ subroutine computeInitialGuess_pH(ksp_pH,b,simstate,ierr)
 #include <finclude/petscdmda.h90>
 
   KSP ksp_pH
-  PetscInt ctx
   PetscErrorCode ierr
-  Vec state, b, onlypH
+  Vec state, b
   type(context) simstate
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
@@ -128,46 +127,24 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
 #include <finclude/petscdmda.h90>
 
   KSP ksp_pH
-  PetscInt ctx
   PetscErrorCode ierr
-  Vec state, onlyenv, onlypH, b
-  PetscScalar, pointer :: pHpointer(:), envpointer(:)
+  Vec state, onlypH, b
   integer :: i,j,k
   type(context) simstate
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecCreate(MPI_COMM_WORLD,onlyenv,ierr)
-  call VecSetSizes(onlyenv,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(onlyenv,ierr)
-  call VecStrideGather(state,nenv,onlyenv,INSERT_VALUES,ierr)
   call VecCreate(MPI_COMM_WORLD,onlypH,ierr)
   call VecSetSizes(onlypH,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(onlypH,ierr)
   call VecStrideGather(state,npH,onlypH,INSERT_VALUES,ierr)
-  call VecDuplicate(state,b,ierr)
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
-
-  call VecGetArrayF90(onlypH,pHpointer,ierr)
-  call VecGetArrayF90(onlyenv,envpointer,ierr)
-
-  do i=1,(simstate%widthx*simstate%widthy*simstate%widthz)
-     if(envpointer(i).gt.0.97d0) then
-        pHpointer(i) = pHpointer(i)/dt
-     else
-        pHpointer(i) = pH_in
-     end if
-  end do
-
-  call VecRestoreArrayF90(onlypH,pHpointer,ierr)
-  call VecRestoreArrayF90(onlyenv,envpointer,ierr)
-
+  call VecScale(onlypH,(1.0d0/dt),ierr)
   call VecStrideScatter(onlypH,npH,b,INSERT_VALUES,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
 
-  call VecDestroy(onlyenv,ierr)
   call VecDestroy(onlypH,ierr)
   return
 end subroutine computeRHS_pH
@@ -194,7 +171,6 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
 #include <finclude/petscdmda.h90>
 
   KSP ksp_pH
-  PetscInt ctx
   PetscErrorCode ierr
   Vec state,statelocal
   Mat matoper, matprecond
@@ -202,12 +178,10 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   PetscScalar  v(7)
   MatStencil   row(4,1),col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  type(context) simstate
   real*8 :: D
-  integer :: nocols, nox, noy, noz
+  integer :: nocols
   real*8 :: add_to_v_ij
-
-  D = D_H_env
+  type(context) simstate
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
   call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
@@ -227,7 +201,7 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
            row(MatStencil_c,1) = npH
 
 
-           if (statepointer(nenv,i,j,k).lt.0.97) then
+           if (k.eq.psz_g-1) then
 
               v(1) = 1.0d0
               col(MatStencil_i,1) = i
@@ -238,6 +212,8 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
               call MatSetValuesStencil(matprecond,1,row,1,col,v,INSERT_VALUES,ierr)
 
            else
+
+              D = D_H_env*statepointer(nenv,i,j,k)
 
               nocols = 0
               add_to_v_ij = 0.0d0
@@ -309,12 +285,11 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
               end if
 
               nocols = nocols + 1
-              v(nocols) = (1.0d0/dt)
+              v(nocols) = (1.0d0/dt) - add_to_v_ij
               col(MatStencil_i,nocols) = i
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k
               col(MatStencil_c,nocols) = npH
-              v(nocols) = V(nocols) - add_to_v_ij
 
               call MatSetValuesStencil(matprecond,1,row,nocols,col,v,INSERT_VALUES,ierr)
 
