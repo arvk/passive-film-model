@@ -46,11 +46,11 @@ subroutine para_musolve(iter,ksp_mu,simstate)
      call VecStrideGather(state_solved,nmus,solved_mu_vector,INSERT_VALUES,ierr)
      call VecStrideScatter(solved_mu_vector,nmus,state,INSERT_VALUES,ierr)
      call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+     call VecDestroy(solved_mu_vector,ierr)
   else
      write(6,*) 'Chemical potential field evolution did not converge. Reason: ', mu_converged_reason
   end if
 
-  call VecDestroy(solved_mu_vector,ierr)
 end subroutine para_musolve
 
 
