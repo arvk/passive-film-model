@@ -19,23 +19,20 @@ subroutine para_musolve(iter,ksp_mu,simstate)
   PetscErrorCode ierr
   KSP ksp_mu
   KSPConvergedReason mu_converged_reason
-  Vec solved_mu_vector
-  Vec state,state_solved
-  PetscInt ctx
+  Vec state, solved_mu_vector, state_solved
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
   type(context) simstate
   external computeRHS_mu, computeMatrix_mu, computeInitialGuess_mu
 
+  call KSPSetDM(ksp_mu,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_mu,computeRHS_mu,simstate,ierr)
   call KSPSetComputeOperators(ksp_mu,computeMatrix_mu,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_mu,computeInitialGuess_mu,simstate,ierr)
 
-  call KSPSetDM(ksp_mu,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)
-
   call KSPGetConvergedReason(ksp_mu,mu_converged_reason,ierr)
 
   if (mu_converged_reason .gt. 0) then
@@ -77,10 +74,8 @@ subroutine computeInitialGuess_mu(ksp_mu,b,simstate,ierr)
 #include <finclude/petscdmda.h90>
 
   KSP ksp_mu
-  PetscInt ctx
   PetscErrorCode ierr
-  DM da
-  Vec state, b, onlymu
+  Vec state, b
   type(context) simstate
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
@@ -90,7 +85,6 @@ subroutine computeInitialGuess_mu(ksp_mu,b,simstate,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
-
   return
 end subroutine computeInitialGuess_mu
 
@@ -119,7 +113,6 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
 #include <finclude/petscdmda.h90>
 
   KSP ksp_mu
-  PetscInt ctx
   PetscErrorCode ierr
   Vec state, b, onlymu
   type(context) simstate
@@ -163,7 +156,6 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 #include <finclude/petscdmda.h90>
 
   KSP ksp_mu
-  PetscInt ctx
   PetscErrorCode ierr
   Vec state,statelocal
   Mat matoper, matprecond
@@ -171,13 +163,11 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   PetscScalar  v(7)
   MatStencil   row(4,1),col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  integer :: startx,starty,startz,widthx,widthy,widthz
   real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
-  integer :: nocols, nox, noy, noz
+  integer :: nocols
   real*8 :: add_to_v_ij
   type(context) simstate
 
-  write(6,*) "In mat comp", rank
 
   D_inter_met = D_S_met
   D_inter_mkw = max(D_Fe_mkw,D_S_mkw)
@@ -192,14 +182,11 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
-
   call DMDAVecGetArrayF90(simstate%lattval,statelocal,statepointer,ierr)
-  call DMDAGetCorners(simstate%lattval,startx,starty,startz,widthx,widthy,widthz,ierr)
 
-
-  do k=startz,startz+widthz-1
-     do j=starty,starty+widthy-1
-        do i=startx,startx+widthx-1
+  do k=simstate%startz,simstate%startz+simstate%widthz-1
+     do j=simstate%starty,simstate%starty+simstate%widthy-1
+        do i=simstate%startx,simstate%startx+simstate%widthx-1
 
            row(MatStencil_i,1) = i
            row(MatStencil_j,1) = j
@@ -207,9 +194,6 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
            row(MatStencil_c,1) = nmus
 
            nocols = 0
-           nox = 0
-           noy = 0
-           noz = 0
            add_to_v_ij = 0.0d0
 
            if (k.gt.0) then
@@ -316,25 +300,12 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
 
-
-
               nocols = nocols + 1
-              v(nocols) = (1.0d0/dt)
+              v(nocols) = (1.0d0/dt) - add_to_v_ij
               col(MatStencil_i,nocols) = i
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k
               col(MatStencil_c,nocols) = nmus
-              v(nocols) = V(nocols) - add_to_v_ij
-
-
-
-              ! if (k.eq.0) then
-              !    v(4) = v(4) - v(1) - v(2) - v(3) - v(5) - v(6)
-              ! else if (k.eq.psz_g-1) then
-              !    v(4) = v(4) - v(2) - v(3) - v(5) - v(6) - v(7)
-              ! else
-              !    v(4) = v(4) - v(1) - v(2) - v(3) - v(5) - v(6) - v(7)
-              ! end if
 
               call MatSetValuesStencil(matprecond,1,row,nocols,col,v,INSERT_VALUES,ierr)
 
