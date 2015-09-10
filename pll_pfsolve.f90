@@ -64,6 +64,7 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
         call VecStrideScatter(single_phase_vector,fesphase,state,INSERT_VALUES,ierr)
      end do
      call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+     call VecDestroy(single_phase_vector,ierr)
   else
      write(6,*) 'Phase field evolution did not converge. Reason: ', pf_converged_reason
   end if
@@ -71,7 +72,6 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
 
   call MatDestroy(mat_jcb,ierr)
   call VecDestroy(function_value,ierr)
-  call VecDestroy(single_phase_vector,ierr)
 end subroutine para_pfsolve
 
 
