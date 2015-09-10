@@ -75,4 +75,15 @@ subroutine allocate_matrices()
   ! Allocate realtive phase permittivities
   allocate(permittivity(0:(nphases-1)))
 
+  ! Derivative of sulfur concentration with chemical potential
+  allocate(drho_dmu(0:(nphases-1)))
+
+  ! Sulfur density in different phases
+  allocate(rhoS(0:(nphases-1)))
+
+  ! Collected sulfidation rates for different FeS phases and environments
+  allocate(sulf_rate_gas(0:(nphases-1)))
+  allocate(sulf_rate_liq(0:(nphases-1)))
+  allocate(sulf_rate(0:(nphases-1)))
+
 end subroutine allocate_matrices

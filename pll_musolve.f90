@@ -115,17 +115,77 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   KSP ksp_mu
   PetscErrorCode ierr
   Vec state, b, onlymu
+  PetscScalar, pointer :: statepointer(:,:,:,:), bpointer(:,:,:,:)
   type(context) simstate
+  integer :: i, j, k, fesphase
+  real*8 :: Chi, S_source_sink
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
   call VecCreate(MPI_COMM_WORLD,onlymu,ierr)
   call VecSetSizes(onlymu,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(onlymu,ierr)
   call VecStrideGather(state,nmus,onlymu,INSERT_VALUES,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
   call VecScale(onlymu,(1.0d0/dt),ierr)
   call VecStrideScatter(onlymu,nmus,b,INSERT_VALUES,ierr)
+
+  call DMDAVecGetArrayF90(simstate%lattval,state,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,b,bpointer,ierr)
+
+
+  if (include_dissolve) then
+     sulf_rate(nmet) = sulf_rate_liq(nmet)
+     sulf_rate(nmkw) = sulf_rate_liq(nmkw)
+     sulf_rate(npht) = sulf_rate_liq(npht)
+     sulf_rate(npyr) = sulf_rate_liq(npyr)
+  else
+     sulf_rate(nmet) = sulf_rate_gas(nmet)
+     sulf_rate(nmkw) = sulf_rate_gas(nmkw)
+     sulf_rate(npht) = sulf_rate_gas(npht)
+     sulf_rate(npyr) = sulf_rate_gas(npyr)
+  end if
+
+  do k=simstate%startz,simstate%startz+simstate%widthz-1
+     do j=simstate%starty,simstate%starty+simstate%widthy-1
+        do i=simstate%startx,simstate%startx+simstate%widthx-1
+
+           !! Calculate derivative of sulfur concentration with chemical potential
+           Chi = 0.0d0
+           do fesphase = 0,nphases-1
+              Chi = Chi + drho_dmu(fesphase)*statepointer(fesphase,i,j,k)
+           end do
+
+           !! Calculate sulfur source and sinks due to phase transformations
+           S_source_sink = 0.0d0
+           do fesphase = 0,nphases-1
+              S_source_sink = S_source_sink + rhoS(fesphase)*(statepointer(fesphase,i,j,k)-statepointer(fesphase,i,j,k))  !!! SHOULD BE EXSTATEPOINTER
+           end do
+
+           bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) - (S_source_sink/Chi)
+
+           !! INCLUDE SULFIDATION
+           if ((statepointer(nenv,i,j,k).gt.0.10d0).and.(statepointer(nenv,i,j,k).lt.0.90d0)) then
+              do fesphase = nmet,npyr
+                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + (rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet))*sulf_rate(fesphase)/dpf)
+              end do
+           end if
+
+           if (k.eq.psz_g-1) then
+              bpointer(nmus,i,j,k) = avg_mu_env/dt
+           end if
+
+           if (k.eq.0) then
+              bpointer(nmus,i,j,k) = (mus_met_mkw_eqb - (R*T*0.5d0))/dt
+           end if
+
+        end do
+     end do
+  end do
+
+  call DMDAVecRestoreArrayF90(simstate%lattval,b,bpointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,state,statepointer,ierr)
+
+  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
@@ -195,6 +255,9 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 
            nocols = 0
            add_to_v_ij = 0.0d0
+
+
+           if ((statepointer(nenv,i,j,k).lt.0.10d0).or.(statepointer(nenv,i,j,k).gt.0.90d0).or.(k.eq.psz_g-1).or.(k.eq.0)) then
 
            if (k.gt.0) then
               nocols = nocols + 1
@@ -299,6 +362,10 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
               v(nocols) = v(nocols)/(dpf*dpf)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
+
+
+        end if
+
 
               nocols = nocols + 1
               v(nocols) = (1.0d0/dt) - add_to_v_ij

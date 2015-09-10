@@ -141,6 +141,17 @@ module thermo_constants
   real*8 :: epsilon0
   real*8, allocatable :: permittivity(:)
 
+  ! Derivative of sulfur concentration with chemical potential
+  real*8, allocatable :: drho_dmu(:)
+
+  ! Sulfur density in different phases
+  real*8, allocatable :: rhoS(:)
+
+  ! Collected sulfidation rates for different FeS phases and environments
+  real*8, allocatable :: sulf_rate_gas(:)
+  real*8, allocatable :: sulf_rate_liq(:)
+  real*8, allocatable :: sulf_rate(:)
+
 end module thermo_constants
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
