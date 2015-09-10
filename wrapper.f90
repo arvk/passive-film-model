@@ -125,9 +125,9 @@ program passive_film_model
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
   call VecStrideGather(state,npot,onlymus,INSERT_VALUES,ierr)
+  call VecView(state,PETSC_NULL_OBJECT,ierr)
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
-!  call VecView(onlymus,PETSC_NULL_OBJECT,ierr)
 
 !   do iter = 1,nomc  ! TIME LOOP
 
