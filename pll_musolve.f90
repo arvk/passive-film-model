@@ -151,6 +151,8 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
      do j=simstate%starty,simstate%starty+simstate%widthy-1
         do i=simstate%startx,simstate%startx+simstate%widthx-1
 
+           bpointer(nmus,i,j,k) = statepointer(nmus,i,j,k) * (1.0d0/dt)
+
            !! Calculate derivative of sulfur concentration with chemical potential
            Chi = 0.0d0
            do fesphase = 0,nphases-1
@@ -168,17 +170,17 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
            !! INCLUDE SULFIDATION
            if ((statepointer(nenv,i,j,k).gt.0.10d0).and.(statepointer(nenv,i,j,k).lt.0.90d0)) then
               do fesphase = nmet,npyr
-                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + (rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet))*sulf_rate(fesphase)/dpf)
+                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + (rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet))*sulf_rate(fesphase)/dpf)*statepointer(fesphase,i,j,k)
               end do
            end if
 
-           if (k.eq.psz_g-1) then
-              bpointer(nmus,i,j,k) = avg_mu_env/dt
+           if ((k.eq.psz_g-1).or.statepointer(nenv,i,j,k).gt.0.97d0) then
+              bpointer(nmus,i,j,k) = avg_mu_env * (1.0d0/dt)
            end if
 
-           if (k.eq.0) then
-              bpointer(nmus,i,j,k) = (mus_met_mkw_eqb - (R*T*0.5d0))/dt
-           end if
+          if (k.eq.0) then
+             bpointer(nmus,i,j,k) = (mus_met_mkw_eqb - (R*T*0.5d0)) * (1.0d0/dt)
+          end if
 
         end do
      end do
@@ -260,8 +262,9 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
            nocols = 0
            add_to_v_ij = 0.0d0
 
+           if ((k.ne.psz_g-1).or.(k.ne.0).or.(statepointer(nenv,i,j,k).lt.0.97d0)) then
 
-           if ((statepointer(nenv,i,j,k).lt.0.10d0).or.(statepointer(nenv,i,j,k).gt.0.90d0).or.(k.eq.psz_g-1).or.(k.eq.0)) then
+           if ((statepointer(nenv,i,j,k).lt.0.10d0).or.(statepointer(nenv,i,j,k).gt.0.90d0)) then
 
            if (k.gt.0) then
               nocols = nocols + 1
@@ -370,6 +373,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 
         end if
 
+     end if
 
               nocols = nocols + 1
               v(nocols) = (1.0d0/dt) - add_to_v_ij
