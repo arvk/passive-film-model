@@ -14,7 +14,7 @@ program passive_film_model
 
   KSP ksp_mu, ksp_pH, ksp_ang
   SNES snes_pf, snes_pot
-  Vec state, onlymus
+  Vec state, exstate, onlymus
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscViewer :: viewer
   integer :: iter  ! Current iteration number (Loop)
@@ -42,6 +42,7 @@ program passive_film_model
   call distrib_params()    ! MPI-Distribute input parameters to non-parent processors
 
   call DMDACreate3D(MPI_COMM_WORLD,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DMDA_STENCIL_STAR,psx_g,psy_g,psz_g,PETSC_DECIDE,PETSC_DECIDE,PETSC_DECIDE,nfields,1,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,simstate%lattval,ierr)
+  call DMDACreate3D(MPI_COMM_WORLD,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DMDA_STENCIL_STAR,psx_g,psy_g,psz_g,PETSC_DECIDE,PETSC_DECIDE,PETSC_DECIDE,nfields,1,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,simstate%exlattval,ierr)
 
   call DMDAGetCorners(simstate%lattval,simstate%startx,simstate%starty,simstate%startz,simstate%widthx,simstate%widthy,simstate%widthz,ierr)
 
@@ -101,6 +102,14 @@ program passive_film_model
 
 
   do iter = 1,nomc
+
+     call DMGetGlobalVector(simstate%lattval,state,ierr)
+     call DMGetGlobalVector(simstate%exlattval,exstate,ierr)
+     call VecDuplicate(state,exstate,ierr)
+     call VecCopy(state,exstate,ierr)
+     call DMRestoreGlobalVector(simstate%exlattval,exstate,ierr)
+     call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+
 !     write(6,*) 'In iteration',iter
      call para_pfsolve(iter,snes_pf,simstate)
      call para_musolve(iter,ksp_mu,simstate)

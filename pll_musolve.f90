@@ -114,13 +114,14 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
 
   KSP ksp_mu
   PetscErrorCode ierr
-  Vec state, b, onlymu
-  PetscScalar, pointer :: statepointer(:,:,:,:), bpointer(:,:,:,:)
+  Vec state, exstate, b, onlymu
+  PetscScalar, pointer :: statepointer(:,:,:,:), exstatepointer(:,:,:,:), bpointer(:,:,:,:)
   type(context) simstate
   integer :: i, j, k, fesphase
   real*8 :: Chi, S_source_sink
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
+  call DMGetGlobalVector(simstate%exlattval,exstate,ierr)
   call VecCreate(MPI_COMM_WORLD,onlymu,ierr)
   call VecSetSizes(onlymu,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(onlymu,ierr)
@@ -130,6 +131,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   call VecStrideScatter(onlymu,nmus,b,INSERT_VALUES,ierr)
 
   call DMDAVecGetArrayF90(simstate%lattval,state,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%exlattval,exstate,exstatepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,b,bpointer,ierr)
 
 
@@ -158,7 +160,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
            !! Calculate sulfur source and sinks due to phase transformations
            S_source_sink = 0.0d0
            do fesphase = 0,nphases-1
-              S_source_sink = S_source_sink + rhoS(fesphase)*(statepointer(fesphase,i,j,k)-statepointer(fesphase,i,j,k))  !!! SHOULD BE EXSTATEPOINTER
+              S_source_sink = S_source_sink + rhoS(fesphase)*(statepointer(fesphase,i,j,k)-exstatepointer(fesphase,i,j,k))
            end do
 
            bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) - (S_source_sink/Chi)
@@ -183,9 +185,11 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   end do
 
   call DMDAVecRestoreArrayF90(simstate%lattval,b,bpointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%exlattval,exstate,exstatepointer,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,state,statepointer,ierr)
 
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call DMRestoreGlobalVector(simstate%exlattval,exstate,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
