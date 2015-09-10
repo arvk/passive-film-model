@@ -262,7 +262,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
            nocols = 0
            add_to_v_ij = 0.0d0
 
-           if ((k.ne.psz_g-1).or.(k.ne.0).or.(statepointer(nenv,i,j,k).lt.0.97d0)) then
+           if ((k.ne.psz_g-1).and.(k.ne.0).and.(statepointer(nenv,i,j,k).lt.0.97d0)) then
 
            if ((statepointer(nenv,i,j,k).lt.0.10d0).or.(statepointer(nenv,i,j,k).gt.0.90d0)) then
 
