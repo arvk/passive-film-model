@@ -14,7 +14,7 @@ program passive_film_model
 
   KSP ksp_mu, ksp_pH, ksp_ang
   SNES snes_pf, snes_pot
-  Vec state, exstate, onlymus
+  Vec state, exstate
   PetscScalar, pointer :: statepointer(:,:,:,:)
   integer :: iter  ! Current iteration number (Loop)
   integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
@@ -103,7 +103,6 @@ program passive_film_model
 
      call DMGetGlobalVector(simstate%lattval,state,ierr)
      call DMGetGlobalVector(simstate%exlattval,exstate,ierr)
-     call VecDuplicate(state,exstate,ierr)
      call VecCopy(state,exstate,ierr)
      call DMRestoreGlobalVector(simstate%exlattval,exstate,ierr)
      call DMRestoreGlobalVector(simstate%lattval,state,ierr)
@@ -116,13 +115,7 @@ program passive_film_model
      call para_potsolve(iter,snes_pot,simstate)
   end do
 
-
-  call VecCreate(MPI_COMM_WORLD,onlymus,ierr)
-  call VecSetSizes(onlymus,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(onlymus,ierr)
-
   call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecStrideGather(state,npot,onlymus,INSERT_VALUES,ierr)
   call VecView(state,PETSC_NULL_OBJECT,ierr)
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
@@ -174,7 +167,6 @@ program passive_film_model
   call SNESDestroy(snes_pot,ierr)
 
 
-  call VecDestroy(onlymus,ierr)
   call VecDestroy(state,ierr)
 
   call DMDestroy(simstate%lattval,ierr)
