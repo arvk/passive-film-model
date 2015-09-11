@@ -42,6 +42,7 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
 
   call SNESSetJacobian(snes_pf,mat_jcb,mat_jcb,FormJacobian_pf,simstate,ierr)
   call SNESSetFunction(snes_pf,function_value,FormFunction_pf,simstate,ierr)
+  call DMCreateGlobalVector(simstate%lattval,rhs_vec,ierr)
   call FormRHS_pf(state,rhs_vec)
 
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
@@ -71,6 +72,7 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
 
   call MatDestroy(mat_jcb,ierr)
   call VecDestroy(function_value,ierr)
+  call VecDestroy(rhs_vec,ierr)
 end subroutine para_pfsolve
 
 
@@ -114,9 +116,6 @@ subroutine FormRHS_pf(input_state,rhs_vec)
   call VecCreate(MPI_COMM_WORLD,single_phase_vector,ierr)
   call VecSetSizes(single_phase_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(single_phase_vector,ierr)
-
-
-  call VecDuplicate(input_state,rhs_vec,ierr)
 
   do fesphase = 0,(nphases-1)
      call VecStrideGather(input_state,fesphase,single_phase_vector,INSERT_VALUES,ierr)
