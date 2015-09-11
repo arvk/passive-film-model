@@ -25,7 +25,6 @@ program passive_film_model
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   !! Initialize Parallelization
-  call mpi_init(ierr)
   call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
   call mpi_comm_size(MPI_COMM_WORLD,procs,ierr)
   call mpi_comm_rank(MPI_COMM_WORLD,rank,ierr)
@@ -181,5 +180,4 @@ program passive_film_model
 
   !! Finalize Parallelization
   call PetscFinalize(ierr)
-  call mpi_finalize(ierr)
 end program passive_film_model
