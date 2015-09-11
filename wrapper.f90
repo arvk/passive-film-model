@@ -15,10 +15,10 @@ program passive_film_model
   KSP ksp_mu, ksp_pH, ksp_ang
   SNES snes_pf, snes_pot
   Vec state, exstate
-  PetscScalar, pointer :: statepointer(:,:,:,:)
+  PetscScalar, pointer :: statepointer(:,:,:,:), exstatepointer(:,:,:,:)
   integer :: iter  ! Current iteration number (Loop)
   integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
-  integer :: x,y,z
+  integer :: x,y,z,field
   type(context) simstate
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
@@ -79,7 +79,6 @@ program passive_film_model
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,state,statepointer,ierr)
-
   do x = simstate%startx , simstate%startx + simstate%widthx-1
      do y = simstate%starty , simstate%starty + simstate%widthy-1
         do z = simstate%startz , simstate%startz + simstate%widthz-1
@@ -103,9 +102,22 @@ program passive_film_model
 
      call DMGetGlobalVector(simstate%lattval,state,ierr)
      call DMGetGlobalVector(simstate%exlattval,exstate,ierr)
-     call VecCopy(state,exstate,ierr)
+     call DMDAVecGetArrayF90(simstate%lattval,state,statepointer,ierr)
+     call DMDAVecGetArrayF90(simstate%exlattval,exstate,exstatepointer,ierr)
+     do x = simstate%startx , simstate%startx + simstate%widthx-1
+        do y = simstate%starty , simstate%starty + simstate%widthy-1
+           do z = simstate%startz , simstate%startz + simstate%widthz-1
+              do field = 0 , (nfields-1)
+                 exstatepointer(field,x,y,z) = statepointer(field,x,y,z)
+              end do
+           end do
+        end do
+     end do
+     call DMDAVecRestoreArrayF90(simstate%exlattval,exstate,exstatepointer,ierr)
+     call DMDAVecRestoreArrayF90(simstate%lattval,state,statepointer,ierr)
      call DMRestoreGlobalVector(simstate%exlattval,exstate,ierr)
      call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+
 
 !     write(6,*) 'In iteration',iter
      call para_pfsolve(iter,snes_pf,simstate)
