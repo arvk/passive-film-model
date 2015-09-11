@@ -16,7 +16,6 @@ program passive_film_model
   SNES snes_pf, snes_pot
   Vec state, exstate, onlymus
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  PetscViewer :: viewer
   integer :: iter  ! Current iteration number (Loop)
   integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
   integer :: x,y,z
@@ -177,6 +176,9 @@ program passive_film_model
 
   call VecDestroy(onlymus,ierr)
   call VecDestroy(state,ierr)
+
+  call DMDestroy(simstate%lattval,ierr)
+  call DMDestroy(simstate%exlattval,ierr)
 
   !! Finalize Parallelization
   call PetscFinalize(ierr)
