@@ -120,43 +120,6 @@ program passive_film_model
   call DMRestoreGlobalVector(simstate%lattval,state,ierr)
 
 
-!   do iter = 1,nomc  ! TIME LOOP
-
-!      call pfsolve(iter)  ! Solve PF evolution equations
-!      call musolve(iter)  ! Solve MU evolution equations
-!      call orsolve(iter)  ! Solve OR evolution equations
-
-!      if (include_dissolve) call dissolve_film() ! If dissolve tag is set, dissolve film
-!      if (include_electro) call elpotsolve(iter) ! If electro tag is set, solve the electric potential field evolution
-!      ! if (iter.eq.nomc/10) call voids_create() ! Create voids every nomc/10 steps
-
-
-! !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
-
-!      if (mod(iter,freq_scale).eq.0) then  ! Start kMC routines every freq_scale steps
-
-!         call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS
-!         call spparks_filmenv()
-!         call spparks_metfilm()
-!      end if
-
-! !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
-
-!      if (mod(iter,max(floor(real(nomc/noimg)),1)).eq.0) then   ! Write output files
-
-!         call gather_pf()      ! Collect phase field to the parent process
-!         call gather_mu()      ! Collect mu field to the parent process
-!         call gather_opyr()    ! Collect orientation field to the parent process
-!         call gather_electro() ! Collect electric potential field to the parent process
-
-!         if (isroot) write(6,'(A,I5.5,A,I6.6,A,I6.6)') " INFO: Writing snapshot ",iter/max(floor(real(nomc/noimg)),1)," at iteration ",iter,"/",nomc
-!         if (isroot) call write_fields(iter) ! IF I am ROOT, write out simulation parameters
-
-!      end if
-
-
-!   end do
-
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
   !! Destroy Unused objects
@@ -165,7 +128,6 @@ program passive_film_model
   call KSPDestroy(ksp_ang,ierr)
   call SNESDestroy(snes_pf,ierr)
   call SNESDestroy(snes_pot,ierr)
-
 
   call VecDestroy(state,ierr)
 
