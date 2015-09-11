@@ -129,8 +129,6 @@ program passive_film_model
   call SNESDestroy(snes_pf,ierr)
   call SNESDestroy(snes_pot,ierr)
 
-  call VecDestroy(state,ierr)
-
   call DMDestroy(simstate%lattval,ierr)
   call DMDestroy(simstate%exlattval,ierr)
 
