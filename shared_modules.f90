@@ -27,6 +27,7 @@ module fields
       type context
 #include <finclude/petscdmdef.h>
          DM lattval, exlattval
+         Vec slice, exslice
          integer :: startx,starty,startz
          integer :: widthx,widthy,widthz
       end type context
