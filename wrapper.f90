@@ -14,11 +14,10 @@ program passive_film_model
 
   KSP ksp_mu, ksp_pH, ksp_ang
   SNES snes_pf, snes_pot
-  Vec state, exstate
-  PetscScalar, pointer :: statepointer(:,:,:,:), exstatepointer(:,:,:,:)
+  PetscScalar, pointer :: statepointer(:,:,:,:)
   integer :: iter  ! Current iteration number (Loop)
   integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
-  integer :: x,y,z,field
+  integer :: x,y,z
   type(context) simstate
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
@@ -39,10 +38,16 @@ program passive_film_model
 
   call distrib_params()    ! MPI-Distribute input parameters to non-parent processors
 
-  call DMDACreate3D(MPI_COMM_WORLD,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DMDA_STENCIL_STAR,psx_g,psy_g,psz_g,PETSC_DECIDE,PETSC_DECIDE,PETSC_DECIDE,nfields,1,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,simstate%lattval,ierr)
-  call DMDACreate3D(MPI_COMM_WORLD,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DMDA_STENCIL_STAR,psx_g,psy_g,psz_g,PETSC_DECIDE,PETSC_DECIDE,PETSC_DECIDE,nfields,1,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,simstate%exlattval,ierr)
+  call DMDACreate3D(MPI_COMM_WORLD,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE, &
+       & DMDA_STENCIL_STAR,psx_g,psy_g,psz_g,PETSC_DECIDE,PETSC_DECIDE,PETSC_DECIDE,nfields, &
+       & 1,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,simstate%lattval,ierr)
 
-  call DMDAGetCorners(simstate%lattval,simstate%startx,simstate%starty,simstate%startz,simstate%widthx,simstate%widthy,simstate%widthz,ierr)
+  call DMDAGetCorners(simstate%lattval,simstate%startx,simstate%starty,simstate%startz, &
+       & simstate%widthx,simstate%widthy,simstate%widthz,ierr)
+
+  call DMCreateGlobalVector(simstate%lattval, simstate%slice, ierr)
+  call DMCreateGlobalVector(simstate%lattval, simstate%exslice, ierr)
+
 
   call KSPCreate(MPI_COMM_WORLD,ksp_mu,ierr)
   call KSPCreate(MPI_COMM_WORLD,ksp_pH,ierr)
@@ -77,8 +82,7 @@ program passive_film_model
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call DMDAVecGetArrayF90(simstate%lattval,state,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   do x = simstate%startx , simstate%startx + simstate%widthx-1
      do y = simstate%starty , simstate%starty + simstate%widthy-1
         do z = simstate%startz , simstate%startz + simstate%widthz-1
@@ -94,43 +98,20 @@ program passive_film_model
         end do
      end do
   end do
-  call DMDAVecRestoreArrayF90(simstate%lattval,state,statepointer,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
 
   do iter = 1,nomc
 
-     call DMGetGlobalVector(simstate%lattval,state,ierr)
-     call DMGetGlobalVector(simstate%exlattval,exstate,ierr)
-     call DMDAVecGetArrayF90(simstate%lattval,state,statepointer,ierr)
-     call DMDAVecGetArrayF90(simstate%exlattval,exstate,exstatepointer,ierr)
-     do x = simstate%startx , simstate%startx + simstate%widthx-1
-        do y = simstate%starty , simstate%starty + simstate%widthy-1
-           do z = simstate%startz , simstate%startz + simstate%widthz-1
-              do field = 0 , (nfields-1)
-                 exstatepointer(field,x,y,z) = statepointer(field,x,y,z)
-              end do
-           end do
-        end do
-     end do
-     call DMDAVecRestoreArrayF90(simstate%exlattval,exstate,exstatepointer,ierr)
-     call DMDAVecRestoreArrayF90(simstate%lattval,state,statepointer,ierr)
-     call DMRestoreGlobalVector(simstate%exlattval,exstate,ierr)
-     call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-
+     call VecCopy(simstate%slice,simstate%exslice,ierr)
 
 !     write(6,*) 'In iteration',iter
-     call para_pfsolve(iter,snes_pf,simstate)
-     call para_musolve(iter,ksp_mu,simstate)
-     call para_pHsolve(iter,ksp_pH,simstate)
-     call para_angsolve(iter,ksp_ang,simstate)
-     call para_potsolve(iter,snes_pot,simstate)
+     ! call para_pfsolve(iter,snes_pf,simstate)
+     ! call para_musolve(iter,ksp_mu,simstate)
+     ! call para_pHsolve(iter,ksp_pH,simstate)
+     ! call para_angsolve(iter,ksp_ang,simstate)
+     ! call para_potsolve(iter,snes_pot,simstate)
   end do
-
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecView(state,PETSC_NULL_OBJECT,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
@@ -142,7 +123,9 @@ program passive_film_model
   call SNESDestroy(snes_pot,ierr)
 
   call DMDestroy(simstate%lattval,ierr)
-  call DMDestroy(simstate%exlattval,ierr)
+
+  call VecDestroy(simstate%slice,ierr)
+  call VecDestroy(simstate%exslice,ierr)
 
   !! Finalize Parallelization
   call PetscFinalize(ierr)
