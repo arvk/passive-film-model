@@ -29,7 +29,7 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
   external FormFunction_pf, FormJacobian_pf
 
   call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecDuplicate(state,state_unknown,ierr)
+  call DMCreateGlobalVector(simstate%lattval,state_unknown,ierr)
   call VecCopy(state,state_unknown,ierr)
   call VecScale(state_unknown,0.99999d0, ierr)
 
@@ -73,6 +73,7 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
   call MatDestroy(mat_jcb,ierr)
   call VecDestroy(function_value,ierr)
   call VecDestroy(rhs_vec,ierr)
+  call VecDestroy(state_unknown,ierr)
 end subroutine para_pfsolve
 
 
