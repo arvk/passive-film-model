@@ -36,13 +36,11 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
   call KSPGetConvergedReason(ksp_pH,pH_converged_reason,ierr)
 
   if (pH_converged_reason .gt. 0) then
-     call DMGetGlobalVector(simstate%lattval,state,ierr)
      call VecCreate(MPI_COMM_WORLD,solved_pH_vector,ierr)
      call VecSetSizes(solved_pH_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
      call VecSetUp(solved_pH_vector,ierr)
      call VecStrideGather(state_solved,npH,solved_pH_vector,INSERT_VALUES,ierr)
-     call VecStrideScatter(solved_pH_vector,npH,state,INSERT_VALUES,ierr)
-     call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+     call VecStrideScatter(solved_pH_vector,npH,simstate%slice,INSERT_VALUES,ierr)
      call VecDestroy(solved_pH_vector,ierr)
   else
      write(6,*) 'pH field evolution did not converge. Reason: ', pH_converged_reason
@@ -84,10 +82,7 @@ subroutine computeInitialGuess_pH(ksp_pH,b,simstate,ierr)
   Vec state, b
   type(context) simstate
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecDuplicate(state,b,ierr)
-  call VecCopy(state,b,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call VecCopy(simstate%slice,b,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
@@ -128,16 +123,14 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
 
   KSP ksp_pH
   PetscErrorCode ierr
-  Vec state, onlypH, b
+  Vec onlypH, b
   integer :: i,j,k
   type(context) simstate
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
   call VecCreate(MPI_COMM_WORLD,onlypH,ierr)
   call VecSetSizes(onlypH,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(onlypH,ierr)
-  call VecStrideGather(state,npH,onlypH,INSERT_VALUES,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call VecStrideGather(simstate%slice,npH,onlypH,INSERT_VALUES,ierr)
 
   call VecScale(onlypH,(1.0d0/dt),ierr)
   call VecStrideScatter(onlypH,npH,b,INSERT_VALUES,ierr)
@@ -183,11 +176,10 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   real*8 :: add_to_v_ij
   type(context) simstate
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
+
   call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
-  call DMGlobalToLocalBegin(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
-  call DMGlobalToLocalEnd(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
+  call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
 
   call DMDAVecGetArrayF90(simstate%lattval,statelocal,statepointer,ierr)
 
@@ -300,6 +292,8 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   end do
 
   call DMDAVecRestoreArrayF90(simstate%lattval,statelocal,statepointer,ierr)
+
+  call DMRestoreLocalVector(simstate%lattval,statelocal,ierr)
 
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
