@@ -80,8 +80,6 @@ program passive_film_model
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
-  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
-
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   do x = simstate%startx , simstate%startx + simstate%widthx-1
      do y = simstate%starty , simstate%starty + simstate%widthy-1
@@ -100,6 +98,7 @@ program passive_film_model
   end do
   call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
 
   do iter = 1,nomc
 
