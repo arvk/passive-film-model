@@ -343,7 +343,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
 
   delo = 0.0d0
 
-  call DMGetLocalVector(simstate%lattval,state_local,ierr)
+  call DMCreateLocalVector(simstate%lattval,state_local,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
@@ -570,8 +570,6 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
 
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
 
-  call DMRestoreLocalVector(simstate%lattval,state_local,ierr)
-
   call MatAssemblyBegin(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
 
@@ -580,6 +578,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
      call MatAssemblyEnd(pf_jacob,MAT_FINAL_ASSEMBLY,ierr)
   end if
 
+  call VecDestroy(state_local,ierr)
   return
 end subroutine FormJacobian_pf
 

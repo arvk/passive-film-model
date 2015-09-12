@@ -25,11 +25,11 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
   type(context) simstate
   external computeRHS_pH, computeMatrix_pH, computeInitialGuess_pH
 
-  call KSPSetDM(ksp_pH,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_pH,computeRHS_pH,simstate,ierr)
   call KSPSetComputeOperators(ksp_pH,computeMatrix_pH,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_pH,computeInitialGuess_pH,simstate,ierr)
 
+  call KSPSetDM(ksp_pH,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_pH,ierr)
   call KSPSolve(ksp_pH,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_pH,state_solved,ierr)
@@ -177,7 +177,7 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   type(context) simstate
 
 
-  call DMGetLocalVector(simstate%lattval,statelocal,ierr)
+  call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
 
@@ -293,11 +293,10 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
 
   call DMDAVecRestoreArrayF90(simstate%lattval,statelocal,statepointer,ierr)
 
-  call DMRestoreLocalVector(simstate%lattval,statelocal,ierr)
-
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
+  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_pH
 

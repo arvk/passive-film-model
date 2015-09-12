@@ -25,11 +25,11 @@ subroutine para_musolve(iter,ksp_mu,simstate)
   type(context) simstate
   external computeRHS_mu, computeMatrix_mu, computeInitialGuess_mu
 
-  call KSPSetDM(ksp_mu,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_mu,computeRHS_mu,simstate,ierr)
   call KSPSetComputeOperators(ksp_mu,computeMatrix_mu,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_mu,computeInitialGuess_mu,simstate,ierr)
 
+  call KSPSetDM(ksp_mu,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)
@@ -224,7 +224,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   D_inter_pyr = max(D_Fe_pyr,D_S_pyr)
   D_inter_env = D_S_env
 
-  call DMGetLocalVector(simstate%lattval,statelocal,ierr)
+  call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
 
@@ -370,11 +370,10 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 
   call DMDAVecRestoreArrayF90(simstate%lattval,statelocal,statepointer,ierr)
 
-  call DMRestoreLocalVector(simstate%lattval,statelocal,ierr)
-
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
+  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_mu
 

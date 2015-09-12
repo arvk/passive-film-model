@@ -25,11 +25,11 @@ subroutine para_angsolve(iter,ksp_ang,simstate)
   type(context) simstate
   external computeRHS_ang, computeMatrix_ang, computeInitialGuess_ang
 
-  call KSPSetDM(ksp_ang,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_ang,computeRHS_ang,simstate,ierr)
   call KSPSetComputeOperators(ksp_ang,computeMatrix_ang,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_ang,computeInitialGuess_ang,simstate,ierr)
 
+  call KSPSetDM(ksp_ang,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_ang,ierr)
   call KSPSolve(ksp_ang,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_ang,state_solved,ierr)
@@ -186,7 +186,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   real*8, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
   type(context) simstate
 
-  call DMGetLocalVector(simstate%lattval,statelocal,ierr)
+  call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,statelocal,statepointer,ierr)
@@ -291,11 +291,10 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
 
   call DMDAVecRestoreArrayF90(simstate%lattval,statelocal,statepointer,ierr)
 
-  call DMRestoreLocalVector(simstate%lattval,statelocal,ierr)
-
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
+  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_ang
 

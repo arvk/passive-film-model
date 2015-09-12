@@ -199,7 +199,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   w = 0.0d0
   delo = 0.0d0
 
-  call DMGetLocalVector(simstate%lattval,state_local,ierr)
+  call DMCreateLocalVector(simstate%lattval,state_local,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
 
@@ -293,11 +293,10 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,function_value,functionpointer,ierr)
 
-  call DMRestoreLocalVector(simstate%lattval,state_local,ierr)
-
   call VecAssemblyBegin(function_value,ierr)
   call VecAssemblyEnd(function_value,ierr)
 
+  call VecDestroy(state_local,ierr)
   return
 end subroutine FormFunction_pot
 
@@ -360,88 +359,10 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   real*8, parameter :: maxconc = 1E2
   real*8 :: min
 
-
-  call DMGetLocalVector(simstate%lattval,state_local,ierr)
+  call DMCreateLocalVector(simstate%lattval,state_local,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
-
   call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
-
-  do z=simstate%startz,simstate%startz+simstate%widthz-1
-     do y=simstate%starty,simstate%starty+simstate%widthy-1
-        do x=simstate%startx,simstate%startx+simstate%widthx-1
-
-           row(MatStencil_i,1) = x
-           row(MatStencil_j,1) = y
-           row(MatStencil_k,1) = z
-           row(MatStencil_c,1) = npot
-
-           v = 0
-
-           nocols = 0
-           if (z.ne.0) then    ! z-1
-              nocols = nocols + 1
-              col(MatStencil_i,nocols) = x
-              col(MatStencil_j,nocols) = y
-              col(MatStencil_k,nocols) = z-1
-              col(MatStencil_c,nocols) = npot
-           end if
-
-           if (y.ne.0) then    ! z-1
-              nocols = nocols + 1
-              col(MatStencil_i,nocols) = x
-              col(MatStencil_j,nocols) = y-1
-              col(MatStencil_k,nocols) = z
-              col(MatStencil_c,nocols) = npot
-           end if
-
-           if (x.ne.0) then    ! z-1
-              nocols = nocols + 1
-              col(MatStencil_i,nocols) = x-1
-              col(MatStencil_j,nocols) = y
-              col(MatStencil_k,nocols) = z
-              col(MatStencil_c,nocols) = npot
-           end if
-
-           if (x.ne.psx_g-1) then    ! z-1
-              nocols = nocols + 1
-              col(MatStencil_i,nocols) = x+1
-              col(MatStencil_j,nocols) = y
-              col(MatStencil_k,nocols) = z
-              col(MatStencil_c,nocols) = npot
-           end if
-
-           if (y.ne.psy_g-1) then    ! z-1
-              nocols = nocols + 1
-              col(MatStencil_i,nocols) = x
-              col(MatStencil_j,nocols) = y+1
-              col(MatStencil_k,nocols) = z
-              col(MatStencil_c,nocols) = npot
-           end if
-
-           if (z.ne.psz_g-1) then    ! z-1
-              nocols = nocols + 1
-              col(MatStencil_i,nocols) = x
-              col(MatStencil_j,nocols) = y
-              col(MatStencil_k,nocols) = z+1
-              col(MatStencil_c,nocols) = npot
-           end if
-
-           nocols = nocols + 1
-           col(MatStencil_i,nocols) = x
-           col(MatStencil_j,nocols) = y
-           col(MatStencil_k,nocols) = z
-           col(MatStencil_c,nocols) = npot
-
-           call MatSetValuesStencil(pf_precond,1,row,nocols,col,v,INSERT_VALUES,ierr)
-
-        end do
-     end do
-  end do
-
-
-  call MatAssemblyBegin(pf_precond,MAT_FLUSH_ASSEMBLY,ierr)
-  call MatAssemblyEnd(pf_precond,MAT_FLUSH_ASSEMBLY,ierr)
 
 
   do z=simstate%startz,simstate%startz+simstate%widthz-1
@@ -624,7 +545,6 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   end do
 
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
-  call DMRestoreLocalVector(simstate%lattval,state_local,ierr)
 
   call MatAssemblyBegin(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
@@ -634,5 +554,6 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
      call MatAssemblyEnd(pf_jacob,MAT_FINAL_ASSEMBLY,ierr)
   end if
 
+  call VecDestroy(state_local,ierr)
   return
 end subroutine FormJacobian_pot
