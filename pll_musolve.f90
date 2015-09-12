@@ -75,13 +75,10 @@ subroutine computeInitialGuess_mu(ksp_mu,b,simstate,ierr)
 
   KSP ksp_mu
   PetscErrorCode ierr
-  Vec state, b
+  Vec b
   type(context) simstate
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecDuplicate(state,b,ierr)
-  call VecCopy(state,b,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call VecCopy(simstate%slice,b,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
@@ -114,26 +111,15 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
 
   KSP ksp_mu
   PetscErrorCode ierr
-  Vec state, exstate, b, onlymu
+  Vec state, exstate, b
   PetscScalar, pointer :: statepointer(:,:,:,:), exstatepointer(:,:,:,:), bpointer(:,:,:,:)
   type(context) simstate
-  integer :: i, j, k, fesphase
+  integer :: i, j, k, fesphase, field
   real*8 :: Chi, S_source_sink
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call DMGetGlobalVector(simstate%exlattval,exstate,ierr)
-  call VecCreate(MPI_COMM_WORLD,onlymu,ierr)
-  call VecSetSizes(onlymu,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(onlymu,ierr)
-  call VecStrideGather(state,nmus,onlymu,INSERT_VALUES,ierr)
-
-  call VecScale(onlymu,(1.0d0/dt),ierr)
-  call VecStrideScatter(onlymu,nmus,b,INSERT_VALUES,ierr)
-
-  call DMDAVecGetArrayF90(simstate%lattval,state,statepointer,ierr)
-  call DMDAVecGetArrayF90(simstate%exlattval,exstate,exstatepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%exslice,exstatepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,b,bpointer,ierr)
-
 
   if (include_dissolve) then
      sulf_rate(nmet) = sulf_rate_liq(nmet)
@@ -150,6 +136,10 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   do k=simstate%startz,simstate%startz+simstate%widthz-1
      do j=simstate%starty,simstate%starty+simstate%widthy-1
         do i=simstate%startx,simstate%startx+simstate%widthx-1
+
+           do field = 0, (nfields-1)
+              bpointer(field,i,j,k) = 0.0d0
+           end do
 
            bpointer(nmus,i,j,k) = statepointer(nmus,i,j,k) * (1.0d0/dt)
 
@@ -187,16 +177,12 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   end do
 
   call DMDAVecRestoreArrayF90(simstate%lattval,b,bpointer,ierr)
-  call DMDAVecRestoreArrayF90(simstate%exlattval,exstate,exstatepointer,ierr)
-  call DMDAVecRestoreArrayF90(simstate%lattval,state,statepointer,ierr)
-
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-  call DMRestoreGlobalVector(simstate%exlattval,exstate,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%exslice,exstatepointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
 
-  call VecDestroy(onlymu,ierr)
   return
 end subroutine computeRHS_mu
 
@@ -223,7 +209,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 
   KSP ksp_mu
   PetscErrorCode ierr
-  Vec state,statelocal
+  Vec statelocal
   Mat matoper, matprecond
   PetscInt     i,j,k
   PetscScalar  v(7)
@@ -234,19 +220,15 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   real*8 :: add_to_v_ij
   type(context) simstate
 
-
   D_inter_met = D_S_met
   D_inter_mkw = max(D_Fe_mkw,D_S_mkw)
   D_inter_pht = max(D_Fe_pht,D_S_pht)
   D_inter_pyr = max(D_Fe_pyr,D_S_pyr)
   D_inter_env = D_S_env
 
-
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
   call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
-  call DMGlobalToLocalBegin(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
-  call DMGlobalToLocalEnd(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
+  call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
 
   call DMDAVecGetArrayF90(simstate%lattval,statelocal,statepointer,ierr)
 
@@ -389,6 +371,8 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   end do
 
   call DMDAVecRestoreArrayF90(simstate%lattval,statelocal,statepointer,ierr)
+
+  call DMRestoreLocalVector(simstate%lattval,statelocal,ierr)
 
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
