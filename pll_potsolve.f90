@@ -19,54 +19,52 @@ subroutine para_potsolve(iter,snes_pot,simstate)
   PetscErrorCode ierr
   SNES snes_pot
   SNESConvergedReason pot_converged_reason
-  Vec vec_feval, elpot_vector
-  Vec state,state_unknown,rhs_vec
+  Vec vec_feval, elpot_vector, solution_vec,rhs_vec
   Mat mat_jacob
   type(context) simstate
   integer, intent(in) :: iter  ! Iteration count
-  integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
   integer :: fesphase
-  real*8 :: el_charg = 1.60217657E-19*6.022E23
   external FormFunction_pot, FormJacobian_pot
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecDuplicate(state,vec_feval,ierr)
-  call VecDuplicate(state,state_unknown,ierr)
-  call VecDuplicate(state,rhs_vec,ierr)
-  call VecCopy(state,state_unknown,ierr)
 
-  call DMCreateMatrix(simstate%lattval,mat_jacob,ierr)
+  call DMCreateGlobalVector(simstate%lattval,solution_vec,ierr)
+  call VecCopy(simstate%slice,solution_vec,ierr)
 
   call DMCreateGlobalVector(simstate%lattval,vec_feval,ierr)
   call VecSet(vec_feval,0.0d0,ierr)
 
+  call DMCreateGlobalVector(simstate%lattval,rhs_vec,ierr)
+  call FormRHS_pot(rhs_vec,simstate)
+
+  call DMCreateMatrix(simstate%lattval,mat_jacob,ierr)
+  call DMSetMatType(simstate%lattval,MATAIJ,ierr)
+
+
   call SNESSetJacobian(snes_pot,mat_jacob,mat_jacob,FormJacobian_pot,simstate,ierr)
   call SNESSetFunction(snes_pot,vec_feval,FormFunction_pot,simstate,ierr)
-  call FormRHS_pot(simstate,state,rhs_vec)
-
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-
   call SNESSetDM(snes_pot,simstate%lattval,ierr)
   call SNESSetFromOptions(snes_pot,ierr)
-
-  call SNESSolve(snes_pot,rhs_vec,state_unknown,ierr)
+  call SNESSolve(snes_pot,rhs_vec,solution_vec,ierr)
   call SNESGetConvergedReason(snes_pot,pot_converged_reason,ierr)
 
+
   if (pot_converged_reason .ge. 0) then
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
   call VecCreate(MPI_COMM_WORLD,elpot_vector,ierr)
   call VecSetSizes(elpot_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(elpot_vector,ierr)
-  call VecStrideGather(state_unknown,npot,elpot_vector,INSERT_VALUES,ierr)
-  call VecStrideScatter(elpot_vector,npot,state,INSERT_VALUES,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call VecStrideGather(solution_vec,npot,elpot_vector,INSERT_VALUES,ierr)
+  call VecStrideScatter(elpot_vector,npot,simstate%slice,INSERT_VALUES,ierr)
+  call VecDestroy(elpot_vector,ierr)
   else
      write(6,*) 'Potential field did not converge. Reason: ', pot_converged_reason
   end if
 
+
   call MatDestroy(mat_jacob,ierr)
+  call VecDestroy(rhs_vec,ierr)
   call VecDestroy(vec_feval,ierr)
-  call VecDestroy(elpot_vector,ierr)
+  call VecDestroy(solution_vec,ierr)
+
 end subroutine para_potsolve
 
 
@@ -77,7 +75,7 @@ end subroutine para_potsolve
 
 
 
-subroutine FormRHS_pot(simstate,input_state,rhs_vec)
+subroutine FormRHS_pot(rhs_vec,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -95,29 +93,23 @@ subroutine FormRHS_pot(simstate,input_state,rhs_vec)
 
   SNES snes_pot
   PetscErrorCode ierr
-  Vec input_state, rhs_vec, state_local
+  Vec rhs_vec
   Vec single_phase_vector
   PetscScalar, pointer :: statepointer(:,:,:,:), rhspointer(:,:,:,:)
   integer :: startx,starty,startz,widthx,widthy,widthz
-  integer :: fesphase,fesphase2
   integer :: x,y,z
-  real*8 :: myD, sum6myD
-  real*8, parameter :: myM = 1.0d0
-  real*8 :: Mobility
-  real*8 :: w(0:nfields), delo(0:nfields)
   type(context) simstate
-  integer :: myi
-  MatNullSpace nullspace
+  integer :: field
 
-  call DMDAVecGetArrayF90(simstate%lattval,input_state,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,rhs_vec,rhspointer,ierr)
 
   do z=simstate%startz,simstate%startz+simstate%widthz-1
      do y=simstate%starty,simstate%starty+simstate%widthy-1
         do x=simstate%startx,simstate%startx+simstate%widthx-1
 
-           do myi = 0,(nfields-1)
-              rhspointer(myi,x,y,z) = 0.0d0
+           do field = 0,(nfields-1)
+              rhspointer(field,x,y,z) = 0.0d0
            end do
 
            if (statepointer(nenv,x,y,z).gt.0.97) then
@@ -131,7 +123,7 @@ subroutine FormRHS_pot(simstate,input_state,rhs_vec)
   end do
 
   call DMDAVecRestoreArrayF90(simstate%lattval,rhs_vec,rhspointer,ierr)
-  call DMDAVecRestoreArrayF90(simstate%lattval,input_state,statepointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
   call VecAssemblyBegin(rhs_vec,ierr)
   call VecAssemblyEnd(rhs_vec,ierr)
@@ -186,7 +178,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   SNES snes_pot
   PetscErrorCode ierr
   Vec input_state, function_value, state_local, state
-  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
+  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
   integer :: startx,starty,startz,widthx,widthy,widthz
   integer :: fesphase,fesphase2
   integer :: x,y,z
@@ -211,9 +203,6 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-
-  call DMDAVecGetArrayF90(simstate%lattval,state,staticpointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,function_value,functionpointer,ierr)
 
@@ -301,11 +290,8 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
      end do
   end do
 
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,function_value,functionpointer,ierr)
-  call DMDAVecRestoreArrayF90(simstate%lattval,state,staticpointer,ierr)
 
   call DMRestoreLocalVector(simstate%lattval,state_local,ierr)
 
@@ -353,7 +339,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   SNES snes_pot
   PetscErrorCode ierr
   Vec input_state, function_value, state_local, state
-  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
+  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
   integer :: startx,starty,startz,widthx,widthy,widthz
   real*8, allocatable :: D_pot(:,:,:,:,:)
   integer :: fesphase,fesphase2
@@ -373,21 +359,13 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   type(context) simstate
   real*8, parameter :: maxconc = 1E2
   real*8 :: min
-  MatNullSpace nullspace
 
-
-!  call DMCreateMatrix(simstate%lattval,pf_jacob,ierr)
 
   call DMGetLocalVector(simstate%lattval,state_local,ierr)
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-
   call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
 
-  call DMDAVecGetArrayF90(simstate%lattval,state,staticpointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
-
-
 
   do z=simstate%startz,simstate%startz+simstate%widthz-1
      do y=simstate%starty,simstate%starty+simstate%widthy-1
@@ -461,8 +439,9 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
      end do
   end do
 
-  call MatAssemblyBegin(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
-  call MatAssemblyEnd(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
+
+  call MatAssemblyBegin(pf_precond,MAT_FLUSH_ASSEMBLY,ierr)
+  call MatAssemblyEnd(pf_precond,MAT_FLUSH_ASSEMBLY,ierr)
 
 
   do z=simstate%startz,simstate%startz+simstate%widthz-1
@@ -640,18 +619,12 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
 
            end if
 
-
         end do
      end do
   end do
 
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
-  call DMDAVecRestoreArrayF90(simstate%lattval,state,staticpointer,ierr)
-
-
   call DMRestoreLocalVector(simstate%lattval,state_local,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-
 
   call MatAssemblyBegin(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
