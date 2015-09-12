@@ -224,7 +224,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   D_inter_pyr = max(D_Fe_pyr,D_S_pyr)
   D_inter_env = D_S_env
 
-  call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
+  call DMGetLocalVector(simstate%lattval,statelocal,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
 
@@ -375,7 +375,6 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
-  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_mu
 

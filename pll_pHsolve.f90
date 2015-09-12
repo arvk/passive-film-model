@@ -177,7 +177,7 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   type(context) simstate
 
 
-  call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
+  call DMGetLocalVector(simstate%lattval,statelocal,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
 
@@ -298,7 +298,6 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
-  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_pH
 

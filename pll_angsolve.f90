@@ -186,7 +186,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   real*8, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
   type(context) simstate
 
-  call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
+  call DMGetLocalVector(simstate%lattval,statelocal,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,statelocal,statepointer,ierr)
@@ -291,10 +291,11 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
 
   call DMDAVecRestoreArrayF90(simstate%lattval,statelocal,statepointer,ierr)
 
+  call DMRestoreLocalVector(simstate%lattval,statelocal,ierr)
+
   call MatAssemblyBegin(matprecond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(matprecond,MAT_FINAL_ASSEMBLY,ierr)
 
-  call VecDestroy(statelocal,ierr)
   return
 end subroutine ComputeMatrix_ang
 
