@@ -19,37 +19,33 @@ subroutine para_angsolve(iter,ksp_ang,simstate)
   PetscErrorCode ierr
   KSP ksp_ang
   KSPConvergedReason ang_converged_reason
-  Vec solved_ang_vector
-  Vec state,state_solved
+  Vec solved_ang_vector,state,state_solved
   integer, intent(in) :: iter  ! Iteration count
   integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
   type(context) simstate
   external computeRHS_ang, computeMatrix_ang, computeInitialGuess_ang
 
+  call KSPSetDM(ksp_ang,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_ang,computeRHS_ang,simstate,ierr)
   call KSPSetComputeOperators(ksp_ang,computeMatrix_ang,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_ang,computeInitialGuess_ang,simstate,ierr)
 
-  call KSPSetDM(ksp_ang,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_ang,ierr)
   call KSPSolve(ksp_ang,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_ang,state_solved,ierr)
-
   call KSPGetConvergedReason(ksp_ang,ang_converged_reason,ierr)
 
   if (ang_converged_reason .gt. 0) then
-     call DMGetGlobalVector(simstate%lattval,state,ierr)
      call VecCreate(MPI_COMM_WORLD,solved_ang_vector,ierr)
      call VecSetSizes(solved_ang_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
      call VecSetUp(solved_ang_vector,ierr)
      call VecStrideGather(state_solved,nang,solved_ang_vector,INSERT_VALUES,ierr)
-     call VecStrideScatter(solved_ang_vector,nang,state,INSERT_VALUES,ierr)
-     call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+     call VecStrideScatter(solved_ang_vector,nang,simstate%slice,INSERT_VALUES,ierr)
+     call VecDestroy(solved_ang_vector,ierr)
   else
      write(6,*) 'Orientation field evolution did not converge. Reason: ', ang_converged_reason
   end if
 
-  call VecDestroy(solved_ang_vector,ierr)
 end subroutine para_angsolve
 
 
@@ -78,13 +74,10 @@ subroutine computeInitialGuess_ang(ksp_ang,b,simstate,ierr)
 
   KSP ksp_ang
   PetscErrorCode ierr
-  Vec state, b, onlyang
+  Vec b
   type(context) simstate
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call VecDuplicate(state,b,ierr)
-  call VecCopy(state,b,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call VecCopy(simstate%slice,b,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
@@ -121,13 +114,10 @@ subroutine computeRHS_ang(ksp_ang,b,simstate,ierr)
   Vec state, b, onlyang
   type(context) simstate
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
   call VecCreate(MPI_COMM_WORLD,onlyang,ierr)
   call VecSetSizes(onlyang,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(onlyang,ierr)
-  call VecStrideGather(state,nang,onlyang,INSERT_VALUES,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-
+  call VecStrideGather(simstate%slice,nang,onlyang,INSERT_VALUES,ierr)
   call VecScale(onlyang,(1.0d0/dt),ierr)
   call VecStrideScatter(onlyang,nang,b,INSERT_VALUES,ierr)
 
@@ -196,11 +186,9 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   real*8, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
   type(context) simstate
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
   call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
-  call DMGlobalToLocalBegin(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
-  call DMGlobalToLocalEnd(simstate%lattval,state,INSERT_VALUES,statelocal,ierr)
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
+  call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
+  call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,statelocal,statepointer,ierr)
 
   do k=simstate%startz,simstate%startz+simstate%widthz-1
