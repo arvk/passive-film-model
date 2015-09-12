@@ -19,51 +19,43 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
   PetscErrorCode ierr
   SNES snes_pf
   SNESConvergedReason pf_converged_reason
-  Vec function_value, single_phase_vector
-  Vec state,state_unknown,rhs_vec
+  Vec function_vec, solution_vec, rhs_vec, single_phase_vector
   Mat mat_jcb
   integer, intent(in) :: iter  ! Iteration count
-  integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
   integer :: fesphase
   type(context) simstate
   external FormFunction_pf, FormJacobian_pf
 
-  call DMGetGlobalVector(simstate%lattval,state,ierr)
-  call DMCreateGlobalVector(simstate%lattval,state_unknown,ierr)
-  call VecCopy(state,state_unknown,ierr)
-  call VecScale(state_unknown,0.99999d0, ierr)
 
+  call DMCreateGlobalVector(simstate%lattval,solution_vec,ierr)
+  call VecCopy(simstate%slice,solution_vec,ierr)
+
+  call DMCreateGlobalVector(simstate%lattval,function_vec,ierr)
+  call VecSet(function_vec,0.0d0,ierr)
+
+  call DMCreateGlobalVector(simstate%lattval,rhs_vec,ierr)
+  call FormRHS_pf(rhs_vec,simstate)
 
   call DMCreateMatrix(simstate%lattval,mat_jcb,ierr)
   call DMSetMatType(simstate%lattval,MATAIJ,ierr)
 
-  call DMCreateGlobalVector(simstate%lattval,function_value,ierr)
-  call VecSet(function_value,0.0d0,ierr)
 
   call SNESSetJacobian(snes_pf,mat_jcb,mat_jcb,FormJacobian_pf,simstate,ierr)
-  call SNESSetFunction(snes_pf,function_value,FormFunction_pf,simstate,ierr)
-  call DMCreateGlobalVector(simstate%lattval,rhs_vec,ierr)
-  call FormRHS_pf(state,rhs_vec)
-
-  call DMRestoreGlobalVector(simstate%lattval,state,ierr)
-
+  call SNESSetFunction(snes_pf,function_vec,FormFunction_pf,simstate,ierr)
   call SNESSetDM(snes_pf,simstate%lattval,ierr)
   call SNESSetFromOptions(snes_pf,ierr)
-
-  call SNESSolve(snes_pf,rhs_vec,state_unknown,ierr)
+  call SNESSolve(snes_pf,rhs_vec,solution_vec,ierr)
   call SNESGetConvergedReason(snes_pf,pf_converged_reason,ierr)
 
 
   if (pf_converged_reason .ge. 0) then
-     call DMGetGlobalVector(simstate%lattval,state,ierr)
      call VecCreate(MPI_COMM_WORLD,single_phase_vector,ierr)
      call VecSetSizes(single_phase_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
      call VecSetUp(single_phase_vector,ierr)
      do fesphase = 0,(nphases-1)
-        call VecStrideGather(state_unknown,fesphase,single_phase_vector,INSERT_VALUES,ierr)
-        call VecStrideScatter(single_phase_vector,fesphase,state,INSERT_VALUES,ierr)
+        call VecStrideGather(solution_vec,fesphase,single_phase_vector,INSERT_VALUES,ierr)
+        call VecStrideScatter(single_phase_vector,fesphase,simstate%slice,INSERT_VALUES,ierr)
      end do
-     call DMRestoreGlobalVector(simstate%lattval,state,ierr)
      call VecDestroy(single_phase_vector,ierr)
   else
      write(6,*) 'Phase field evolution did not converge. Reason: ', pf_converged_reason
@@ -71,9 +63,10 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
 
 
   call MatDestroy(mat_jcb,ierr)
-  call VecDestroy(function_value,ierr)
   call VecDestroy(rhs_vec,ierr)
-  call VecDestroy(state_unknown,ierr)
+  call VecDestroy(function_vec,ierr)
+  call VecDestroy(solution_vec,ierr)
+
 end subroutine para_pfsolve
 
 
@@ -84,7 +77,7 @@ end subroutine para_pfsolve
 
 
 
-subroutine FormRHS_pf(input_state,rhs_vec)
+subroutine FormRHS_pf(rhs_vec,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -100,26 +93,17 @@ subroutine FormRHS_pf(input_state,rhs_vec)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  SNES snes_pf
-  PetscInt ctx
   PetscErrorCode ierr
-  DM da
-  Vec input_state, rhs_vec
-  Vec single_phase_vector
-  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  integer :: fesphase,fesphase2
-  integer :: x,y,z
-  real*8 :: myD, sum6myD
-  real*8, parameter :: myM = 1.0d0
-  real*8 :: Mobility
-  real*8 :: w(0:nfields), delo(0:nfields)
+  Vec rhs_vec, single_phase_vector
+  integer :: fesphase
+  type(context) simstate
 
   call VecCreate(MPI_COMM_WORLD,single_phase_vector,ierr)
   call VecSetSizes(single_phase_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
   call VecSetUp(single_phase_vector,ierr)
 
   do fesphase = 0,(nphases-1)
-     call VecStrideGather(input_state,fesphase,single_phase_vector,INSERT_VALUES,ierr)
+     call VecStrideGather(simstate%slice,fesphase,single_phase_vector,INSERT_VALUES,ierr)
      call VecScale(single_phase_vector,(1.0d0/dt),ierr)
      call VecStrideScatter(single_phase_vector,fesphase,rhs_vec,INSERT_VALUES,ierr)
   end do
@@ -176,21 +160,16 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
 #include <finclude/petscdmda.h90>
 
   SNES snes_pf
-  PetscInt ctx
   PetscErrorCode ierr
-  DM da
   Vec input_state, function_value, state_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
   integer :: fesphase,fesphase2
   integer :: x,y,z
   real*8 :: myD, sum6myD
-  real*8, parameter :: myM = 1.0d0
-  real*8 :: Mobility
-  real*8 :: w(0:nfields), delo(0:nfields)
+  real*8 :: delo(0:nfields)
   real*8 :: grady, gradz
   type(context) simstate
 
-  w = 0.0d0
   delo = 0.0d0
 
   call DMGetLocalVector(simstate%lattval,state_local,ierr)
@@ -348,16 +327,13 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
 #include <finclude/petscdmda.h90>
 
   SNES snes_pf
-  PetscInt ctx
   PetscErrorCode ierr
-  DM da
   Vec input_state, state_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  real*8, allocatable :: D_pf(:,:,:,:,:)
   integer :: fesphase,fesphase2
   integer :: x,y,z
-  real*8 :: myD, sum6myD
-  real*8 :: w(0:nfields), delo(0:nfields)
+  real*8 :: sum6myD
+  real*8 :: delo(0:nfields)
   PetscScalar  v((9*2*(nfields-1))+1)
   MatStencil   row(4,1),col(4,(9*2*(nfields-1))+1)
   integer :: nocols
@@ -365,7 +341,6 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   real*8 :: grady, gradz
   type(context) simstate
 
-  w = 0.0d0
   delo = 0.0d0
 
   call DMGetLocalVector(simstate%lattval,state_local,ierr)
@@ -594,6 +569,8 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   end do
 
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
+
+  call DMRestoreLocalVector(simstate%lattval,state_local,ierr)
 
   call MatAssemblyBegin(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
