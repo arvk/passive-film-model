@@ -105,12 +105,12 @@ program passive_film_model
 
      call VecCopy(simstate%slice,simstate%exslice,ierr)
 
-!     write(6,*) 'In iteration',iter
-     ! call para_pfsolve(iter,snes_pf,simstate)
-     ! call para_musolve(iter,ksp_mu,simstate)
-     ! call para_pHsolve(iter,ksp_pH,simstate)
-     ! call para_angsolve(iter,ksp_ang,simstate)
-     ! call para_potsolve(iter,snes_pot,simstate)
+     write(6,*) 'In iteration',iter
+     call para_pfsolve(iter,snes_pf,simstate)
+     call para_musolve(iter,ksp_mu,simstate)
+     call para_pHsolve(iter,ksp_pH,simstate)
+     call para_angsolve(iter,ksp_ang,simstate)
+     call para_potsolve(iter,snes_pot,simstate)
   end do
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
@@ -122,10 +122,10 @@ program passive_film_model
   call SNESDestroy(snes_pf,ierr)
   call SNESDestroy(snes_pot,ierr)
 
-  call DMDestroy(simstate%lattval,ierr)
-
   call VecDestroy(simstate%slice,ierr)
   call VecDestroy(simstate%exslice,ierr)
+
+  call DMDestroy(simstate%lattval,ierr)
 
   !! Finalize Parallelization
   call PetscFinalize(ierr)
