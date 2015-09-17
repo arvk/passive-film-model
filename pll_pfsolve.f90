@@ -249,8 +249,8 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
 
                      !! LINEAR
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z)*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (6.0d0*Mob_pf(fesphase,fesphase2)*hill*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (gb_S*Mob_pf(fesphase,fesphase2)*hill*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (6.0d0*Mob_pf(fesphase,fesphase2)*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (gb_S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
 
                      !! QUADRATIC
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)*statepointer(fesphase,x,y,z)
