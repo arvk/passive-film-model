@@ -63,7 +63,6 @@ program passive_film_model
 
 
   call allocate_matrices() ! Allocate all field matrices
-  call thermo()            ! Calculate phase stabilities
   call diffusivities()     ! Calculate phase diffusivities
   call estimate_timestep() ! Estimate timestep for all field evolution equations
   call seed_prng()         ! Seed the Pseudo-random-number-generator
@@ -75,6 +74,8 @@ program passive_film_model
         call initialize_geometry()
      end if
   end if
+
+  call thermo()            ! Calculate phase stabilities
 
   call distrib_pf()    ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
 
