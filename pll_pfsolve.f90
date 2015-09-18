@@ -162,7 +162,7 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
   SNES snes_pf
   PetscErrorCode ierr
   Vec input_state, function_value, state_local
-  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
+  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
   integer :: fesphase,fesphase2
   integer :: x,y,z
   real*8 :: myD, sum6myD
@@ -178,7 +178,7 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
 
   call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,function_value,functionpointer,ierr)
-
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,staticpointer,ierr)
 
   do z=simstate%startz,simstate%startz+simstate%widthz-1
      do y=simstate%starty,simstate%starty+simstate%widthy-1
@@ -186,10 +186,10 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
 
 
            !! Calculate phase stabilities
-           w_pf(nmet) =  0.0d0 - (statepointer(nmus,x,y,z)*0.0015d0)
-           w_pf(nmkw) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 65060) - (statepointer(nmus,x,y,z)*0.80d0)
-           w_pf(npht) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 72050) - (statepointer(nmus,x,y,z))
-           w_pf(npyr) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-9)) + 50.355*T - 98710) - (statepointer(nmus,x,y,z)*2)
+           w_pf(nmet) =  0.0d0 - (staticpointer(nmus,x,y,z)*0.0015d0)
+           w_pf(nmkw) = ((staticpointer(nmus,x,y,z)*staticpointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 65060) - (staticpointer(nmus,x,y,z)*0.80d0)
+           w_pf(npht) = ((staticpointer(nmus,x,y,z)*staticpointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 72050) - (staticpointer(nmus,x,y,z))
+           w_pf(npyr) = ((staticpointer(nmus,x,y,z)*staticpointer(nmus,x,y,z)*(1E-9)) + 50.355*T - 98710) - (staticpointer(nmus,x,y,z)*2)
            w_pf(nenv) = 0.0d0
 
 
@@ -204,6 +204,8 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
 
 
            do fesphase = nmet,nenv   ! Row
+
+              functionpointer(fesphase,x,y,z) = 0.0d0
 
               do fesphase2 = nmet,nenv  ! Column
                if (fesphase .ne. fesphase2) then
@@ -248,12 +250,16 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + sum6myD*(statepointer(fesphase2,x,y,z)-statepointer(fesphase,x,y,z))
 
                      !! LINEAR
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z)*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (6.0d0*Mob_pf(fesphase,fesphase2)*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (gb_S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + &
+                          & (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z)*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + &
+                          & (6.0d0*Mob_pf(fesphase,fesphase2)*(w_pf(fesphase)-w_pf(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + &
+                          & (gb_S*Mob_pf(fesphase,fesphase2)*(delo(fesphase)-delo(fesphase2))*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)
 
                      !! QUADRATIC
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)*statepointer(fesphase,x,y,z)
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - &
+                          & (2.0d0*Mob_pf(fesphase,fesphase2)*hill*statepointer(fesphase2,x,y,z))*statepointer(fesphase,x,y,z)*statepointer(fesphase,x,y,z)
 
 
               end if
@@ -268,6 +274,7 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
      end do
   end do
 
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,staticpointer,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,function_value,functionpointer,ierr)
 
@@ -329,7 +336,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   SNES snes_pf
   PetscErrorCode ierr
   Vec input_state, state_local
-  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
+  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
   integer :: fesphase,fesphase2
   integer :: x,y,z
   real*8 :: sum6myD
@@ -347,6 +354,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,staticpointer,ierr)
 
 
   do z=simstate%startz,simstate%startz+simstate%widthz-1
@@ -355,10 +363,10 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
 
 
           !! Calculate phase stabilities
-           w_pf(nmet) =  0.0d0 - (statepointer(nmus,x,y,z)*0.0015d0)
-           w_pf(nmkw) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 65060) - (statepointer(nmus,x,y,z)*0.80d0)
-           w_pf(npht) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 72050) - (statepointer(nmus,x,y,z))
-           w_pf(npyr) = ((statepointer(nmus,x,y,z)*statepointer(nmus,x,y,z)*(1E-9)) + 50.355*T - 98710) - (statepointer(nmus,x,y,z)*2)
+           w_pf(nmet) =  0.0d0 - (staticpointer(nmus,x,y,z)*0.0015d0)
+           w_pf(nmkw) = ((staticpointer(nmus,x,y,z)*staticpointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 65060) - (staticpointer(nmus,x,y,z)*0.80d0)
+           w_pf(npht) = ((staticpointer(nmus,x,y,z)*staticpointer(nmus,x,y,z)*(1E-6)) + 20.53*T - 72050) - (staticpointer(nmus,x,y,z))
+           w_pf(npyr) = ((staticpointer(nmus,x,y,z)*staticpointer(nmus,x,y,z)*(1E-9)) + 50.355*T - 98710) - (staticpointer(nmus,x,y,z)*2)
            w_pf(nenv) = 0.0d0
 
 
@@ -568,6 +576,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
      end do
   end do
 
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,staticpointer,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
 
   call MatAssemblyBegin(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
