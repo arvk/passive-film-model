@@ -147,14 +147,10 @@ subroutine spparks_filmenv(iter,simstate)
 
 
   if(isroot)then
-
      call system('rm -f input.filmenv log.spparks')
-
      write(kmc_numel_string,'(I24)') psx*psy*kg_scale*kg_scale
-
      call system('tail -n '//trim(kmc_numel_string)//' couplingfe | awk ''{printf " %5.5i %5.5i %5.5i \n", $1,$2,$3}'' > tocouple')
      call system('rm -f couplingfe')
-
   end if
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Wait for RANK 0 to write the 'toucouple' file before reading it
@@ -197,8 +193,9 @@ subroutine spparks_filmenv(iter,simstate)
 
      call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
-     call system('rm -f tocouple')
 
-  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning coupling kMC results to PF
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Wait for ALL RANKS to complete coupling the kMC to PF before erasing the 'toucouple' file
+  if(isroot) call system('rm -f tocouple')
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before going back to the PF routines
 
 end subroutine spparks_filmenv
