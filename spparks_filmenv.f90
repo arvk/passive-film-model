@@ -30,6 +30,8 @@ subroutine spparks_filmenv(iter,simstate)
   integer, intent(in) :: iter  ! Iteration count
   DM latticemu
   Vec onlymus_petscorder, onlymus_naturalorder, onlymus_maxstride, onlymus_alongz
+  PetscScalar, pointer :: statepointer(:,:,:,:)
+
 
   interface
 
@@ -138,60 +140,65 @@ subroutine spparks_filmenv(iter,simstate)
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
-!  call spparks_open(myargc,C_LOC(myargv),C_LOC(MPI_COMM_WORLD),C_LOC(myspparks))
-!  call spparks_file(myspparks,'filmenv.spparksscript'//C_NULL_CHAR)
-!  call spparks_close(myspparks)
+  call spparks_open(myargc,C_LOC(myargv),C_LOC(MPI_COMM_WORLD),C_LOC(myspparks))
+  call spparks_file(myspparks,'filmenv.spparksscript'//C_NULL_CHAR)
+  call spparks_close(myspparks)
 
 
 
-  ! if(isroot)then
+  if(isroot)then
 
-  !    call system('rm -f input.filmenv log.spparks')
+     call system('rm -f input.filmenv log.spparks')
 
-  !    write(kmc_numel_string,'(I24)') psx*psy*kg_scale*kg_scale
+     write(kmc_numel_string,'(I24)') psx*psy*kg_scale*kg_scale
 
-  !    call system('tail -n '//trim(kmc_numel_string)//' couplingfe | awk ''{printf " %5.5i %5.5i %5.5i \n", $1,$2,$3}'' > tocouple')
-  !    call system('rm -f couplingfe')
+     call system('tail -n '//trim(kmc_numel_string)//' couplingfe | awk ''{printf " %5.5i %5.5i %5.5i \n", $1,$2,$3}'' > tocouple')
+     call system('rm -f couplingfe')
 
-  !    open (unit = 667, file = 'tocouple', status = 'old')
-  !    do x = 1,psx*psy*kg_scale*kg_scale
-  !       read(667,'(I6, I6, I6)') xfine, yfine, fine_kmc_array(xfine+1,yfine+1)
-  !    end do
-  !    close(667)
+  end if
 
-  !    do x = 0,psx-1
-  !       do y = 0,psy-1
-  !          average_from_fine = 0.0d0
-  !          do xfine = 0,kg_scale-1
-  !             do yfine = 0,kg_scale-1
-  !                average_from_fine = average_from_fine + fine_kmc_array((x*kg_scale)+xfine+1,(y*kg_scale)+yfine+1)
-  !             end do
-  !          end do
-  !          average_from_fine = average_from_fine/(kg_scale*kg_scale)
-  !          distance_interface_moved(x+1,y+1) = interface_loc(x+1,y+1) - (average_from_fine/kg_scale)
-  !          interface_loc(x+1,y+1) = floor(average_from_fine/kg_scale)
-  !       end do
-  !    end do
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Wait for RANK 0 to write the 'toucouple' file before reading it
 
-  !    do x = 1,psx_g
-  !       do y = 1,psy_g
-  !          do z = interface_loc(x,y)+1,psz_g
-  !                met_g(x,y,z) = 0.0d0
-  !                mkw_g(x,y,z) = 0.0d0
-  !                pht_g(x,y,z) = 0.0d0
-  !                pyr_g(x,y,z) = 0.0d0
-  !                env_g(x,y,z) = 1.0d0
-  !                mu_g(x,y,z) = avg_mu_env
-  !          end do
-  !          met_g(x,y,interface_loc(x,y)) = met_g(x,y,interface_loc(x,y))*(1.0d0-mod(distance_interface_moved(x,y),kg_scale*1.0d0)/kg_scale)
-  !       end do
-  !    end do
+     open (unit = 667, file = 'tocouple', status = 'old')
+     do x = 1,psx*psy*kg_scale*kg_scale
+        read(667,'(I6, I6, I6)') xfine, yfine, fine_kmc_array(xfine+1,yfine+1)
+     end do
+     close(667)
 
-  !    call system('rm -f tocouple')
+     do x = 0,psx-1
+        do y = 0,psy-1
+           average_from_fine = 0.0d0
+           do xfine = 0,kg_scale-1
+              do yfine = 0,kg_scale-1
+                 average_from_fine = average_from_fine + fine_kmc_array((x*kg_scale)+xfine+1,(y*kg_scale)+yfine+1)
+              end do
+           end do
+           average_from_fine = average_from_fine/(kg_scale*kg_scale)
+           distance_interface_moved(x+1,y+1) = interface_loc(x+1,y+1) - (average_from_fine/kg_scale)
+           interface_loc(x+1,y+1) = floor(average_from_fine/kg_scale)
+        end do
+     end do
 
-  ! end if
+
+     call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+
+     do x = simstate%startx , simstate%startx + simstate%widthx-1
+        do y = simstate%starty , simstate%starty + simstate%widthy-1
+           do z = max(simstate%startz,interface_loc(x+1,y+1)) , simstate%startz + simstate%widthz-1
+              statepointer(nmet,x,y,z) = 0.0d0
+              statepointer(nmkw,x,y,z) = 0.0d0
+              statepointer(npht,x,y,z) = 0.0d0
+              statepointer(npyr,x,y,z) = 0.0d0
+              statepointer(nenv,x,y,z) = 1.0d0
+              statepointer(nmus,x,y,z) = avg_mu_env
+           end do
+        end do
+     end do
+
+     call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+
+     call system('rm -f tocouple')
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning coupling kMC results to PF
-!  call distrib_pf()                     ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
 
 end subroutine spparks_filmenv
