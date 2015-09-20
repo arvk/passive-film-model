@@ -145,9 +145,9 @@ subroutine spparks_metfilm(iter,simstate)
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   do x = simstate%startx , simstate%startx + simstate%widthx-1
      do y = simstate%starty , simstate%starty + simstate%widthy-1
-        do z = simstate%startz , simstate%startz + simstate%widthz
+        do z = simstate%startz , simstate%startz + simstate%widthz-2
            if (((statepointer(nmet,x,y,z).gt.0.5d0).and.(statepointer(nmkw,x,y,z).lt.0.5d0)) .and. ((statepointer(nmet,x,y,z+1).lt.0.5d0).and.(statepointer(nmkw,x,y,z+1).gt.0.5d0))) then
-              statepointer(nvoi,x,y,z) = statepointer(nvoi,x,y,z) - (coarse_h2_evolved(x+1,y+1)/30.0d0)
+              statepointer(nvoi,x,y,z) = statepointer(nvoi,x,y,z) - (coarse_h2_evolved(x+1,y+1)/300.0d0)
               statepointer(nvoi,x,y,z) = min(max(statepointer(nvoi,x,y,z),0.0d0),1.0d0)
            end if
         end do
