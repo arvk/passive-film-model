@@ -1,0 +1,31 @@
+## TEST SCRIPT
+
+seed 1273
+
+app_style diffusion nonlinear hop
+
+dimension 2
+boundary p p p
+lattice sq/4n 1.0
+
+temperature 0.04723590744
+
+region cell block 0 320 0 320 -0.5 0.5
+create_box cell
+create_sites box
+
+set i1 value 2 region cell
+
+ecoord 0  0.2
+ecoord 1  0.1
+ecoord 2 -0.0
+ecoord 3 -0.1
+ecoord 4 -0.2
+barrier hop 0.2
+
+solve_style tree
+sector yes
+
+dump mydump text 1000 raw_vacmet_output x y i1
+set i1 value 1 fraction 0.01
+
