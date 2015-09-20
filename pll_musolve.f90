@@ -355,7 +355,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k-1
               col(MatStencil_c,nocols) = nmus
-              v(nocols) = v(nocols)/(dpf*dpf)
+              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
 
@@ -372,7 +372,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
               col(MatStencil_j,nocols) = j-1
               col(MatStencil_k,nocols) = k
               col(MatStencil_c,nocols) = nmus
-              v(nocols) = v(nocols)/(dpf*dpf)
+              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
 
@@ -389,7 +389,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k
               col(MatStencil_c,nocols) = nmus
-              v(nocols) = v(nocols)/(dpf*dpf)
+              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
 
@@ -407,7 +407,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k
               col(MatStencil_c,nocols) = nmus
-              v(nocols) = v(nocols)/(dpf*dpf)
+              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
 
@@ -425,7 +425,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
               col(MatStencil_j,nocols) = j+1
               col(MatStencil_k,nocols) = k
               col(MatStencil_c,nocols) = nmus
-              v(nocols) = v(nocols)/(dpf*dpf)
+              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
 
@@ -442,7 +442,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k+1
               col(MatStencil_c,nocols) = nmus
-              v(nocols) = v(nocols)/(dpf*dpf)
+              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
 

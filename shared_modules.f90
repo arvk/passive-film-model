@@ -68,7 +68,7 @@ module commondata
 
   integer, dimension(:), allocatable :: seed  ! Seed for PRNG
 
-  integer, parameter :: nfields = 9
+  integer, parameter :: nfields = 10
   integer, parameter :: nphases = 5
   integer, parameter :: nmet = 0
   integer, parameter :: nmkw = 1
@@ -79,6 +79,7 @@ module commondata
   integer, parameter :: npH = 6
   integer, parameter :: nang = 7
   integer, parameter :: npot = 8
+  integer, parameter :: nvoi = 9
 
 end module commondata
 

@@ -187,6 +187,7 @@ subroutine spparks_filmenv(iter,simstate)
               statepointer(npyr,x,y,z) = 0.0d0
               statepointer(nenv,x,y,z) = 1.0d0
               statepointer(nmus,x,y,z) = avg_mu_env
+              statepointer(nvoi,x,y,z) = 1.0d0
            end do
         end do
      end do
