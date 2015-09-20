@@ -112,7 +112,14 @@ program passive_film_model
      call para_pHsolve(iter,ksp_pH,simstate)
      call para_angsolve(iter,ksp_ang,simstate)
      call para_potsolve(iter,snes_pot,simstate)
+
+     call spparks_filmenv(iter,simstate)
+     call spparks_metfilm(iter,simstate)
+     call spparks_vacmet(iter,simstate)
+
   end do
+
+  call VecView(simstate%slice,PETSC_NULL_OBJECT,ierr)
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
 
