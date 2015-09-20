@@ -94,6 +94,7 @@ program passive_film_model
            statepointer(npH,x,y,z) = 10**(0.0d0-pH_in)
            statepointer(nang,x,y,z) = opyr_g(x+1,y+1,z+1)
            statepointer(npot,x,y,z) = elpot_g(x+1,y+1,z+1)
+           statepointer(nvoi,x,y,z) = 1.0d0
         end do
      end do
   end do
