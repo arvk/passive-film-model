@@ -92,8 +92,6 @@ subroutine spparks_filmenv(iter,simstate)
   call VecSetUp(onlymus_maxstride,ierr)
   call VecCopy(onlymus_naturalorder,onlymus_maxstride,ierr)
 
-  write(6,*) 'Yo'
-
 
   call VecCreate(MPI_COMM_WORLD,onlymus_alongz,ierr)
   call VecSetSizes(onlymus_alongz,PETSC_DECIDE,psz_g,ierr)
