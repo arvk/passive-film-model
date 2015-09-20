@@ -173,7 +173,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   PetscErrorCode ierr
   Vec state,statelocal
   Mat matoper, matprecond
-  PetscInt     i,j,k
+  PetscInt     i,j,k,x,y,z
   PetscScalar  v(7)
   MatStencil   row(4,1),col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
@@ -185,11 +185,95 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   real*8 :: add_to_v_ij
   real*8, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
   type(context) simstate
+  PetscScalar zeromatentry(7)
+  integer :: matfield
+
 
   call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,statelocal,statepointer,ierr)
+
+
+  zeromatentry(1) = 0.0d0
+  zeromatentry(2) = 0.0d0
+  zeromatentry(3) = 0.0d0
+  zeromatentry(4) = 0.0d0
+  zeromatentry(5) = 0.0d0
+  zeromatentry(6) = 0.0d0
+  zeromatentry(7) = 0.0d0
+
+  do z=simstate%startz,simstate%startz+simstate%widthz-1
+     do y=simstate%starty,simstate%starty+simstate%widthy-1
+        do x=simstate%startx,simstate%startx+simstate%widthx-1
+           do matfield = 0,nfields-1   ! Row
+
+              row(MatStencil_i,1) = x
+              row(MatStencil_j,1) = y
+              row(MatStencil_k,1) = z
+              row(MatStencil_c,1) = matfield
+
+              nocols = 0
+
+              if (z.ne.0) then    ! z-1
+                 nocols = nocols + 1
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z-1
+                 col(MatStencil_c,nocols) = matfield
+              end if
+
+              if (y.ne.0) then    ! z-1
+                 nocols = nocols + 1
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y-1
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = matfield
+              end if
+
+              if (x.ne.0) then    ! z-1
+                 nocols = nocols + 1
+                 col(MatStencil_i,nocols) = x-1
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = matfield
+              end if
+
+              if (x.ne.psx_g-1) then    ! z-1
+                 nocols = nocols + 1
+                 col(MatStencil_i,nocols) = x+1
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = matfield
+              end if
+
+              if (y.ne.psy_g-1) then    ! z-1
+                 nocols = nocols + 1
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y+1
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = matfield
+              end if
+
+              if (z.ne.psz_g-1) then    ! z-1
+                 nocols = nocols + 1
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z+1
+                 col(MatStencil_c,nocols) = matfield
+              end if
+
+              call MatSetValuesStencil(matprecond,1,row,nocols,col,zeromatentry,INSERT_VALUES,ierr)
+
+           end do
+        end do
+     end do
+  end do
+
+  call MatAssemblyBegin(matprecond,MAT_FLUSH_ASSEMBLY,ierr)
+  call MatAssemblyEnd(matprecond,MAT_FLUSH_ASSEMBLY,ierr)
+
+
 
   do k=simstate%startz,simstate%startz+simstate%widthz-1
      do j=simstate%starty,simstate%starty+simstate%widthy-1
