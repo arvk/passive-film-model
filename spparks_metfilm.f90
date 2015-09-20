@@ -29,6 +29,11 @@ subroutine spparks_metfilm(iter,simstate)
   logical :: already_run_once
   type(context) simstate
   integer, intent(in) :: iter  ! Iteration count
+  integer, dimension(psx_g,psy_g) :: coarse_h2_evolved
+  integer :: coarsex,coarsey
+  PetscScalar, pointer :: statepointer(:,:,:,:)
+  integer :: floor
+  real*8 :: max, min
 
   interface
 
@@ -122,10 +127,34 @@ subroutine spparks_metfilm(iter,simstate)
 
      close(667)
      close(666)
-     call system('rm -f metfilm_spparks_output.template')
+!     call system('rm -f metfilm_spparks_output.template')
 
   end if
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
+
+  coarse_h2_evolved = 0
+  open (unit = 667, file = 'metfilm_spparks_output.template', status = 'old')
+  do x = 1,psx_g*psy_g*kg_scale*kg_scale*4
+     read(667,'(I8, I5, I5, I4, I4, I6)') site_id, partial_x, partial_y, i1, i2, no_h2_already_evolved
+     coarsex = floor(1.0d0*partial_x/kg_scale)
+     coarsey = floor(1.0d0*partial_y/kg_scale)
+     coarse_h2_evolved(coarsex+1,coarsey+1) = coarse_h2_evolved(coarsex+1,coarsey+1) + no_h2_already_evolved
+  end do
+  close(667)
+
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+  do x = simstate%startx , simstate%startx + simstate%widthx-1
+     do y = simstate%starty , simstate%starty + simstate%widthy-1
+        do z = simstate%startz , simstate%startz + simstate%widthz
+           if (((statepointer(nmet,x,y,z).gt.0.5d0).and.(statepointer(nmkw,x,y,z).lt.0.5d0)) .and. ((statepointer(nmet,x,y,z+1).lt.0.5d0).and.(statepointer(nmkw,x,y,z+1).gt.0.5d0))) then
+              statepointer(nvoi,x,y,z) = statepointer(nvoi,x,y,z) - (coarse_h2_evolved(x+1,y+1)/30.0d0)
+              statepointer(nvoi,x,y,z) = min(max(statepointer(nvoi,x,y,z),0.0d0),1.0d0)
+           end if
+        end do
+     end do
+  end do
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+
 
 end subroutine spparks_metfilm
