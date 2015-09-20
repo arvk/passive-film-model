@@ -25,5 +25,5 @@ spparks_metfilm.o: spparks_metfilm.f90
 	$(FC) $(CFLAG) -c $(OFLAG) $(INC) shared_modules.f90 spparks_metfilm.f90
 
 clean:
-	rm -f *.exe *.out *.mod *.o kgrid pgrid
+	rm -f *.exe *.out *.mod *.o *__genmod.f90
 
