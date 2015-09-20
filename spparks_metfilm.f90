@@ -127,7 +127,6 @@ subroutine spparks_metfilm(iter,simstate)
 
      close(667)
      close(666)
-!     call system('rm -f metfilm_spparks_output.template')
 
   end if
 
@@ -156,5 +155,11 @@ subroutine spparks_metfilm(iter,simstate)
   end do
   call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
+
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before file IO
+  if(isroot)then
+     call system('rm -f metfilm_spparks_output.template')
+  end if
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before returning to PF routines
 
 end subroutine spparks_metfilm
