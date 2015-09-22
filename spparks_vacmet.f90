@@ -26,7 +26,6 @@ subroutine spparks_vacmet(iter,simstate)
   character*24 :: kmc_numel_string
   integer, dimension(psx_g*kg_scale,psy_g*kg_scale) :: fine_kmc_array
   real*8 :: average_from_fine
-  logical :: already_run_once
   type(context) simstate
   integer, intent(in) :: iter  ! Iteration count
   integer, dimension(psx_g,psy_g) :: coarse_vac_config
@@ -75,8 +74,6 @@ subroutine spparks_vacmet(iter,simstate)
 
   myargc = 0
   myargv = C_NULL_CHAR
-
-  INQUIRE(FILE='input.metfilm', EXIST=already_run_once)
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
