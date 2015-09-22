@@ -29,7 +29,7 @@ subroutine spparks_vacmet(iter,simstate)
   logical :: already_run_once
   type(context) simstate
   integer, intent(in) :: iter  ! Iteration count
-  integer, dimension(psx_g,psy_g) :: coarse_h2_evolved
+  integer, dimension(psx_g,psy_g) :: coarse_vac_config
   integer :: coarsex,coarsey
   PetscScalar, pointer :: statepointer(:,:,:,:)
   integer :: floor
@@ -93,42 +93,44 @@ subroutine spparks_vacmet(iter,simstate)
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
-  ! if(isroot)then
-  !    call system('rm -f input.metfilm log.spparks')
-  !    ! READ RAW SPPARKS OUTPUT AND WRITE FORTRAN-READABLE OUTPUT
-  !    write(kmc_numel_string,'(I24)') psx_g*psy_g*kg_scale*kg_scale*4
-  !    call system('tail -n '//trim(kmc_numel_string)//' raw_metfilm_output | awk ''{printf " %7.7i %4.4i %4.4i %3.3i %3.3i %5.5i \n", $1,$2,$3,$4,$5,$6}'' > metfilm_spparks_output.template')
-  !    call system('rm -f raw_metfilm_output')
-  ! end if
+  if(isroot)then
+     call system('rm -f input.vacmet log.spparks')
+     ! READ RAW SPPARKS OUTPUT AND WRITE FORTRAN-READABLE OUTPUT
+     write(kmc_numel_string,'(I24)') psx_g*psy_g*kg_scale*kg_scale
+     call system('tail -n '//trim(kmc_numel_string)//' raw_vacmet_output | awk ''{printf " %4.4i %4.4i %3.3i \n", $1,$2,$3}'' > vacmet_spparks_output.template')
+     call system('rm -f raw_vacmet_output')
+  end if
 
-  ! call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
-  ! if(isroot)then
-  !    !  READ FORTRAN-READABLE INPUT AND STORE IN ARRAY FOR COUPLING
+!  if(isroot)then
+     !  READ FORTRAN-READABLE INPUT AND STORE IN ARRAY FOR COUPLING
 
-  !    call system('rm -f input.metfilm')
-  !    open(unit = 666, file = 'input.metfilm', status = 'new')
-  !    open (unit = 667, file = 'metfilm_spparks_output.template', status = 'old')
+     call system('rm -f input.vacmet')
+!     open(unit = 666, file = 'input.vacmet', status = 'new')
+     open (unit = 667, file = 'vacmet_spparks_output.template', status = 'old')
 
-  !    write(666,*) 'Testing'
-  !    write(666,*) '2 dimension'
-  !    write(666,*) '0 ', psx_g*kg_scale ,' xlo xhi'
-  !    write(666,*) '0 ', psy_g*kg_scale ,' ylo yhi'
-  !    write(666,*) '-0.5 0.5 zlo zhi'
-  !    write(666,*) psx_g*psy_g*kg_scale*kg_scale*4, ' sites'
-  !    write(666,*) ' '
-  !    write(666,*) 'Values'
-  !    write(666,*) ' '
+     ! write(666,*) 'Testing'
+     ! write(666,*) '2 dimension'
+     ! write(666,*) '0 ', psx_g*kg_scale ,' xlo xhi'
+     ! write(666,*) '0 ', psy_g*kg_scale ,' ylo yhi'
+     ! write(666,*) '-0.5 0.5 zlo zhi'
+     ! write(666,*) psx_g*psy_g*kg_scale*kg_scale*4, ' sites'
+     ! write(666,*) ' '
+     ! write(666,*) 'Values'
+     ! write(666,*) ' '
 
-  !    do x = 1,psx_g*psy_g*kg_scale*kg_scale*4
-  !       read(667,'(I8, I5, I5, I4, I4, I6)') site_id, partial_x, partial_y, i1, i2, no_h2_already_evolved
-  !       write(666,'(I8,I4,I4,I6)') site_id, i1, i2, no_h2_already_evolved
-  !    end do
+     do x = 1,psx_g*psy_g*kg_scale*kg_scale
+        read(667,'(I5, I5, I4)') partial_x, partial_y, i1
+        coarsex = floor(1.0d0*partial_x/kg_scale)
+        coarsey = floor(1.0d0*partial_y/kg_scale)
+        coarse_vac_config(coarsex+1,coarsey+1) = coarse_vac_config(coarsex+1,coarsey+1) + (i1/(kg_scale*kg_scale))
+     end do
 
-  !    close(667)
-  !    close(666)
+     close(667)
+!     close(666)
 
-  ! end if
+!  end if
 
   ! call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
@@ -142,24 +144,24 @@ subroutine spparks_vacmet(iter,simstate)
   ! end do
   ! close(667)
 
-  ! call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
-  ! do x = simstate%startx , simstate%startx + simstate%widthx-1
-  !    do y = simstate%starty , simstate%starty + simstate%widthy-1
-  !       do z = simstate%startz , simstate%startz + simstate%widthz-2
-  !          if (((statepointer(nmet,x,y,z).gt.0.5d0).and.(statepointer(nmkw,x,y,z).lt.0.5d0)) .and. ((statepointer(nmet,x,y,z+1).lt.0.5d0).and.(statepointer(nmkw,x,y,z+1).gt.0.5d0))) then
-  !             statepointer(nvoi,x,y,z) = statepointer(nvoi,x,y,z) - (coarse_h2_evolved(x+1,y+1)/300.0d0)
-  !             statepointer(nvoi,x,y,z) = min(max(statepointer(nvoi,x,y,z),0.0d0),1.0d0)
-  !          end if
-  !       end do
-  !    end do
-  ! end do
-  ! call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+  do x = simstate%startx , simstate%startx + simstate%widthx-1
+     do y = simstate%starty , simstate%starty + simstate%widthy-1
+        do z = simstate%startz + 1 , simstate%startz + simstate%widthz-1
+           if (((statepointer(nmet,x,y,z-1).gt.0.5d0).and.(statepointer(nmkw,x,y,z-1).lt.0.5d0)) .and. ((statepointer(nmet,x,y,z).lt.0.5d0).and.(statepointer(nmkw,x,y,z).gt.0.5d0))) then
+              statepointer(nvoi,x,y,z-1) = statepointer(nvoi,x,y,z-1) - coarse_vac_config(x+1,y+1)
+              statepointer(nvoi,x,y,z-1) = min(max(statepointer(nvoi,x,y,z-1),0.0d0),1.0d0)
+           end if
+        end do
+     end do
+  end do
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
 
-  ! call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before file IO
-  ! if(isroot)then
-  !    call system('rm -f metfilm_spparks_output.template')
-  ! end if
-  ! call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before returning to PF routines
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before file IO
+  if(isroot)then
+     call system('rm -f vacmet_spparks_output.template')
+  end if
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before returning to PF routines
 
 end subroutine spparks_vacmet
