@@ -65,6 +65,7 @@ module commondata
   integer :: swap_freq_kmc = 10         ! Frequency with which MPI swaps are conducted for KMC solving
   integer :: freq_scale = 1750000000    ! KMC information is transferred every freq_scale steps
   integer :: kg_scale = 5               ! Number of KMC grid points per PF grid
+  integer :: kmc_freq = 100             ! Frequency with which kMC calculations are done
 
   integer, dimension(:), allocatable :: seed  ! Seed for PRNG
 

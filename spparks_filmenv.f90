@@ -136,6 +136,37 @@ subroutine spparks_filmenv(iter,simstate)
 
   end if
 
+
+
+
+  if(isroot)then
+
+     call system('rm -f filmenv.spparksscript')
+
+     open(unit = 667, file = 'filmenv.spparksscript', status = 'new')
+     write(667,*) 'seed 1273'
+     write(667,*) 'app_style filmenv 0.25'
+     write(667,*) 'dimension 2'
+     write(667,*) 'boundary p p p'
+     write(667,*) 'lattice sq/4n 1.0'
+     write(667,'(A,F16.8)') 'temperature ', 8.61733034E-5*T
+     write(667,*) 'region cell block 0 ',psx_g*kg_scale,' 0 ',psy_g*kg_scale,' -0.5 0.5'
+     write(667,*) 'create_box cell'
+     write(667,*) 'create_sites box'
+     write(667,*) 'read_sites input.filmenv'
+     write(667,*) 'solve_style tree'
+     write(667,*) 'sector yes'
+     write(667,*) 'diag_style energy stats yes'
+     write(667,*) 'stats 5'
+     write(667,*) 'dump couplingfe text 15 couplingfe x y i2'
+     write(667,'(A,F16.8)') 'run ', dt*kmc_freq
+     write(667,*) 'undump couplingfe'
+     close(667)
+
+  end if
+
+
+
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
   call spparks_open(myargc,C_LOC(myargv),C_LOC(MPI_COMM_WORLD),C_LOC(myspparks))
