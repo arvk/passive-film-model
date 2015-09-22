@@ -66,6 +66,7 @@ program passive_film_model
   call diffusivities()     ! Calculate phase diffusivities
   call estimate_timestep() ! Estimate timestep for all field evolution equations
   call seed_prng()         ! Seed the Pseudo-random-number-generator
+  call thermo()            ! Calculate phase stabilities
 
   if (isroot) then
      if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then   ! If it is a restarted run, read PF matrices
@@ -75,7 +76,7 @@ program passive_film_model
      end if
   end if
 
-  call thermo()            ! Calculate phase stabilities
+  call calculate_sulfidation_rates()    ! Calculate sulfidation rates on different FeS phases
 
   call distrib_pf()    ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
 
