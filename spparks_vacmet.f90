@@ -107,9 +107,6 @@ subroutine spparks_vacmet(iter,simstate)
      write(666,'(A,F16.8)') 'dump_modify mydump delay ', dt*kmc_freq
      write(666,'(A,F16.8)') 'run ', dt*kmc_freq
      close(666)
-!     call system('cp vacmet.spparksscript.template vacmet.spparksscript')
-!     call system('echo "dump_modify mydump delay 1000" >> vacmet.spparksscript')
-!     call system('echo "run 1000" >> vacmet.spparksscript')
   end if
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
@@ -129,46 +126,18 @@ subroutine spparks_vacmet(iter,simstate)
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
-!  if(isroot)then
-     !  READ FORTRAN-READABLE INPUT AND STORE IN ARRAY FOR COUPLING
 
-     call system('rm -f input.vacmet')
-!     open(unit = 666, file = 'input.vacmet', status = 'new')
-     open (unit = 667, file = 'vacmet_spparks_output.template', status = 'old')
+  call system('rm -f input.vacmet')
+  open (unit = 667, file = 'vacmet_spparks_output.template', status = 'old')
 
-     ! write(666,*) 'Testing'
-     ! write(666,*) '2 dimension'
-     ! write(666,*) '0 ', psx_g*kg_scale ,' xlo xhi'
-     ! write(666,*) '0 ', psy_g*kg_scale ,' ylo yhi'
-     ! write(666,*) '-0.5 0.5 zlo zhi'
-     ! write(666,*) psx_g*psy_g*kg_scale*kg_scale*4, ' sites'
-     ! write(666,*) ' '
-     ! write(666,*) 'Values'
-     ! write(666,*) ' '
+  do x = 1,psx_g*psy_g*kg_scale*kg_scale
+     read(667,'(I5, I5, I4)') partial_x, partial_y, i1
+     coarsex = floor(1.0d0*partial_x/kg_scale)
+     coarsey = floor(1.0d0*partial_y/kg_scale)
+     coarse_vac_config(coarsex+1,coarsey+1) = coarse_vac_config(coarsex+1,coarsey+1) + (i1/(kg_scale*kg_scale))
+  end do
 
-     do x = 1,psx_g*psy_g*kg_scale*kg_scale
-        read(667,'(I5, I5, I4)') partial_x, partial_y, i1
-        coarsex = floor(1.0d0*partial_x/kg_scale)
-        coarsey = floor(1.0d0*partial_y/kg_scale)
-        coarse_vac_config(coarsex+1,coarsey+1) = coarse_vac_config(coarsex+1,coarsey+1) + (i1/(kg_scale*kg_scale))
-     end do
-
-     close(667)
-!     close(666)
-
-!  end if
-
-  ! call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
-
-  ! coarse_h2_evolved = 0
-  ! open (unit = 667, file = 'metfilm_spparks_output.template', status = 'old')
-  ! do x = 1,psx_g*psy_g*kg_scale*kg_scale*4
-  !    read(667,'(I8, I5, I5, I4, I4, I6)') site_id, partial_x, partial_y, i1, i2, no_h2_already_evolved
-  !    coarsex = floor(1.0d0*partial_x/kg_scale)
-  !    coarsey = floor(1.0d0*partial_y/kg_scale)
-  !    coarse_h2_evolved(coarsex+1,coarsey+1) = coarse_h2_evolved(coarsex+1,coarsey+1) + no_h2_already_evolved
-  ! end do
-  ! close(667)
+  close(667)
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   do x = simstate%startx , simstate%startx + simstate%widthx-1
