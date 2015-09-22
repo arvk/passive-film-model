@@ -81,10 +81,39 @@ subroutine spparks_metfilm(iter,simstate)
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
   if(isroot)then
-     call system('cp metfilm.spparksscript.template metfilm.spparksscript')
-     if (already_run_once) call system('echo "read_sites input.metfilm" >> metfilm.spparksscript')
-     call system('echo "run 100" >> metfilm.spparksscript')
+     call system('rm -f metfilm.spparksscript')
+     open(unit = 666, file = 'metfilm.spparksscript', status = 'new')
+     write(666,*) 'seed 1273'
+     write(666,*) 'app_style metfilm'
+     write(666,*) 'dimension 2'
+     write(666,*) 'boundary p p p'
+     write(666,*) 'lattice mkw 1.0'
+     write(666,'(A,F16.8)') 'temperature ', 8.61733034E-5*T
+     write(666,*) 'region cell block 0 ',psx_g*kg_scale,' 0 ',psy_g*kg_scale,' -0.5 0.5'
+     write(666,*) 'create_box cell'
+     write(666,*) '# BASIS : 1=Fe, 2=Fe, 3=S_up, 4=S_down'
+     write(666,*) '# SITE IDS (I2) : 1=Fe, 2=Sup-H, 3=Fe-H2, 4=V_Fe, 5=S_up, 6=S_down'
+     write(666,*) 'create_sites box value i2 2 basis 1 1 basis 2 1 basis 3 5 basis 4 5'
+     write(666,*) 'set i1 value 2'
+     write(666,*) 'set i2 value 2 if i2 = 5 fraction 0.1'
+     write(666,*) 'set i2 value 4 if i2 = 1 fraction 0.01'
+     write(666,*) 'solve_style tree'
+     write(666,*) 'sector yes'
+     write(666,*) 'event 2 oct oct fe sup 0.32355940 fe h  # Adsorption'
+     write(666,*) 'event 2 oct oct fe h 0.10 fe sup  # Desorption'
+     write(666,*) 'event 2 oct oct h sup 0.47584796 sup h  # H glide along plane'
+     write(666,*) 'event 3 oct oct oct fe h h 0.68543162 fe sup sup'
+     write(666,*) 'event 3 oct oct oct fe sup sup 0.58708402 fe h h'
+     write(666,*) 'event 3 oct oct oct vac h h 0.73076749 vac sup sup'
+     write(666,*) 'event 3 oct oct oct vac sup sup 0.79569354 vac h h'
+     write(666,*) 'diag_style metfilm stats yes list events d1 d2 d3 t1 t2 t3 t4'
+     write(666,'(A,F16.8,A)') 'dump raw_metfilm_output text ', dt*kmc_freq, ' raw_metfilm_output id x y i1 i2 i3'
+     write(666,'(A,F16.8)') 'dump_modify raw_metfilm_output delay ', dt*kmc_freq
+     if (already_run_once) write(666,*) 'read_sites input.metfilm'
+     write(666,'(A,F16.8)') 'run ', dt*kmc_freq
+     close(666)
   end if
+
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
   call spparks_open(myargc,C_LOC(myargv),C_LOC(MPI_COMM_WORLD),C_LOC(myspparks))
