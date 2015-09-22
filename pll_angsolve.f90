@@ -181,7 +181,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   real*8 :: M_opyr_max = 1.0E-26
   real*8 :: M_opyr_min = 1.0E-29
   real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
-  integer :: nocols, nox, noy, noz
+  integer :: nocols
   real*8 :: add_to_v_ij
   real*8, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
   type(context) simstate
@@ -285,9 +285,6 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
            row(MatStencil_c,1) = nang
 
            nocols = 0
-           nox = 0
-           noy = 0
-           noz = 0
            add_to_v_ij = 0.0d0
 
 
