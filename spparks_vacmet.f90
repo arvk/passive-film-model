@@ -81,9 +81,35 @@ subroutine spparks_vacmet(iter,simstate)
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
   if(isroot)then
-     call system('cp vacmet.spparksscript.template vacmet.spparksscript')
-     call system('echo "dump_modify mydump delay 1000" >> vacmet.spparksscript')
-     call system('echo "run 1000" >> vacmet.spparksscript')
+
+     call system('rm -f vacmet.spparksscript')
+     open(unit = 666, file = 'vacmet.spparksscript', status = 'new')
+     write(666,*) 'seed 1273'
+     write(666,*) 'app_style diffusion nonlinear hop'
+     write(666,*) 'dimension 2'
+     write(666,*) 'boundary p p p'
+     write(666,*) 'lattice sq/4n 1.0'
+     write(666,'(A,F16.8)') 'temperature ', 8.61733034E-5*T
+     write(666,*) 'region cell block 0 ',psx_g*kg_scale,' 0 ',psy_g*kg_scale,' -0.5 0.5'
+     write(666,*) 'create_box cell'
+     write(666,*) 'create_sites box'
+     write(666,*) 'set i1 value 2 region cell'
+     write(666,*) 'ecoord 0  0.2'
+     write(666,*) 'ecoord 1  0.1'
+     write(666,*) 'ecoord 2 -0.0'
+     write(666,*) 'ecoord 3 -0.1'
+     write(666,*) 'ecoord 4 -0.2'
+     write(666,*) 'barrier hop 0.2'
+     write(666,*) 'solve_style tree'
+     write(666,*) 'sector yes'
+     write(666,'(A,F16.8,A)') 'dump mydump text ', dt*kmc_freq, ' raw_vacmet_output x y i1'
+     write(666,*) 'set i1 value 1 fraction 0.01'
+     write(666,'(A,F16.8)') 'dump_modify mydump delay ', dt*kmc_freq
+     write(666,'(A,F16.8)') 'run ', dt*kmc_freq
+     close(666)
+!     call system('cp vacmet.spparksscript.template vacmet.spparksscript')
+!     call system('echo "dump_modify mydump delay 1000" >> vacmet.spparksscript')
+!     call system('echo "run 1000" >> vacmet.spparksscript')
   end if
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
