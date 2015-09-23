@@ -4,13 +4,6 @@ subroutine calculate_sulfidation_rates
   use fields
   implicit none
 
-  ! integer :: mu_x_10k                              ! Integer equal to 10000*mu (Loop)
-  ! real*8 :: my_mu                                  ! Chemical potential
-  ! real*8 :: my_met, my_mkw, my_pht, my_pyr         ! Free energy of each phase
-  ! real*8 :: min_met_mkw, min_mkw_pht, min_pht_pyr  ! Difference in free energy between two phases
-
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
-
   !! Collected sulfidation rates for different FeS phases and environments
   sulf_rate_gas(nmet) = 10**((0.00473*T)-5.645+(0.4*(avg_mu_env+63562)/(R*T))) !! Ref = Assessing Corrosion in Oil Refining and Petrochemical Processing, Materials Research, Vol 7, No 1, pp. 163-173, 2004
   sulf_rate_gas(nmet) = max(sulf_rate_gas(nmet)*1E-9,0.0d0)

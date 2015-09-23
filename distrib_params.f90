@@ -4,7 +4,7 @@ subroutine distrib_params()
   implicit none
   include 'mpif.h'
 
-  integer :: ierr,status(MPI_STATUS_SIZE)
+  integer :: ierr
 
   call mpi_bcast(psx_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(psy_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
