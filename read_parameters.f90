@@ -1,15 +1,16 @@
 subroutine read_parameters()
+!! This subroutine reads simulation parameters from the user-provided input file before the beginning of each simulation.
   use commondata
   use fields
   implicit none
 
-  integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl, error_snapshots
-  character*1 :: isdissolve
-  character*1 :: useelectro
+  integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl, error_snapshots !! Flags to store exceptions raised during file-read
+  character*1 :: isdissolve !! Flag to indicate if film dissolution must be modeled (Y or N)
+  character*1 :: useelectro !! Flag to indicate if electrical potential distribution must be modeled (Y or N)
 
-!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! START | Tag= RESTART | Question= Is the simulation being started from scratch? | Output_var= isrestart !!
+  ! START | Tag= RESTART | Question= Is the simulation being started from scratch? | Output_var= isrestart !
   call system("cat param.in | sed 's/!.*//g' | grep '^ *RESTART' | sed 's/RESTART//g'| sed 's/=//g' > .isrestart.readin")
   open(unit = 7000, file = ".isrestart.readin", status = 'old') ; read(7000,*) isrestart ; close(7000)
   call system ("rm .isrestart.readin")
@@ -20,11 +21,11 @@ subroutine read_parameters()
      call system("rm -rf *.out")
      write(6,*) 'INFO: Simulation started from scratch.'
   end if
-  !! FINISH | Tag= RESTART !!
+  ! FINISH | Tag= RESTART !
 
-!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! START | Tag= PFSIZE | Question= What is the size of the phase-field simulation box? | Output_var= psx_g, psy_g, psz_g  !!
+  ! START | Tag= PFSIZE | Question= What is the size of the phase-field simulation box? | Output_var= psx_g, psy_g, psz_g  !
   call system("cat param.in | sed 's/!.*//g' | grep '^ *PFSIZE' | sed 's/PFSIZE//g'| sed 's/=//g' > .pfsize.readin")
   open(unit = 7101, file = ".pfsize.readin", status = 'old') ; read(7101,*) psx_g, psy_g, psz_g ; close(7101)
   call system ("rm .pfsize.readin")
@@ -34,11 +35,11 @@ subroutine read_parameters()
   end if
 
   psx = psx_g ; psy = psy_g ; psz = psz_g/procs
-  !! FINISH | Tag= PFSIZE !!
+  ! FINISH | Tag= PFSIZE !
 
-!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! START | Tag= TEMP | Question= What is the temperature of the simulation box? | Output_var= T !!
+  ! START | Tag= TEMP | Question= What is the temperature of the simulation box? | Output_var= T !
   call system("cat param.in | sed 's/!.*//g' | grep '^ *TEMP' | sed 's/TEMP//g'| sed 's/=//g' > .temp.readin")
   open(unit = 7102, file = ".temp.readin", status = 'old');   read(7102,*,IOSTAT=error_temp) T ; close(7102)
   call system ("rm .temp.readin")
@@ -52,11 +53,11 @@ subroutine read_parameters()
      T = 573
      write(6,*) "WARNING: Error in reading temperature. Simulation will continue at 573K."
   end if
-  !! FINISH | Tag= TEMP !!
+  ! FINISH | Tag= TEMP !
 
-!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! START | Tag= PH | What is the pH of the simulation box? | Output_var= pH_in !!
+  ! START | Tag= PH | What is the pH of the simulation box? | Output_var= pH_in !
   call system("cat param.in | sed 's/!.*//g' | grep '^ *PH' | sed 's/PH//g'| sed 's/=//g' > .ph.readin")
   open(unit = 7102, file = ".ph.readin", status = 'old');   read(7102,*,IOSTAT=error_ph) pH_in ; close(7102)
   call system ("rm .ph.readin")
@@ -65,11 +66,11 @@ subroutine read_parameters()
      pH_in = 3.0d0
      write(6,*) "WARNING: No pH input. Simulation will continue at a pH of 3."
   end if
-  !! FINISH | Tag= PH !!
+  ! FINISH | Tag= PH !
 
-!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! START | Tag= SIMLEN | Question= What is the length of the simulation? | Output_var= nomc !!
+  ! START | Tag= SIMLEN | Question= What is the length of the simulation? | Output_var= nomc !
   call system("cat param.in | sed 's/!.*//g' | grep '^ *SIMLEN' | sed 's/SIMLEN//g'| sed 's/=//g' > .nomc.readin")
   open(unit = 7103, file = ".nomc.readin", status = 'old');   read(7103,*,IOSTAT=error_nomc) nomc ; close(7103)
   call system ("rm .nomc.readin")
@@ -83,11 +84,11 @@ subroutine read_parameters()
      nomc = 1000000
      write(6,*) "WARNING: Error in reading SIMLEN. Simulation will run for 10^6 steps."
   end if
-  !! FINISH | Tag= SIMLEN !!
+  ! FINISH | Tag= SIMLEN !
 
-!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! START | Tag= DISSOLVE | Question= Should dissolution be included in the simulation? | Output_var= include_dissolve !!
+  ! START | Tag= DISSOLVE | Question= Should dissolution be included in the simulation? | Output_var= include_dissolve !
   call system("cat param.in | sed 's/!.*//g' | grep '^ *DISSOLVE' | sed 's/DISSOLVE//g'| sed 's/=//g' > .isdissolve.readin")
   open(unit = 7000, file = ".isdissolve.readin", status = 'old') ; read(7000,*,IOSTAT=error_dissolve) isdissolve ; close(7000)
   call system ("rm .isdissolve.readin")
@@ -108,11 +109,11 @@ subroutine read_parameters()
      end if
 
   end if
-  !! FINISH | Tag= SIMLEN !!
+  ! FINISH | Tag= SIMLEN !
 
-!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! START | Tag= ELECTRO | Question= Should the electrochemistry module be included? | Output_var= include_electro !!
+  ! START | Tag= ELECTRO | Question= Should the electrochemistry module be included? | Output_var= include_electro !
   call system("cat param.in | sed 's/!.*//g' | grep '^ *ELECTRO' | sed 's/ELECTRO//g'| sed 's/=//g' > .useelectro.readin")
   open(unit = 7000, file = ".useelectro.readin", status = 'old') ; read(7000,*,IOSTAT=error_electro) useelectro ; close(7000)
   call system ("rm .useelectro.readin")
@@ -128,7 +129,7 @@ subroutine read_parameters()
         include_electro = .TRUE.
         write (6,*) 'INFO: Electrochemistry module included.'
 
-        !!----Start reading Metal Potential-----!!
+        !----Start reading Metal Potential-----!
         call system("cat param.in | sed 's/!.*//g' | grep '^ *METPOTL' | sed 's/METPOTL//g'| sed 's/=//g' > .metpotl.readin")
         open(unit = 7000, file = ".metpotl.readin", status = 'old') ; read(7000,*,IOSTAT=error_metpotl) metal_potential ; close(7000)
         call system ("rm .metpotl.readin")
@@ -137,7 +138,7 @@ subroutine read_parameters()
            metal_potential = -0.50d0
            write(6,*) "WARNING: Metal potential not set. -0.5V SHE assumed."
         end if
-        !!----End reading Metal Potential-----!!
+        !----End reading Metal Potential-----!
 
      else                                                      ! If dissolution SHOULD NOT be included in the simulation
         include_electro = .FALSE.
@@ -145,11 +146,11 @@ subroutine read_parameters()
      end if
 
   end if
-  !! FINISH | Tag= ELECTRO !!
+  ! FINISH | Tag= ELECTRO !
 
-!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! START | Tag= SNAPSHOTS | Question= How many output snapshots? | Output_var= noimg !!
+  ! START | Tag= SNAPSHOTS | Question= How many output snapshots? | Output_var= noimg !
   call system("cat param.in | sed 's/!.*//g' | grep '^ *SNAPSHOTS' | sed 's/SNAPSHOTS//g'| sed 's/=//g' > .nosnapshots.readin")
   open(unit = 7109, file = ".nosnapshots.readin", status = 'old');   read(7109,*,IOSTAT=error_snapshots) noimg ; close(7109)
   call system ("rm .nosnapshots.readin")
@@ -163,6 +164,6 @@ subroutine read_parameters()
      noimg = min(nomc,100)
      write(6,*) "WARNING: Error in reading SNAPSHOTS. 100 output files will be created."
   end if
-  !! FINISH | Tag= SNAPSHOTS !!
+  ! FINISH | Tag= SNAPSHOTS !
 
 end subroutine read_parameters
