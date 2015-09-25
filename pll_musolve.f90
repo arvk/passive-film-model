@@ -31,7 +31,6 @@ subroutine para_musolve(iter,ksp_mu,simstate)
 
   call KSPSetDM(ksp_mu,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_mu,ierr)
-  call KSPSetType(ksp_mu,KSPRICHARDSON,ierr)
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)
   call KSPGetConvergedReason(ksp_mu,mu_converged_reason,ierr)
