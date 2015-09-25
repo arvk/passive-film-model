@@ -349,7 +349,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   real*8 :: grady, gradz
   type(context) simstate
   PetscScalar zeromatentry(7)
-  integer :: matfield
+  integer :: matfield1, matfield2
 
 
   delo = 0.0d0
@@ -372,12 +372,14 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   do z=simstate%startz,simstate%startz+simstate%widthz-1
      do y=simstate%starty,simstate%starty+simstate%widthy-1
         do x=simstate%startx,simstate%startx+simstate%widthx-1
-           do matfield = 0,nfields-1   ! Row
+           do matfield1 = 0,nfields-1   ! Row
 
               row(MatStencil_i,1) = x
               row(MatStencil_j,1) = y
               row(MatStencil_k,1) = z
-              row(MatStencil_c,1) = matfield
+              row(MatStencil_c,1) = matfield1
+
+           do matfield2 = 0,nfields-1   ! Column
 
               nocols = 0
 
@@ -386,7 +388,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z-1
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (y.ne.0) then    ! z-1
@@ -394,7 +396,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y-1
                  col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (x.ne.0) then    ! z-1
@@ -402,7 +404,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                  col(MatStencil_i,nocols) = x-1
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (x.ne.psx_g-1) then    ! z-1
@@ -410,7 +412,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                  col(MatStencil_i,nocols) = x+1
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (y.ne.psy_g-1) then    ! z-1
@@ -418,7 +420,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y+1
                  col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (z.ne.psz_g-1) then    ! z-1
@@ -426,10 +428,12 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z+1
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               call MatSetValuesStencil(pf_precond,1,row,nocols,col,zeromatentry,INSERT_VALUES,ierr)
+
+           end do
 
            end do
         end do
