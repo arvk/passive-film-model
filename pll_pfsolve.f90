@@ -199,6 +199,7 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
            do fesphase = 0, nphases-1
               if (fesphase.ne.npyr) then
                  sigma(npyr,fesphase) = sigma_pyr_0 * (1+0.85d0*cos(4*(0.185+ atan(grady/(abs(gradz)+1E-14))))-statepointer(nang,x,y,z))
+                 sigma(fesphase,npyr) = sigma_pyr_0 * (1+0.85d0*cos(4*(0.185+ atan(grady/(abs(gradz)+1E-14))))-statepointer(nang,x,y,z))
               end if
            end do
 
@@ -462,6 +463,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
            do fesphase = 0, nphases-1
               if (fesphase.ne.npyr) then
                  sigma(npyr,fesphase) = sigma_pyr_0 * (1+0.85d0*cos(4*(0.185+ atan(grady/(abs(gradz)+1E-14))))-statepointer(nang,x,y,z))
+                 sigma(fesphase,npyr) = sigma_pyr_0 * (1+0.85d0*cos(4*(0.185+ atan(grady/(abs(gradz)+1E-14))))-statepointer(nang,x,y,z))
               end if
            end do
 
