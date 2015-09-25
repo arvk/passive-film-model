@@ -1,4 +1,9 @@
 program passive_film_model
+!!Passive Film Model
+!!--------------------
+
+!! This program models the growth and breakdown of an iron-sulfide film formed in sour-corrosive conditions using a combined phase-field and kinetic Monte Carlo algorithm.
+
   use commondata
   use fields
   implicit none
@@ -15,14 +20,14 @@ program passive_film_model
   KSP ksp_mu, ksp_pH, ksp_ang
   SNES snes_pf, snes_pot
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  integer :: iter  ! Current iteration number (Loop)
-  integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
-  integer :: x,y,z
-  type(context) simstate
+  integer :: iter  !! Current iteration number in the time-stepping loop
+  integer :: ierr,status(MPI_STATUS_SIZE)  !! MPI error and status 
+  integer :: x,y,z !! 3D location inside the simulation cell
+  type(context) simstate !! Field variables stored as PETSc Vectors and DMDA objects
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! Initialize Parallelization
+  ! Initialize Parallelization
   call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
   call mpi_comm_size(MPI_COMM_WORLD,procs,ierr)
   call mpi_comm_rank(MPI_COMM_WORLD,rank,ierr)
@@ -80,7 +85,7 @@ program passive_film_model
 
   call distrib_pf()    ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   do x = simstate%startx , simstate%startx + simstate%widthx-1
@@ -122,9 +127,9 @@ program passive_film_model
 
   call VecView(simstate%slice,PETSC_NULL_OBJECT,ierr)
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! Destroy Unused objects
+  ! Destroy Unused objects
   call KSPDestroy(ksp_mu,ierr)
   call KSPDestroy(ksp_pH,ierr)
   call KSPDestroy(ksp_ang,ierr)
@@ -136,6 +141,6 @@ program passive_film_model
 
   call DMDestroy(simstate%lattval,ierr)
 
-  !! Finalize Parallelization
+  ! Finalize Parallelization
   call PetscFinalize(ierr)
 end program passive_film_model
