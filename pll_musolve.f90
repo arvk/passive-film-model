@@ -156,7 +156,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
            bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) - (S_source_sink/Chi)
 
            !! INCLUDE SULFIDATION
-           if ((statepointer(nenv,i,j,k).gt.0.10d0).and.(statepointer(nenv,i,j,k).lt.0.90d0)) then
+           if ((statepointer(nenv,i,j,min(k+2,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k-2,simstate%startz))).gt.0.1d0) then
               do fesphase = nmet,npyr
                  bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + ((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/dpf)*statepointer(fesphase,i,j,k)
               end do
@@ -339,7 +339,7 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 
            if ((k.ne.psz_g-1).and.(k.ne.0).and.(statepointer(nenv,i,j,k).lt.0.97d0)) then
 
-           if ((statepointer(nenv,i,j,k).lt.0.10d0).or.(statepointer(nenv,i,j,k).gt.0.90d0)) then
+           if ((statepointer(nenv,i,j,min(k+2,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k-2,simstate%startz))).lt.0.1d0) then
 
            if (k.gt.0) then
               nocols = nocols + 1
