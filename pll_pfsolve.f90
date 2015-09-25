@@ -165,7 +165,7 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
   integer :: fesphase,fesphase2
   integer :: x,y,z
-  real*8 :: myD, sum6myD
+  real*8 :: myD1, sum6myD1, myD2, sum6myD2
   real*8 :: delo(0:nfields)
   real*8 :: grady, gradz
   type(context) simstate
@@ -210,45 +210,65 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
 
               do fesphase2 = nmet,nenv  ! Column
                if (fesphase .ne. fesphase2) then
-                  sum6myD = 0.0d0
+                  sum6myD1 = 0.0d0
+                  sum6myD2 = 0.0d0
 
                   if (z.ne.0) then    ! z-1
-                     myD = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y,z-1)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
-                     sum6myD = sum6myD - myD
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + myD*(statepointer(fesphase2,x,y,z-1)-statepointer(fesphase,x,y,z-1))
+                     myD1 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y,z-1)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     sum6myD1 = sum6myD1 - myD1
+                     myD2 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x,y,z-1)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
+                     sum6myD2 = sum6myD2 - myD2
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (myD1*statepointer(fesphase2,x,y,z-1))
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (myD2*statepointer(fesphase,x,y,z-1))
                   end if
 
                   if (y.ne.0) then    ! y-1
-                     myD = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y-1,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
-                     sum6myD = sum6myD - myD
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + myD*(statepointer(fesphase2,x,y-1,z)-statepointer(fesphase,x,y-1,z))
+                     myD1 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y-1,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     sum6myD1 = sum6myD1 - myD1
+                     myD2 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x,y-1,z)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
+                     sum6myD2 = sum6myD2 - myD2
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (myD1*statepointer(fesphase2,x,y-1,z))
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (myD2*statepointer(fesphase,x,y-1,z))
                   end if
 
                   if (x.ne.0) then    ! x-1
-                     myD = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x-1,y,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
-                     sum6myD = sum6myD - myD
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + myD*(statepointer(fesphase2,x-1,y,z)-statepointer(fesphase,x-1,y,z))
+                     myD1 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x-1,y,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     sum6myD1 = sum6myD1 - myD1
+                     myD2 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x-1,y,z)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
+                     sum6myD2 = sum6myD2 - myD2
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (myD1*statepointer(fesphase2,x-1,y,z))
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (myD2*statepointer(fesphase,x-1,y,z))
                   end if
 
                   if (x.ne.psx_g-1) then    ! x+1
-                     myD = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x+1,y,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
-                     sum6myD = sum6myD - myD
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + myD*(statepointer(fesphase2,x+1,y,z)-statepointer(fesphase,x+1,y,z))
+                     myD1 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x+1,y,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     sum6myD1 = sum6myD1 - myD1
+                     myD2 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x+1,y,z)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
+                     sum6myD2 = sum6myD2 - myD2
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (myD1*statepointer(fesphase2,x+1,y,z))
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (myD2*statepointer(fesphase,x+1,y,z))
                   end if
 
                   if (y.ne.psy_g-1) then    ! y+1
-                     myD = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y+1,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
-                     sum6myD = sum6myD - myD
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + myD*(statepointer(fesphase2,x,y+1,z)-statepointer(fesphase,x,y+1,z))
+                     myD1 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y+1,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     sum6myD1 = sum6myD1 - myD1
+                     myD2 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x,y+1,z)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
+                     sum6myD2 = sum6myD2 - myD2
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (myD1*statepointer(fesphase2,x,y+1,z))
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (myD2*statepointer(fesphase,x,y+1,z))
                   end if
 
                   if (z.ne.psz_g-1) then    ! z+1
-                     myD = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y,z+1)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
-                     sum6myD = sum6myD - myD
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + myD*(statepointer(fesphase2,x,y,z+1)-statepointer(fesphase,x,y,z+1))
+                     myD1 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y,z+1)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     sum6myD1 = sum6myD1 - myD1
+                     myD2 = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x,y,z+1)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
+                     sum6myD2 = sum6myD2 - myD2
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (myD1*statepointer(fesphase2,x,y,z+1))
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (myD2*statepointer(fesphase,x,y,z+1))
                   end if
 
-                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + sum6myD*(statepointer(fesphase2,x,y,z)-statepointer(fesphase,x,y,z))
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + (sum6myD1*statepointer(fesphase2,x,y,z))
+                     functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) - (sum6myD2*statepointer(fesphase,x,y,z))
 
                      !! LINEAR
                      functionpointer(fesphase,x,y,z) = functionpointer(fesphase,x,y,z) + &
@@ -340,7 +360,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
   integer :: fesphase,fesphase2
   integer :: x,y,z
-  real*8 :: sum6myD
+  real*8 :: sum6myD1, sum6myD2
   real*8 :: delo(0:nfields)
   PetscScalar  v((9*2*(nfields-1))+1)
   MatStencil   row(4,1),col(4,(9*2*(nfields-1))+1)
@@ -485,17 +505,17 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
 
                if (fesphase .ne. fesphase2) then
 
-                  sum6myD = 0.0d0
+                  sum6myD1 = 0.0d0
 
                   if (z.ne.0) then    ! z-1
                      nocols = nocols + 1
-                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y,z-1)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x,y,z-1)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z-1
                      col(MatStencil_c,nocols) = fesphase
 
-                     sum6myD = sum6myD - v(nocols)
+                     sum6myD1 = sum6myD1 - v(nocols)
 
                      nocols = nocols + 1
                      v(nocols) = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y,z-1)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
@@ -503,17 +523,20 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z-1
                      col(MatStencil_c,nocols) = fesphase2
+
+                     sum6myD2 = sum6myD2 - v(nocols)
+
                   end if
 
                   if (y.ne.0) then    ! y-1
                      nocols = nocols + 1
-                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y-1,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x,y-1,z)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y-1
                      col(MatStencil_k,nocols) = z
                      col(MatStencil_c,nocols) = fesphase
 
-                     sum6myD = sum6myD - v(nocols)
+                     sum6myD1 = sum6myD1 - v(nocols)
 
                      nocols = nocols + 1
                      v(nocols) = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y-1,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
@@ -521,17 +544,20 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                      col(MatStencil_j,nocols) = y-1
                      col(MatStencil_k,nocols) = z
                      col(MatStencil_c,nocols) = fesphase2
+
+                     sum6myD2 = sum6myD2 - v(nocols)
+
                   end if
 
                   if (x.ne.0) then    ! x-1
                      nocols = nocols + 1
-                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x-1,y,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x-1,y,z)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
                      col(MatStencil_i,nocols) = x-1
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z
                      col(MatStencil_c,nocols) = fesphase
 
-                     sum6myD = sum6myD - v(nocols)
+                     sum6myD1 = sum6myD1 - v(nocols)
 
                      nocols = nocols + 1
                      v(nocols) = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x-1,y,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
@@ -539,17 +565,20 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z
                      col(MatStencil_c,nocols) = fesphase2
+
+                     sum6myD2 = sum6myD2 - v(nocols)
+
                   end if
 
                   if (x.ne.psx_g-1) then    ! x+1
                      nocols = nocols + 1
-                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x+1,y,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x+1,y,z)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
                      col(MatStencil_i,nocols) = x+1
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z
                      col(MatStencil_c,nocols) = fesphase
 
-                     sum6myD = sum6myD - v(nocols)
+                     sum6myD1 = sum6myD1 - v(nocols)
 
                      nocols = nocols + 1
                      v(nocols) = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x+1,y,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
@@ -557,17 +586,20 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z
                      col(MatStencil_c,nocols) = fesphase2
+
+                     sum6myD2 = sum6myD2 - v(nocols)
+
                   end if
 
                   if (y.ne.psy_g-1) then    ! y+1
                      nocols = nocols + 1
-                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y+1,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x,y+1,z)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y+1
                      col(MatStencil_k,nocols) = z
                      col(MatStencil_c,nocols) = fesphase
 
-                     sum6myD = sum6myD - v(nocols)
+                     sum6myD1 = sum6myD1 - v(nocols)
 
                      nocols = nocols + 1
                      v(nocols) = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y+1,z)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
@@ -575,17 +607,20 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                      col(MatStencil_j,nocols) = y+1
                      col(MatStencil_k,nocols) = z
                      col(MatStencil_c,nocols) = fesphase2
+
+                     sum6myD2 = sum6myD2 - v(nocols)
+
                   end if
 
                   if (z.ne.psz_g-1) then    ! z+1
                      nocols = nocols + 1
-                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y,z+1)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
+                     v(nocols) = 0.0d0 - (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase2,x,y,z+1)+statepointer(fesphase2,x,y,z)))/(dpf*dpf)
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z+1
                      col(MatStencil_c,nocols) = fesphase
 
-                     sum6myD = sum6myD - v(nocols)
+                     sum6myD1 = sum6myD1 - v(nocols)
 
                      nocols = nocols + 1
                      v(nocols) = (0.5d0*Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2)*(statepointer(fesphase,x,y,z+1)+statepointer(fesphase,x,y,z)))/(dpf*dpf)
@@ -593,11 +628,14 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z+1
                      col(MatStencil_c,nocols) = fesphase2
+
+                     sum6myD2 = sum6myD2 - v(nocols)
+
                   end if
 
 
                      nocols = nocols + 1
-                     v(nocols) = sum6myD
+                     v(nocols) = sum6myD1
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z
@@ -605,7 +643,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
 
 
                      nocols = nocols + 1
-                     v(nocols) = 0.0d0 - sum6myD
+                     v(nocols) = sum6myD2
                      col(MatStencil_i,nocols) = x
                      col(MatStencil_j,nocols) = y
                      col(MatStencil_k,nocols) = z
