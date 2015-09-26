@@ -1,24 +1,24 @@
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
 module fields
   implicit none
   save
 
-  integer :: psx_g,psy_g,psz_g ! Number of PF gridpoints in 3 directions
-  integer :: psx,psy,psz       ! Number of PF gridpoints in 3 directions
+  integer :: psx_g,psy_g,psz_g !! Number of gridpoints in the simulation cell along 3 directions 
+  integer :: psx,psy,psz       !! Number of PF gridpoints in 3 directions
 
   ! Local phase fields
-  real*8, dimension(:,:,:), allocatable :: met,mkw,pht,pyr,env ! Local PF grid for metal, pyrrhotite, pyrite and environment
-  real*8, dimension(:,:,:), allocatable :: mu                  ! Local mu_S grid
-  real*8, dimension(:,:,:), allocatable :: opyr                ! Local orientation field for pyrite
-  real*8, dimension(:,:,:), allocatable :: voids               ! Local void fraction
-  real*8, dimension(:,:,:), allocatable :: elpot               ! Local electrical potential
+  real*8, dimension(:,:,:), allocatable :: met,mkw,pht,pyr,env !! Local PF grid for metal, pyrrhotite, pyrite and environment
+  real*8, dimension(:,:,:), allocatable :: mu                  !! Local mu_S grid
+  real*8, dimension(:,:,:), allocatable :: opyr                !! Local orientation field for pyrite
+  real*8, dimension(:,:,:), allocatable :: voids               !! Local void fraction
+  real*8, dimension(:,:,:), allocatable :: elpot               !! Local electrical potential
 
   ! Global phase fields
-  real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g ! Global PF grid for metal, pyrrhotite, pyrite and environment
-  real*8, dimension(:,:,:), allocatable :: mu_g                              ! Global mu_S grid
-  real*8, dimension(:,:,:), allocatable :: opyr_g                            ! Global orientation field for pyrite
-  real*8, dimension(:,:,:), allocatable :: elpot_g                           ! Global electrical potential
+  real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g !! Global PF grid for metal, pyrrhotite, pyrite and environment
+  real*8, dimension(:,:,:), allocatable :: mu_g                              !! Global mu_S grid
+  real*8, dimension(:,:,:), allocatable :: opyr_g                            !! Global orientation field for pyrite
+  real*8, dimension(:,:,:), allocatable :: elpot_g                           !! Global electrical potential
 
   real*8, dimension(:,:,:), allocatable :: dmet_dt, dmkw_dt, dpht_dt, dpyr_dt, denv_dt, dmu_dt
   real*8, dimension(:,:,:), allocatable :: newmet, newmkw, newpht, newpyr, newenv
@@ -27,14 +27,14 @@ module fields
       type context
 #include <finclude/petscdmdef.h>
          DM lattval
-         Vec slice, exslice
-         integer :: startx,starty,startz
-         integer :: widthx,widthy,widthz
+         Vec slice, exslice   !! All field variables that define the system state
+         integer :: startx,starty,startz !! Coordinates that define the bottom-left corner of the local part of the simulation cell
+         integer :: widthx,widthy,widthz !! Size of the local part of the simulation cell
       end type context
 
 end module fields
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
 module commondata
   implicit none
@@ -84,7 +84,7 @@ module commondata
 
 end module commondata
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
 module thermo_constants
   implicit none
@@ -157,7 +157,7 @@ module thermo_constants
 
 end module thermo_constants
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
 module diffusion_constants
   implicit none
@@ -169,7 +169,7 @@ module diffusion_constants
 
 end module diffusion_constants
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
 module gradients
   implicit none
@@ -179,4 +179,4 @@ module gradients
 
 end module gradients
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
