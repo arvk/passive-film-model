@@ -3,13 +3,14 @@ subroutine initialize_geometry()
   use fields
   use thermo_constants
   implicit none
+  !! **Initialize the simulation system containing a metal surface in contact with the given environment**
 
-  integer :: x,y,z                               ! Index for x-, y- and z-direction (Loop)
-  integer :: met_z_end                           ! Location of boundary between metal and environment
-  real*8 :: avg_mu_met                           ! Chemical potential in the metal region
-  real*8, parameter :: infinitesimal = 0.00001d0 ! A hard-coded 'small' number
+  integer :: x,y,z                               !! Coordinates inside the simulation system
+  integer :: met_z_end                           !! Location of boundary between metal and environment
+  real*8 :: avg_mu_met                           !! Chemical potential in the metal region
+  real*8, parameter :: infinitesimal = 0.00001d0 !! A hard-coded 'small' number
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   met_z_end = 15*(psz_g/16)
 
@@ -35,7 +36,7 @@ subroutine initialize_geometry()
      end do
   end do
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   avg_mu_met = mus_met_mkw_eqb - (R*T*0.5d0)
   avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0)
@@ -54,11 +55,11 @@ subroutine initialize_geometry()
      end do
   end do
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   elpot_g = metal_potential            ! Initialize global electrical potential
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   call random_seed(put=seed)
   call random_number(opyr_g)
