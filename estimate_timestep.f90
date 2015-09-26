@@ -8,6 +8,7 @@ subroutine estimate_timestep
   real*8 :: dt_stable_diffusion    !! Maximum stable forward-euler timestep for integrating the chemical-potential field
   real*8 :: dt_stable_phase_field  !! Maximum stable forward-euler timestep for integrating the phase field
   real*8 :: max_M_sigma            !! Maximum of Mobility*sigma for all the phases
+  real*8 :: fesphase, fesphase2
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
@@ -15,10 +16,14 @@ subroutine estimate_timestep
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  max_M_sigma = max(M_met_mkw*sigma_met_mkw,M_met_pht*sigma_met_pht,M_met_pyr*sigma_met_pyr_0,M_met_env*sigma_met_env)
-  max_M_sigma = max(max_M_sigma,M_mkw_pht*sigma_mkw_pht,M_mkw_pyr*sigma_mkw_pyr_0,M_mkw_env*sigma_mkw_env)
-  max_M_sigma = max(max_M_sigma,M_pht_pyr*sigma_pht_pyr_0,M_pht_env*sigma_pht_env)
-  max_M_sigma = max(max_M_sigma,M_pyr_env*sigma_pyr_env_0)
+  max_M_sigma = 0.0d0
+  do fesphase = 0,(nphases-1)
+     do fesphase2 = 0,(nphases-1)
+        if (fesphase.ne.fesphase2) then
+           max_M_sigma = max(max_M_sigma,Mob_pf(fesphase,fesphase2)*sigma(fesphase,fesphase2))
+        end if
+     end do
+  end do
 
   dt_stable_phase_field = (dpf*dpf)/max_M_sigma ! The prefactor before the laplacian for PF evolution is the sum of M*sigma for each phase.
 

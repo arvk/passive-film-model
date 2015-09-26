@@ -77,6 +77,10 @@ subroutine thermo
   sigma(npht,nenv) = 1E-12 ; sigma(nenv,npht) = 1E-12
   sigma(npht,nmet) = 1E-12 ; sigma(nmet,npht) = 1E-12
   sigma(nmet,nenv) = 1E-12 ; sigma(nenv,nmet) = 1E-12
+  sigma(npyr,nmet) = 1E-12 ; sigma(nmet,npyr) = sigma_pyr_0
+  sigma(npyr,nmkw) = 1E-12 ; sigma(nmkw,npyr) = sigma_pyr_0
+  sigma(npyr,npht) = 1E-12 ; sigma(npht,npyr) = sigma_pyr_0
+  sigma(npyr,nenv) = 1E-12 ; sigma(nenv,npyr) = sigma_pyr_0
 
   ! Assign relative permittivity to FeS phases
   epsilon0 = 8.854187817E-12 ! Define vacuum permittivity

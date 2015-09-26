@@ -58,9 +58,9 @@ program passive_film_model
 
   call allocate_matrices() ! Allocate all field matrices
   call diffusivities()     ! Calculate phase diffusivities
-  call estimate_timestep() ! Estimate timestep for all field evolution equations
   call seed_prng()         ! Seed the Pseudo-random-number-generator
   call thermo()            ! Calculate phase stabilities
+  call estimate_timestep() ! Estimate timestep for all field evolution equations
 
   if (isroot) then
      if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then   ! If it is a restarted run, read PF matrices
