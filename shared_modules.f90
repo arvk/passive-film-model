@@ -49,10 +49,6 @@ module commondata
   real*8 :: dt                          !! Timestep for PF evolution
   real*8 :: avg_mu_env                  !! Sulfur chemical potential in the environment
   real*8 :: sulfidation_rate            !! Sulfidation rate / Film growth rate in m/s
-  integer, parameter :: ghost_width = 2 !! Number of ghost nodes (in the z direction)
-  integer :: swap_freq_pf = 5           !! Frequency with which MPI swaps are conducted for PF solving
-  integer :: swap_freq_kmc = 10         !! Frequency with which MPI swaps are conducted for KMC solving
-  integer :: freq_scale = 1750000000    !! KMC information is transferred every freq_scale steps
   integer :: kg_scale = 5               !! Number of KMC grid points per PF grid
   integer :: kmc_freq = 100             !! Frequency with which kMC calculations are done
 
