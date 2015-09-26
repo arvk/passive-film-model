@@ -45,27 +45,27 @@ module commondata
   integer :: rank, procs
 
   ! Input parameters
-  character*1 :: isrestart     ! Is the calculation a restarted one?
-  integer :: nomc              ! Number of PF iterations
-  integer :: T                 ! Temperature of the simulation box
-  real*8 :: pH_in              ! Scalar pH input
-  integer :: noimg             ! Number of output files
-  real*8 :: metal_potential    ! Electric potential of the metal
-  logical :: include_dissolve  ! Include film dissolution
-  logical :: include_electro   ! Include potential distribution
+  character*1 :: isrestart     !! Is the calculation a restarted one?
+  integer :: nomc              !! Number of PF iterations
+  integer :: T                 !! Temperature of the simulation box
+  real*8 :: pH_in              !! Scalar pH input
+  integer :: noimg             !! Number of output files
+  real*8 :: metal_potential    !! Electric potential of the metal
+  logical :: include_dissolve  !! Include film dissolution
+  logical :: include_electro   !! Include potential distribution
 
 
   ! Simulation parameters
-  real*8, parameter :: dpf = 5E-9       ! Phase-field grid size
-  real*8 :: dt                          ! Timestep for PF evolution
-  real*8 :: avg_mu_env                  ! Sulfur chemical potential in the environment
-  real*8 :: sulfidation_rate            ! Sulfidation rate / Film growth rate in m/s
-  integer, parameter :: ghost_width = 2 ! Number of ghost nodes (in the z direction)
-  integer :: swap_freq_pf = 5           ! Frequency with which MPI swaps are conducted for PF solving
-  integer :: swap_freq_kmc = 10         ! Frequency with which MPI swaps are conducted for KMC solving
-  integer :: freq_scale = 1750000000    ! KMC information is transferred every freq_scale steps
-  integer :: kg_scale = 5               ! Number of KMC grid points per PF grid
-  integer :: kmc_freq = 100             ! Frequency with which kMC calculations are done
+  real*8, parameter :: dpf = 5E-9       !! Phase-field grid size
+  real*8 :: dt                          !! Timestep for PF evolution
+  real*8 :: avg_mu_env                  !! Sulfur chemical potential in the environment
+  real*8 :: sulfidation_rate            !! Sulfidation rate / Film growth rate in m/s
+  integer, parameter :: ghost_width = 2 !! Number of ghost nodes (in the z direction)
+  integer :: swap_freq_pf = 5           !! Frequency with which MPI swaps are conducted for PF solving
+  integer :: swap_freq_kmc = 10         !! Frequency with which MPI swaps are conducted for KMC solving
+  integer :: freq_scale = 1750000000    !! KMC information is transferred every freq_scale steps
+  integer :: kg_scale = 5               !! Number of KMC grid points per PF grid
+  integer :: kmc_freq = 100             !! Frequency with which kMC calculations are done
 
   integer, dimension(:), allocatable :: seed  ! Seed for PRNG
 
@@ -90,8 +90,8 @@ module thermo_constants
   implicit none
   save
 
-  real*8 :: mus_met_mkw_eqb, mus_mkw_pht_eqb, mus_pht_pyr_eqb ! mu_S boundary between phases
-  real*8 :: rho_met, rho_mkw, rho_pht, rho_pyr, rho_env       ! Sulfur density
+  real*8 :: mus_met_mkw_eqb, mus_mkw_pht_eqb, mus_pht_pyr_eqb !! mu_S boundary between phases
+  real*8 :: rho_met, rho_mkw, rho_pht, rho_pyr, rho_env       !! Sulfur density
   real*8, parameter :: R = 8.3144621
 
   ! Surface energy sigmas
@@ -105,6 +105,7 @@ module thermo_constants
   real*8, parameter :: sigma_met_env= 1E-12, sigma_env_met= 1E-12
   real*8, parameter :: sigma_met_pyr_0 = 1E-12, sigma_pyr_met_0 = 1E-12
   real*8, parameter :: sigma_env_pyr_0 = 1E-12, sigma_pyr_env_0 = 1E-12
+  !! Energy of interfaces between phases
 
   ! Field mobilities
   real*8, parameter :: M_pht_met = 3.00E-08, M_met_pht = 3.00E-08
@@ -117,6 +118,7 @@ module thermo_constants
   real*8, parameter :: M_mkw_env = 4.00E-15, M_env_mkw = 4.00E-15
   real*8, parameter :: M_met_env = 4.00E-15, M_env_met = 4.00E-15
   real*8, parameter :: M_env_pyr = 4.00E-15, M_pyr_env = 4.00E-15
+  !! Field mobilities
 
   ! Double well potential heights
   real*8, parameter :: double_well_barrier = 100.0d0 ! in J/mol
@@ -126,33 +128,26 @@ module thermo_constants
   real*8 :: hill_pht_met, hill_pht_mkw, hill_pht_pyr, hill_pht_env
   real*8 :: hill_pyr_met, hill_pyr_mkw, hill_pyr_pht, hill_pyr_env
   real*8 :: hill_env_met, hill_env_mkw, hill_env_pht, hill_env_pyr
+  !! Magnitude of the barrier in the double-well potential
 
-  ! Field mobilities
-  real*8, allocatable :: Mob_pf(:,:)
+  real*8, allocatable :: Mob_pf(:,:) !! Field mobilities
 
-  ! Phase surface energies
-  real*8, allocatable :: sigma(:,:)
-  real*8, parameter :: sigma_pyr_0 = 1E-12
+  real*8, allocatable :: sigma(:,:)  !! Energy of interfaces between phases
+  real*8, parameter :: sigma_pyr_0 = 1E-12 !! Energy of interfaces between pyrite and other phases
 
-  ! Relative phase stabilities
-  real*8, allocatable :: w_pf(:)
+  real*8, allocatable :: w_pf(:)  !! Free energy of different FeS phases
 
-  ! Grain boundary stability
-  real*8 :: gb_S = 0.0d0
+  real*8 :: gb_S = 0.0d0 !! Stability of boundary between different pyrite grains
 
-  ! Relative permittivities of FeS phases
-  real*8 :: epsilon0
-  real*8, allocatable :: permittivity(:)
+  real*8 :: epsilon0  !! Vacuum permittivity
+  real*8, allocatable :: permittivity(:)  !! Relative permittivity
 
-  ! Derivative of sulfur concentration with chemical potential
-  real*8, allocatable :: drho_dmu(:)
+  real*8, allocatable :: drho_dmu(:)  !! Derivative of sulfur concentration with chemical potential
 
-  ! Sulfur density in different phases
-  real*8, allocatable :: rhoS(:)
+  real*8, allocatable :: rhoS(:)  !! Sulfur density in different FeS phases
 
-  ! Collected sulfidation rates for different FeS phases and environments
-  real*8, allocatable :: sulf_rate_gas(:)
-  real*8, allocatable :: sulf_rate_liq(:)
+  real*8, allocatable :: sulf_rate_gas(:) !! Collected sulfidation rates for different FeS phases in gaseous environments
+  real*8, allocatable :: sulf_rate_liq(:) !! Collected sulfidation rates for different FeS phases in gaseous environments
   real*8, allocatable :: sulf_rate(:)
 
 end module thermo_constants
@@ -163,9 +158,9 @@ module diffusion_constants
   implicit none
   save
 
-  real*8 :: D_S_met, D_S_mkw, D_S_pht, D_S_pyr, D_S_env
-  real*8 :: D_Fe_met, D_Fe_mkw, D_Fe_pht, D_Fe_pyr, D_Fe_env
-  real*8 :: D_H_env, D_H_met, D_H_pht, D_H_pyr
+  real*8 :: D_S_met, D_S_mkw, D_S_pht, D_S_pyr, D_S_env  !! Diffusivity of sulfur in different FeS phases
+  real*8 :: D_Fe_met, D_Fe_mkw, D_Fe_pht, D_Fe_pyr, D_Fe_env  !! Diffusivity of iron in different FeS phases
+  real*8 :: D_H_env, D_H_met, D_H_pht, D_H_pyr  !! Diffusivity of hydrogen in different FeS phases
 
 end module diffusion_constants
 
@@ -175,7 +170,7 @@ module gradients
   implicit none
   save
 
-  real*8, dimension(:,:,:), allocatable :: delypyr,delzpyr
+  real*8, dimension(:,:,:), allocatable :: delypyr,delzpyr  !! Gradient of pyrite phase fraction in the y- and z-direction
 
 end module gradients
 
