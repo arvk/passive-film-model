@@ -17,13 +17,13 @@ subroutine spparks_filmenv(iter,simstate)
   integer (C_INT) :: myargc
   character*1 , target :: myargv
   type(c_ptr), target :: myspparks
-  integer, dimension(psx,psy) :: interface_loc
-  real*8, dimension(psx,psy) :: distance_interface_moved
-  real*8, dimension(psx,psy) :: vac_form_bias
+  integer, dimension(psx_g,psy_g) :: interface_loc
+  real*8, dimension(psx_g,psy_g) :: distance_interface_moved
+  real*8, dimension(psx_g,psy_g) :: vac_form_bias
   integer :: x,y,z,xfine,yfine
   integer :: nint
   character*24 :: kmc_numel_string
-  integer, dimension(psx*kg_scale,psy*kg_scale) :: fine_kmc_array
+  integer, dimension(psx_g*kg_scale,psy_g*kg_scale) :: fine_kmc_array
   real*8 :: average_from_fine
   type(context) simstate
   PetscScalar no_of_env_cells
@@ -126,7 +126,7 @@ subroutine spparks_filmenv(iter,simstate)
         do y = 0,psy_g-1
            do xfine = 0,kg_scale-1
               do yfine = 0,kg_scale-1
-                 write(666,'(I8,I3,I7,F19.12)') 1+((x*kg_scale)+xfine)+(((y*kg_scale)+yfine)*(kg_scale*psx)), 1, interface_loc(x+1,y+1)*kg_scale, vac_form_bias(x+1,y+1)
+                 write(666,'(I8,I3,I7,F19.12)') 1+((x*kg_scale)+xfine)+(((y*kg_scale)+yfine)*(kg_scale*psx_g)), 1, interface_loc(x+1,y+1)*kg_scale, vac_form_bias(x+1,y+1)
               end do
            end do
         end do
@@ -177,7 +177,7 @@ subroutine spparks_filmenv(iter,simstate)
 
   if(isroot)then
      call system('rm -f input.filmenv log.spparks')
-     write(kmc_numel_string,'(I24)') psx*psy*kg_scale*kg_scale
+     write(kmc_numel_string,'(I24)') psx_g*psy_g*kg_scale*kg_scale
      call system('tail -n '//trim(kmc_numel_string)//' couplingfe | awk ''{printf " %5.5i %5.5i %5.5i \n", $1,$2,$3}'' > tocouple')
      call system('rm -f couplingfe')
   end if
@@ -185,13 +185,13 @@ subroutine spparks_filmenv(iter,simstate)
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Wait for RANK 0 to write the 'toucouple' file before reading it
 
      open (unit = 667, file = 'tocouple', status = 'old')
-     do x = 1,psx*psy*kg_scale*kg_scale
+     do x = 1,psx_g*psy_g*kg_scale*kg_scale
         read(667,'(I6, I6, I6)') xfine, yfine, fine_kmc_array(xfine+1,yfine+1)
      end do
      close(667)
 
-     do x = 0,psx-1
-        do y = 0,psy-1
+     do x = 0,psx_g-1
+        do y = 0,psy_g-1
            average_from_fine = 0.0d0
            do xfine = 0,kg_scale-1
               do yfine = 0,kg_scale-1

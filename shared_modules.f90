@@ -5,7 +5,6 @@ module fields
   save
 
   integer :: psx_g,psy_g,psz_g !! Number of gridpoints in the simulation cell along 3 directions
-  integer :: psx,psy,psz       !! Number of PF gridpoints in 3 directions
 
   ! Global phase fields
   real*8, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g !! Global PF grid for metal, pyrrhotite, pyrite and environment
