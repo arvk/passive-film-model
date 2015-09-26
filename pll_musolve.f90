@@ -4,6 +4,7 @@ subroutine para_musolve(iter,ksp_mu,simstate)
   use thermo_constants
   use diffusion_constants
   implicit none
+  !! **Set up and solve the linear equations for time-evolution of sulfur chemical potential in different \(FeS\) phases**
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
 #include <finclude/petscmat.h>
@@ -14,15 +15,15 @@ subroutine para_musolve(iter,ksp_mu,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   PetscErrorCode ierr
-  KSP ksp_mu
+  KSP ksp_mu !! Linear chemical potential solver
   KSPConvergedReason mu_converged_reason
-  Vec state, solved_mu_vector, state_solved
-  integer, intent(in) :: iter  ! Iteration count
-  integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
-  type(context) simstate
+  Vec state, solved_mu_vector, state_solved !! Vectors to store function values and solutions
+  integer, intent(in) :: iter  !! Current iteration number
+  integer :: x, y, z           !! Coordinates inside the simulation system
+  type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_mu, computeMatrix_mu, computeInitialGuess_mu
 
   call KSPSetComputeRHS(ksp_mu,computeRHS_mu,simstate,ierr)
@@ -141,13 +142,13 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
 
            bpointer(nmus,i,j,k) = statepointer(nmus,i,j,k) * (1.0d0/dt)
 
-           !! Calculate derivative of sulfur concentration with chemical potential
+           ! Calculate derivative of sulfur concentration with chemical potential
            Chi = 0.0d0
            do fesphase = 0,nphases-1
               Chi = Chi + drho_dmu(fesphase)*statepointer(fesphase,i,j,k)
            end do
 
-           !! Calculate sulfur source and sinks due to phase transformations
+           ! Calculate sulfur source and sinks due to phase transformations
            S_source_sink = 0.0d0
            do fesphase = 0,nphases-1
               S_source_sink = S_source_sink + rhoS(fesphase)*(statepointer(fesphase,i,j,k)-exstatepointer(fesphase,i,j,k))
@@ -155,7 +156,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
 
            bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) - (S_source_sink/Chi)
 
-           !! INCLUDE SULFIDATION
+           ! INCLUDE SULFIDATION
            if ((statepointer(nenv,i,j,min(k+2,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k-2,simstate%startz))).gt.0.1d0) then
               do fesphase = nmet,npyr
                  bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + ((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/dpf)*statepointer(fesphase,i,j,k)
