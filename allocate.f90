@@ -5,15 +5,16 @@ subroutine allocate_matrices()
   use thermo_constants
   implicit none
   include 'mpif.h'
+  !!####Allocate all matrices responsible for storing the field variables
 
-  integer :: seed_size ! For seeding the PRNG
+  integer :: seed_size !! Size of the seed for the PRNG
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   call random_seed(size=seed_size)
   allocate(seed(seed_size)) ! Allocate PRNG Seed
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Allocate global matrices
   allocate(met_g(psx_g,psy_g,psz_g))
@@ -25,7 +26,7 @@ subroutine allocate_matrices()
   allocate(opyr_g(psx_g,psy_g,psz_g))
   allocate(elpot_g(psx_g,psy_g,psz_g))
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Allocate local matrices
   allocate(met(psx,psy,psz+(2*ghost_width)))
@@ -38,13 +39,13 @@ subroutine allocate_matrices()
   allocate(voids(psx,psy,psz+(2*ghost_width))) ; voids = 0.0d0
   allocate(elpot(psx,psy,psz+(2*ghost_width)))
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Allocate gradient matrices
   allocate(delypyr(psx,psy,psz+(2*ghost_width)))
   allocate(delzpyr(psx,psy,psz+(2*ghost_width)))
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Allocate time-evolution matrices
   allocate(dmet_dt(psx,psy,psz+(2*ghost_width))) ; dmet_dt = 0.0d0
@@ -54,7 +55,7 @@ subroutine allocate_matrices()
   allocate(denv_dt(psx,psy,psz+(2*ghost_width))) ; denv_dt = 0.0d0
   allocate(dmu_dt(psx,psy,psz+(2*ghost_width)))  ; dmu_dt = 0.0d0
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Allocate local matrices for updated phase-fields
   allocate(newmet(psx,psy,psz+(2*ghost_width)))
