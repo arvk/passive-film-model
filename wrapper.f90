@@ -12,16 +12,19 @@ program passive_film_model
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  !!#This program simulates the growth and breakdown of iron sulfide films formed in sour corrosive conditions using a combined phase-field and kinetic Monte Carlo algorithm.
-  !---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  !!##This program simulates the growth and breakdown of iron sulfide films formed in sour corrosive conditions using a combined phase-field and kinetic Monte Carlo algorithm.
+  !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  KSP ksp_mu, ksp_pH, ksp_ang
-  SNES snes_pf, snes_pot
-  PetscScalar, pointer :: statepointer(:,:,:,:)
-  integer :: iter  !! Current iteration number in the time-stepping loop
-  integer :: ierr,status(MPI_STATUS_SIZE)  !! MPI error and status variables
-  integer :: x,y,z  !! Coordinates inside the simulation cell
-  type(context) simstate !! Field variables stored in PETSc vectors and DMDA objects
+  KSP ksp_mu     !! Linear chemical potential field solver
+  KSP ksp_pH     !! Linear pH field solver
+  KSP ksp_ang    !! Linear pyrite crystal shape solver
+  SNES snes_pf   !! Non-linear phase-field solver
+  SNES snes_pot  !! Non-linear electrical potential field solver
+  PetscScalar, pointer :: statepointer(:,:,:,:) !! Pointer array referenced to individual gridpoints inside the simulation cell
+  integer :: iter                               !! Current iteration number in the time-stepping loop
+  integer :: ierr,status(MPI_STATUS_SIZE)       !! MPI error and status variables
+  integer :: x,y,z                              !! Coordinates inside the simulation cell
+  type(context) simstate                        !! Field variables stored in PETSc vectors and DMDA objects
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
