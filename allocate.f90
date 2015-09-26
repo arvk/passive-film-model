@@ -1,7 +1,6 @@
 subroutine allocate_matrices()
   use commondata
   use fields
-  use gradients
   use thermo_constants
   implicit none
   include 'mpif.h'
@@ -25,12 +24,6 @@ subroutine allocate_matrices()
   allocate(mu_g(psx_g,psy_g,psz_g))
   allocate(opyr_g(psx_g,psy_g,psz_g))
   allocate(elpot_g(psx_g,psy_g,psz_g))
-
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
-
-  ! Allocate gradient matrices
-  allocate(delypyr(psx,psy,psz+(2*ghost_width)))
-  allocate(delzpyr(psx,psy,psz+(2*ghost_width)))
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 

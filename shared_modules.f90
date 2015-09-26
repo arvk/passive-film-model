@@ -154,13 +154,3 @@ module diffusion_constants
 end module diffusion_constants
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
-
-module gradients
-  implicit none
-  save
-
-  real*8, dimension(:,:,:), allocatable :: delypyr,delzpyr  !! Gradient of pyrite phase fraction in the y- and z-direction
-
-end module gradients
-
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
