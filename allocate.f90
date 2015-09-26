@@ -28,19 +28,6 @@ subroutine allocate_matrices()
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  ! Allocate local matrices
-  allocate(met(psx,psy,psz+(2*ghost_width)))
-  allocate(mkw(psx,psy,psz+(2*ghost_width)))
-  allocate(pht(psx,psy,psz+(2*ghost_width)))
-  allocate(pyr(psx,psy,psz+(2*ghost_width)))
-  allocate(env(psx,psy,psz+(2*ghost_width)))
-  allocate(mu(psx,psy,psz+(2*ghost_width)))
-  allocate(opyr(psx,psy,psz+(2*ghost_width)))
-  allocate(voids(psx,psy,psz+(2*ghost_width))) ; voids = 0.0d0
-  allocate(elpot(psx,psy,psz+(2*ghost_width)))
-
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
-
   ! Allocate gradient matrices
   allocate(delypyr(psx,psy,psz+(2*ghost_width)))
   allocate(delzpyr(psx,psy,psz+(2*ghost_width)))

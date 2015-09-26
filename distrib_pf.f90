@@ -29,25 +29,4 @@ subroutine distrib_pf()
   ! Broadcast the chemical potential of the environment
   call mpi_bcast(avg_mu_env,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
-
-  ! Copy relevant portions of the global matrices onto local matrices
-  do x = 1,psx
-     do y = 1,psy
-        do z = 1,psz
-           met(x,y,z+ghost_width) = met_g(x,y,z+(rank*psz_g/procs))
-           mkw(x,y,z+ghost_width) = mkw_g(x,y,z+(rank*psz_g/procs))
-           pht(x,y,z+ghost_width) = pht_g(x,y,z+(rank*psz_g/procs))
-           pyr(x,y,z+ghost_width) = pyr_g(x,y,z+(rank*psz_g/procs))
-           env(x,y,z+ghost_width) = env_g(x,y,z+(rank*psz_g/procs))
-
-           mu(x,y,z+ghost_width) = mu_g(x,y,z+(rank*psz_g/procs))
-
-           opyr(x,y,z+ghost_width) = opyr_g(x,y,z+(rank*psz_g/procs))
-
-           elpot(x,y,z+ghost_width) = elpot_g(x,y,z+(rank*psz_g/procs))
-        end do
-     end do
-  end do
-
 end subroutine distrib_pf
