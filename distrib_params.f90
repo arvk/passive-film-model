@@ -3,8 +3,9 @@ subroutine distrib_params()
   use fields
   implicit none
   include 'mpif.h'
+  !!####Distribute simulation parameters to all child processors
 
-  integer :: ierr
+  integer :: ierr !! MPI error flag
 
   call mpi_bcast(psx_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(psy_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
