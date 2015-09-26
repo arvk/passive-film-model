@@ -4,6 +4,7 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
   use thermo_constants
   use diffusion_constants
   implicit none
+  !! **Set up and solve the phase-field equations for time-evolution of phase-fractions of different \(FeS\) phases**
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
 #include <finclude/petscmat.h>
@@ -14,16 +15,16 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   PetscErrorCode ierr
-  SNES snes_pf
+  SNES snes_pf !! Non-linear phase-field solver
   SNESConvergedReason pf_converged_reason
-  Vec function_vec, solution_vec, rhs_vec, single_phase_vector
-  Mat mat_jcb
-  integer, intent(in) :: iter  ! Iteration count
-  integer :: fesphase
-  type(context) simstate
+  Vec function_vec, solution_vec, rhs_vec, single_phase_vector !! Vectors to store function values and solutions
+  Mat mat_jcb !! Jacobian for PF evolution
+  integer, intent(in) :: iter  !! Current iteration number
+  integer :: fesphase          !! Index corresponding to FeS phase
+  type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external FormFunction_pf, FormJacobian_pf
 
 
