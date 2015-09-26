@@ -4,6 +4,7 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
   use thermo_constants
   use diffusion_constants
   implicit none
+  !! **Set up and solve the linear equations for time-evolution of [H+] in the environment**
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
 #include <finclude/petscmat.h>
@@ -14,15 +15,15 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   PetscErrorCode ierr
-  KSP ksp_pH
+  KSP ksp_pH  !! Linear pH field solver
   KSPConvergedReason pH_converged_reason
-  Vec state, solved_pH_vector, state_solved
-  integer, intent(in) :: iter  ! Iteration count
-  integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
-  type(context) simstate
+  Vec state, solved_pH_vector, state_solved !! Vectors to store function values and solutions
+  integer, intent(in) :: iter  !! Current iteration number
+  integer :: x, y, z           !! Coordinates inside the simulation system
+  type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_pH, computeMatrix_pH, computeInitialGuess_pH
 
   call KSPSetComputeRHS(ksp_pH,computeRHS_pH,simstate,ierr)
