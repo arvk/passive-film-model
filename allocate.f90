@@ -34,16 +34,6 @@ subroutine allocate_matrices()
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  ! Allocate time-evolution matrices
-  allocate(dmet_dt(psx,psy,psz+(2*ghost_width))) ; dmet_dt = 0.0d0
-  allocate(dmkw_dt(psx,psy,psz+(2*ghost_width))) ; dmkw_dt = 0.0d0
-  allocate(dpht_dt(psx,psy,psz+(2*ghost_width))) ; dpht_dt = 0.0d0
-  allocate(dpyr_dt(psx,psy,psz+(2*ghost_width))) ; dpyr_dt = 0.0d0
-  allocate(denv_dt(psx,psy,psz+(2*ghost_width))) ; denv_dt = 0.0d0
-  allocate(dmu_dt(psx,psy,psz+(2*ghost_width)))  ; dmu_dt = 0.0d0
-
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
-
   ! Allocate field mobilities
   allocate(Mob_pf(0:(nphases-1),0:(nphases-1)))
 

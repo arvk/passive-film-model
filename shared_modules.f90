@@ -13,9 +13,6 @@ module fields
   real*8, dimension(:,:,:), allocatable :: opyr_g                            !! Global orientation field for pyrite
   real*8, dimension(:,:,:), allocatable :: elpot_g                           !! Global electrical potential
 
-  real*8, dimension(:,:,:), allocatable :: dmet_dt, dmkw_dt, dpht_dt, dpyr_dt, denv_dt, dmu_dt
-
-
       type context
 #include <finclude/petscdmdef.h>
          DM lattval
