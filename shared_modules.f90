@@ -29,8 +29,9 @@ module commondata
   save
 
   ! MPI parameters
-  logical :: isroot
-  integer :: rank, procs
+  logical :: isroot     !! Is this processor 0?
+  integer :: rank       !! What is the rank of the current processor?
+  integer :: procs      !! How many processors is the program running on?
 
   ! Input parameters
   character*1 :: isrestart     !! Is the calculation a restarted one?
@@ -53,18 +54,18 @@ module commondata
 
   integer, dimension(:), allocatable :: seed  ! Seed for PRNG
 
-  integer, parameter :: nfields = 10
-  integer, parameter :: nphases = 5
-  integer, parameter :: nmet = 0
-  integer, parameter :: nmkw = 1
-  integer, parameter :: npht = 2
-  integer, parameter :: npyr = 3
-  integer, parameter :: nenv = 4
-  integer, parameter :: nmus = 5
-  integer, parameter :: npH = 6
-  integer, parameter :: nang = 7
-  integer, parameter :: npot = 8
-  integer, parameter :: nvoi = 9
+  integer, parameter :: nfields = 10 !! Number of field variables at each grid point
+  integer, parameter :: nphases = 5 !! Number of FeS phases
+  integer, parameter :: nmet = 0 !! Index for the metal phase fraction
+  integer, parameter :: nmkw = 1 !! Index for the mackinawite phase fraction
+  integer, parameter :: npht = 2 !! Index for the pyrrhotite phase fraction
+  integer, parameter :: npyr = 3 !! Index for the pyrite phase fraction
+  integer, parameter :: nenv = 4 !! Index for the environment phase fraction
+  integer, parameter :: nmus = 5 !! Index for the sulfur chemical potential field
+  integer, parameter :: npH = 6 !! Index for the pH field
+  integer, parameter :: nang = 7 !! Index for the pyrite grain shape and orientation field
+  integer, parameter :: npot = 8 !! Index for the electrical potential field
+  integer, parameter :: nvoi = 9 !! Index for the void field
 
 end module commondata
 
@@ -81,11 +82,6 @@ module thermo_constants
   ! Double well potential heights
   real*8, parameter :: double_well_barrier = 100.0d0 ! in J/mol
   real*8, parameter :: hill = (16.0d0/3.0d0)*double_well_barrier
-  real*8 :: hill_met_mkw, hill_met_pht, hill_met_pyr, hill_met_env
-  real*8 :: hill_mkw_met, hill_mkw_pht, hill_mkw_pyr, hill_mkw_env
-  real*8 :: hill_pht_met, hill_pht_mkw, hill_pht_pyr, hill_pht_env
-  real*8 :: hill_pyr_met, hill_pyr_mkw, hill_pyr_pht, hill_pyr_env
-  real*8 :: hill_env_met, hill_env_mkw, hill_env_pht, hill_env_pyr
   !! Magnitude of the barrier in the double-well potential
 
   real*8, allocatable :: Mob_pf(:,:) !! Field mobilities
