@@ -4,6 +4,7 @@ subroutine para_potsolve(iter,snes_pot,simstate)
   use thermo_constants
   use diffusion_constants
   implicit none
+  !! **Set up and solve the Poisson-Boltzmann equations in the environment region on the simulation cell**
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
 #include <finclude/petscmat.h>
@@ -14,16 +15,16 @@ subroutine para_potsolve(iter,snes_pot,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   PetscErrorCode ierr
-  SNES snes_pot
+  SNES snes_pot !! Non-linear electrical potential solver
   SNESConvergedReason pot_converged_reason
-  Vec vec_feval, elpot_vector, solution_vec,rhs_vec
-  Mat mat_jacob
-  type(context) simstate
-  integer, intent(in) :: iter  ! Iteration count
-  integer :: fesphase
+  Vec vec_feval, elpot_vector, solution_vec,rhs_vec !! Vectors to store function values and solutions
+  Mat mat_jacob !! Jacobian for electrical potential evolution
+  type(context) simstate !! Field variables stored in PETSc vectors and DMDA objects
+  integer, intent(in) :: iter  !! Current iteration number
+  integer :: fesphase !! Index corresponding to FeS phase
   external FormFunction_pot, FormJacobian_pot
 
 
@@ -188,7 +189,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   real*8 :: w(0:nfields), delo(0:nfields)
   real*8 :: grady, gradz
   real*8 :: exponent
-  real*8 :: c0 = 1.0d0 !! Moles/m^3
+  real*8 :: c0 = 1.0d0 !! Average density of counter charge (moles/m^3)
   real*8 :: el_charg = 1.60217657E-19*6.022E23
   type(context) simstate
   real*8, parameter :: maxconc = 1E2
@@ -353,7 +354,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   Mat pf_jacob, pf_precond
   real*8 :: grady, gradz
   real*8 :: exponent
-  real*8 :: c0 = 1.0d0 !! Moles/m^3
+  real*8 :: c0 = 1.0d0 !! Average density of counter charge (moles/m^3)
   real*8 :: el_charg = 1.60217657E-19*6.022E23
   type(context) simstate
   real*8, parameter :: maxconc = 1E2
