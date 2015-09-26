@@ -44,13 +44,6 @@ subroutine allocate_matrices()
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  ! Allocate local matrices for updated phase-fields
-  allocate(newmet(psx,psy,psz+(2*ghost_width)))
-  allocate(newmkw(psx,psy,psz+(2*ghost_width)))
-  allocate(newpht(psx,psy,psz+(2*ghost_width)))
-  allocate(newpyr(psx,psy,psz+(2*ghost_width)))
-  allocate(newenv(psx,psy,psz+(2*ghost_width)))
-
   ! Allocate field mobilities
   allocate(Mob_pf(0:(nphases-1),0:(nphases-1)))
 

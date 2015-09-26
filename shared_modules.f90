@@ -14,7 +14,6 @@ module fields
   real*8, dimension(:,:,:), allocatable :: elpot_g                           !! Global electrical potential
 
   real*8, dimension(:,:,:), allocatable :: dmet_dt, dmkw_dt, dpht_dt, dpyr_dt, denv_dt, dmu_dt
-  real*8, dimension(:,:,:), allocatable :: newmet, newmkw, newpht, newpyr, newenv
 
 
       type context
