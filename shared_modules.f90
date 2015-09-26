@@ -78,32 +78,6 @@ module thermo_constants
   real*8 :: rho_met, rho_mkw, rho_pht, rho_pyr, rho_env       !! Sulfur density
   real*8, parameter :: R = 8.3144621
 
-  ! Surface energy sigmas
-  real*8, parameter :: sigma_mkw_env= 1E-12, sigma_env_mkw= 1E-12
-  real*8, parameter :: sigma_mkw_met= 1E-12, sigma_met_mkw= 1E-12
-  real*8, parameter :: sigma_mkw_pht= 1E-12, sigma_pht_mkw= 1E-12
-  real*8, parameter :: sigma_mkw_pyr_0 = 1E-12, sigma_pyr_mkw_0 = 1E-12
-  real*8, parameter :: sigma_pht_env= 1E-12, sigma_env_pht= 1E-12
-  real*8, parameter :: sigma_pht_met= 1E-12, sigma_met_pht= 1E-12
-  real*8, parameter :: sigma_pht_pyr_0 = 1E-12, sigma_pyr_pht_0 = 1E-12
-  real*8, parameter :: sigma_met_env= 1E-12, sigma_env_met= 1E-12
-  real*8, parameter :: sigma_met_pyr_0 = 1E-12, sigma_pyr_met_0 = 1E-12
-  real*8, parameter :: sigma_env_pyr_0 = 1E-12, sigma_pyr_env_0 = 1E-12
-  !! Energy of interfaces between phases
-
-  ! Field mobilities
-  real*8, parameter :: M_pht_met = 3.00E-08, M_met_pht = 3.00E-08
-  real*8, parameter :: M_mkw_met = 1.40E-06, M_met_mkw = 1.40E-06
-  real*8, parameter :: M_met_pyr = 3.00E-08, M_pyr_met = 3.00E-08
-  real*8, parameter :: M_pht_pyr = 5.00E-07, M_pyr_pht = 5.00E-07
-  real*8, parameter :: M_mkw_pyr = 3.00E-08, M_pyr_mkw = 3.00E-08
-  real*8, parameter :: M_pht_mkw = 6.00E-07, M_mkw_pht = 6.00E-07
-  real*8, parameter :: M_pht_env = 4.00E-15, M_env_pht = 4.00E-15
-  real*8, parameter :: M_mkw_env = 4.00E-15, M_env_mkw = 4.00E-15
-  real*8, parameter :: M_met_env = 4.00E-15, M_env_met = 4.00E-15
-  real*8, parameter :: M_env_pyr = 4.00E-15, M_pyr_env = 4.00E-15
-  !! Field mobilities
-
   ! Double well potential heights
   real*8, parameter :: double_well_barrier = 100.0d0 ! in J/mol
   real*8, parameter :: hill = (16.0d0/3.0d0)*double_well_barrier
