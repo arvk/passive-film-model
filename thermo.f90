@@ -3,15 +3,16 @@ subroutine thermo
   use commondata
   use fields
   implicit none
+  !! **Calculate thermodynamic properties of different \(FeS\) phases -- Phase boundaries, densities, surface energies and field mobilities.**
 
-  integer :: mu_x_10k                              ! Integer equal to 10000*mu (Loop)
-  real*8 :: my_mu                                  ! Chemical potential
-  real*8 :: my_met, my_mkw, my_pht, my_pyr         ! Free energy of each phase
-  real*8 :: min_met_mkw, min_mkw_pht, min_pht_pyr  ! Difference in free energy between two phases
+  integer :: mu_x_10k                              !! Integer equal to 10000*mu. Useful for looping
+  real*8 :: my_mu                                  !! Chemical potential of sulfur
+  real*8 :: my_met, my_mkw, my_pht, my_pyr         !! Free energy of each FeS phase
+  real*8 :: min_met_mkw, min_mkw_pht, min_pht_pyr  !! Difference in free energy between two phases
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! Estimate the phase-stability region
+  ! Estimate the phase-stability region
   min_met_mkw = 50000.0d0; min_mkw_pht = 50000.0d0; min_pht_pyr = 50000.0d0
 
   do mu_x_10k = -300000,300000
@@ -39,9 +40,9 @@ subroutine thermo
 
   end do
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! Density of sulfur in each phase (no. of moles of S / m^3 )
+  ! Density of sulfur in each phase (no. of moles of S / m^3 )
   rho_mkw = 48683.0d0           ! REF= Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
   rho_met = 0.0015d0*140401     ! REF= 0.15% assumed
   rho_pht = 52275.0d0           ! REF= de Villiers et. al. American Minerologist, 95(1): 148-152
@@ -55,9 +56,9 @@ subroutine thermo
   rhoS(npyr) = 2.0d0*41667.0d0     ! REF= Muscat et. al. PRB 65(5):054107, 2002
   rhoS(nenv) = 0.0015d0*(13303/T)  ! REF= 0.15% assumed
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! Assign field mobilities
+  ! Assign field mobilities
   Mob_pf(npht,nmet) = 3.00E-08 ; Mob_pf(nmet,npht) = 3.00E-08
   Mob_pf(nmkw,nmet) = 1.40E-06 ; Mob_pf(nmet,nmkw) = 1.40E-06
   Mob_pf(nmet,npyr) = 3.00E-08 ; Mob_pf(npyr,nmet) = 3.00E-08
@@ -69,7 +70,7 @@ subroutine thermo
   Mob_pf(nmet,nenv) = 4.00E-15 ; Mob_pf(nenv,nmet) = 4.00E-15
   Mob_pf(nenv,npyr) = 4.00E-15 ; Mob_pf(npyr,nenv) = 4.00E-15
 
-  !! Assign surface energies
+  ! Assign surface energies
   sigma(nmkw,nenv) = 1E-12 ; sigma(nenv,nmkw) = 1E-12
   sigma(nmkw,nmet) = 1E-12 ; sigma(nmet,nmkw) = 1E-12
   sigma(nmkw,npht) = 1E-12 ; sigma(npht,nmkw) = 1E-12
@@ -77,8 +78,8 @@ subroutine thermo
   sigma(npht,nmet) = 1E-12 ; sigma(nmet,npht) = 1E-12
   sigma(nmet,nenv) = 1E-12 ; sigma(nenv,nmet) = 1E-12
 
-  !! Assign relative permittivity to FeS phases
-  epsilon0 = 8.854187817E-12 !! Define vacuum permittivity
+  ! Assign relative permittivity to FeS phases
+  epsilon0 = 8.854187817E-12 ! Define vacuum permittivity
   permittivity(nmet) = 500.0d0
   permittivity(nmkw) = 500.0d0
   permittivity(npht) = 2.0d0
@@ -86,7 +87,7 @@ subroutine thermo
   permittivity(nenv) = 80.0d0
 
 
-  !! Calculate derivative of sulfur concentration with chemical potential
+  ! Calculate derivative of sulfur concentration with chemical potential
   drho_dmu(nmet) = (0.0015d0*140401)/(R*T)
   drho_dmu(nmkw) = 0.95d0*48683.0d0/(2*250896.0d0)
   drho_dmu(npht) = 52275.0d0/(2*250896.0d0)
