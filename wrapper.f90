@@ -12,17 +12,20 @@ program passive_film_model
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
+  !!#This program simulates the growth and breakdown of iron sulfide films formed in sour corrosive conditions using a combined phase-field and kinetic Monte Carlo algorithm.
+  !---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   KSP ksp_mu, ksp_pH, ksp_ang
   SNES snes_pf, snes_pot
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  integer :: iter  ! Current iteration number (Loop)
-  integer :: ierr,status(MPI_STATUS_SIZE)  ! MPI variables
-  integer :: x,y,z
-  type(context) simstate
+  integer :: iter  !! Current iteration number in the time-stepping loop
+  integer :: ierr,status(MPI_STATUS_SIZE)  !! MPI error and status variables
+  integer :: x,y,z  !! Coordinates inside the simulation cell
+  type(context) simstate !! Field variables stored in PETSc vectors and DMDA objects
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! Initialize Parallelization
+  ! Initialize Parallelization
   call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
   call mpi_comm_size(MPI_COMM_WORLD,procs,ierr)
   call mpi_comm_rank(MPI_COMM_WORLD,rank,ierr)
@@ -68,7 +71,7 @@ program passive_film_model
 
   call distrib_pf()    ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   do x = simstate%startx , simstate%startx + simstate%widthx-1
@@ -110,13 +113,13 @@ program passive_film_model
 
   call VecView(simstate%slice,PETSC_NULL_OBJECT,ierr)
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  !! Destroy Unused objects
+  ! Destroy Unused objects
   call VecDestroy(simstate%slice,ierr)
   call VecDestroy(simstate%exslice,ierr)
   call DMDestroy(simstate%lattval,ierr)
 
-  !! Finalize Parallelization
+  ! Finalize Parallelization
   call PetscFinalize(ierr)
 end program passive_film_model
