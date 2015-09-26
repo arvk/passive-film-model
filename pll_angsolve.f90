@@ -4,6 +4,7 @@ subroutine para_angsolve(iter,ksp_ang,simstate)
   use thermo_constants
   use diffusion_constants
   implicit none
+  !! **Set up and solve the linear equations for evolution of pyrite crystal shape**
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
 #include <finclude/petscmat.h>
@@ -14,15 +15,15 @@ subroutine para_angsolve(iter,ksp_ang,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   PetscErrorCode ierr
-  KSP ksp_ang
+  KSP ksp_ang !! Linear pyrite crystal shape solver
   KSPConvergedReason ang_converged_reason
-  Vec solved_ang_vector,state,state_solved
-  integer, intent(in) :: iter  ! Iteration count
-  integer :: x, y, z           ! Index for x-, y-, and z-direction (Loop)
-  type(context) simstate
+  Vec solved_ang_vector,state,state_solved !! Vectors to store function values and solutions
+  integer, intent(in) :: iter  !! Current iteration number
+  integer :: x, y, z           !! Coordinates inside the simulation system
+  type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_ang, computeMatrix_ang, computeInitialGuess_ang
 
   call KSPSetComputeRHS(ksp_ang,computeRHS_ang,simstate,ierr)
