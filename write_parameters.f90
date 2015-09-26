@@ -2,6 +2,8 @@ subroutine write_parameters()
   use commondata
   use fields
   implicit none
+  !!####Write-out current simulation parameters to the PARAMS.out file. This can be used to restart a simulation
+  !!---
 
   call system("rm -rf PARAMS.out")
   open(unit = 8000, file = "PARAMS.out", status = 'new')
