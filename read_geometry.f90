@@ -3,8 +3,10 @@ subroutine read_geometry
   use fields
   use thermo_constants
   implicit none
+#include <finclude/petscsys.h>
 
-  integer :: x, y, z   ! Index along x-, y- and z-directions (Loop)
+
+  PetscInt :: x, y, z   ! Index along x-, y- and z-directions (Loop)
   character*1 :: hash  ! Hash character
 
 !!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!

@@ -21,8 +21,8 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
   KSP ksp_pH  !! Linear pH field solver
   KSPConvergedReason pH_converged_reason
   Vec state, solved_pH_vector, state_solved !! Vectors to store function values and solutions
-  integer, intent(in) :: iter  !! Current iteration number
-  integer :: x, y, z           !! Coordinates inside the simulation system
+  PetscInt, intent(in) :: iter  !! Current iteration number
+  PetscInt :: x, y, z           !! Coordinates inside the simulation system
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_pH, computeMatrix_pH, computeInitialGuess_pH
 
@@ -125,7 +125,7 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
   KSP ksp_pH
   PetscErrorCode ierr
   Vec onlypH, b
-  integer :: i,j,k
+  PetscInt :: i,j,k
   type(context) simstate
 
   call VecCreate(MPI_COMM_WORLD,onlypH,ierr)
@@ -172,12 +172,12 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   PetscScalar  v(7)
   MatStencil   row(4,1),col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  real*8 :: D
-  integer :: nocols
-  real*8 :: add_to_v_ij
+  PetscScalar :: D
+  PetscInt :: nocols
+  PetscScalar :: add_to_v_ij
   type(context) simstate
   PetscScalar zeromatentry(7)
-  integer :: matfield
+  PetscInt :: matfield
 
 
   call DMCreateLocalVector(simstate%lattval,statelocal,ierr)

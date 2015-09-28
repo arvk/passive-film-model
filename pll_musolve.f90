@@ -20,8 +20,8 @@ subroutine para_musolve(iter,ksp_mu,simstate)
   KSP ksp_mu !! Linear chemical potential solver
   KSPConvergedReason mu_converged_reason
   Vec state, solved_mu_vector, state_solved !! Vectors to store function values and solutions
-  integer, intent(in) :: iter  !! Current iteration number
-  integer :: x, y, z           !! Coordinates inside the simulation system
+  PetscInt, intent(in) :: iter  !! Current iteration number
+  PetscInt :: x, y, z           !! Coordinates inside the simulation system
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_mu, computeMatrix_mu, computeInitialGuess_mu
 
@@ -110,8 +110,8 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   Vec state, exstate, b
   PetscScalar, pointer :: statepointer(:,:,:,:), exstatepointer(:,:,:,:), bpointer(:,:,:,:)
   type(context) simstate
-  integer :: i, j, k, fesphase, field
-  real*8 :: Chi, S_source_sink
+  PetscInt :: i, j, k, fesphase, field
+  PetscScalar :: Chi, S_source_sink
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,simstate%exslice,exstatepointer,ierr)
@@ -211,12 +211,12 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
   PetscScalar  v(7)
   MatStencil   row(4,1),col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
-  integer :: nocols
-  real*8 :: add_to_v_ij
+  PetscScalar :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
+  PetscInt :: nocols
+  PetscScalar :: add_to_v_ij
   type(context) simstate
   PetscScalar zeromatentry(7)
-  integer :: matfield
+  PetscInt :: matfield
 
 
   D_inter_met = D_S_met

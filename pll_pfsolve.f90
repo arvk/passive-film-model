@@ -22,8 +22,8 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
   SNESConvergedReason pf_converged_reason
   Vec function_vec, solution_vec, rhs_vec, single_phase_vector !! Vectors to store function values and solutions
   Mat mat_jcb !! Jacobian for PF evolution
-  integer, intent(in) :: iter  !! Current iteration number
-  integer :: fesphase          !! Index corresponding to FeS phase
+  PetscInt, intent(in) :: iter  !! Current iteration number
+  PetscInt :: fesphase          !! Index corresponding to FeS phase
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external FormFunction_pf, FormJacobian_pf
 
@@ -96,7 +96,7 @@ subroutine FormRHS_pf(rhs_vec,simstate)
 
   PetscErrorCode ierr
   Vec rhs_vec, single_phase_vector
-  integer :: fesphase
+  PetscInt :: fesphase
   type(context) simstate
 
   call VecCreate(MPI_COMM_WORLD,single_phase_vector,ierr)
@@ -164,11 +164,11 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
   PetscErrorCode ierr
   Vec input_state, function_value, state_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
-  integer :: fesphase,fesphase2
-  integer :: x,y,z
-  real*8 :: myD1, sum6myD1, myD2, sum6myD2
-  real*8 :: delo(0:nfields)
-  real*8 :: grady, gradz
+  PetscInt :: fesphase,fesphase2
+  PetscInt :: x,y,z
+  PetscScalar :: myD1, sum6myD1, myD2, sum6myD2
+  PetscScalar :: delo(0:nfields)
+  PetscScalar :: grady, gradz
   type(context) simstate
 
   delo = 0.0d0
@@ -359,18 +359,18 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   PetscErrorCode ierr
   Vec input_state, state_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
-  integer :: fesphase,fesphase2
-  integer :: x,y,z
-  real*8 :: sum6myD1, sum6myD2
-  real*8 :: delo(0:nfields)
+  PetscInt :: fesphase,fesphase2
+  PetscInt :: x,y,z
+  PetscScalar :: sum6myD1, sum6myD2
+  PetscScalar :: delo(0:nfields)
   PetscScalar  v((9*2*(nfields-1))+1)
   MatStencil   row(4,1),col(4,(9*2*(nfields-1))+1)
-  integer :: nocols
+  PetscInt :: nocols
   Mat pf_jacob, pf_precond
-  real*8 :: grady, gradz
+  PetscScalar :: grady, gradz
   type(context) simstate
   PetscScalar zeromatentry(7)
-  integer :: matfield1, matfield2
+  PetscInt :: matfield1, matfield2
 
 
   delo = 0.0d0

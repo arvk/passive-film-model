@@ -3,12 +3,13 @@ subroutine initialize_geometry()
   use fields
   use thermo_constants
   implicit none
+#include <finclude/petscsys.h>
   !! **Initialize the simulation system containing a metal surface in contact with the given environment**
 
-  integer :: x,y,z                               !! Coordinates inside the simulation system
-  integer :: met_z_end                           !! Location of boundary between metal and environment
-  real*8 :: avg_mu_met                           !! Chemical potential in the metal region
-  real*8, parameter :: infinitesimal = 0.00001d0 !! A hard-coded 'small' number
+  PetscInt :: x,y,z                               !! Coordinates inside the simulation system
+  PetscInt :: met_z_end                           !! Location of boundary between metal and environment
+  PetscScalar :: avg_mu_met                           !! Chemical potential in the metal region
+  PetscScalar, parameter :: infinitesimal = 0.00001d0 !! A hard-coded 'small' number
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 

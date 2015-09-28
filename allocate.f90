@@ -3,10 +3,10 @@ subroutine allocate_matrices()
   use fields
   use thermo_constants
   implicit none
-  include 'mpif.h'
+#include <finclude/petscsys.h>
   !!####Allocate all matrices responsible for storing the field variables
 
-  integer :: seed_size !! Size of the seed for the PRNG
+  PetscInt :: seed_size !! Size of the seed for the PRNG
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
