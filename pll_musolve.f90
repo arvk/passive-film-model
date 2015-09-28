@@ -10,7 +10,6 @@ subroutine para_musolve(iter,ksp_mu,simstate)
 #include <finclude/petscmat.h>
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
 #include <finclude/petscdm.h>
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
@@ -26,11 +25,11 @@ subroutine para_musolve(iter,ksp_mu,simstate)
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_mu, computeMatrix_mu, computeInitialGuess_mu
 
+  call KSPSetDM(ksp_mu,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_mu,computeRHS_mu,simstate,ierr)
   call KSPSetComputeOperators(ksp_mu,computeMatrix_mu,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_mu,computeInitialGuess_mu,simstate,ierr)
 
-  call KSPSetDM(ksp_mu,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)
@@ -67,7 +66,6 @@ subroutine computeInitialGuess_mu(ksp_mu,b,simstate,ierr)
 #include <finclude/petscmat.h>
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
 #include <finclude/petscdm.h>
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
@@ -103,7 +101,6 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
 #include <finclude/petscmat.h>
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
 #include <finclude/petscdm.h>
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
@@ -202,7 +199,6 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 #include <finclude/petscmat.h>
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
 #include <finclude/petscdm.h>
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
