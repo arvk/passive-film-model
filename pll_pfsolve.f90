@@ -507,6 +507,7 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
                if (fesphase .ne. fesphase2) then
 
                   sum6myD1 = 0.0d0
+                  sum6myD2 = 0.0d0
 
                   if (z.ne.0) then    ! z-1
                      nocols = nocols + 1
