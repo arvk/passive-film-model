@@ -20,7 +20,6 @@ program passive_film_model
   KSP ksp_ang    !! Linear pyrite crystal shape solver
   SNES snes_pf   !! Non-linear phase-field solver
   SNES snes_pot  !! Non-linear electrical potential field solver
-  PetscScalar, pointer :: statepointer(:,:,:,:) !! Pointer array referenced to individual gridpoints inside the simulation cell
   PetscInt :: iter                               !! Current iteration number in the time-stepping loop
   PetscErrorCode ierr !! MPI error flag
   PetscInt :: status(MPI_STATUS_SIZE)       !! MPI status variables
@@ -65,41 +64,13 @@ program passive_film_model
   call thermo()            ! Calculate phase stabilities
   call estimate_timestep() ! Estimate timestep for all field evolution equations
 
-  if (isroot) then
-     if ((isrestart .eq. 'Y') .or. (isrestart .eq. 'y')) then   ! If it is a restarted run, read PF matrices
-        call read_geometry()
-     else                                                       ! If it is a fresh calculation
-        call initialize_geometry()
-     end if
-  end if
+  call initialize_geometry(simstate)
 
   call calculate_sulfidation_rates()    ! Calculate sulfidation rates on different FeS phases
 
-  call distrib_pf()    ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
-
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
-  do x = simstate%startx , simstate%startx + simstate%widthx-1
-     do y = simstate%starty , simstate%starty + simstate%widthy-1
-        do z = simstate%startz , simstate%startz + simstate%widthz-1
-           statepointer(nmet,x,y,z) = met_g(x+1,y+1,z+1)
-           statepointer(nmkw,x,y,z) = mkw_g(x+1,y+1,z+1)
-           statepointer(npht,x,y,z) = pht_g(x+1,y+1,z+1)
-           statepointer(npyr,x,y,z) = pyr_g(x+1,y+1,z+1)
-           statepointer(nenv,x,y,z) = env_g(x+1,y+1,z+1)
-           statepointer(nmus,x,y,z) = mu_g(x+1,y+1,z+1)
-           statepointer(npH,x,y,z) = 10**(0.0d0-pH_in)
-           statepointer(nang,x,y,z) = opyr_g(x+1,y+1,z+1)
-           statepointer(npot,x,y,z) = elpot_g(x+1,y+1,z+1)
-           statepointer(nvoi,x,y,z) = 1.0d0
-        end do
-     end do
-  end do
-  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
-
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
-
 
   do iter = 1,nomc
 
