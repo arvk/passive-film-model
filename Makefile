@@ -30,3 +30,6 @@ spparks_vacmet.o: spparks_vacmet.f90
 clean:
 	rm -f *.exe *.out *.mod *.o *__genmod.f90
 
+purge:
+	rm -f *.exe *.out *.mod *.o *__genmod.f90 input.metfilm *.spparksscript
+
