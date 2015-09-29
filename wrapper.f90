@@ -1,3 +1,10 @@
+!================================================================================
+! Passive Film Model
+! Aravind Krishnamoorthy, aravindk@mit.edu, Massachusetts Institute of Technology
+!
+! Copyright 2015 Aravind Krishnamoorthy. This software is distributed under
+! the GNU General Public License. See doc/LICENSE.GPL for the license text.
+!================================================================================
 program passive_film_model
   use commondata
   use fields
