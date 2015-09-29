@@ -1,4 +1,4 @@
-subroutine spparks_filmenv(iter,simstate)
+subroutine kMC_filmdissolve(iter,simstate)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
@@ -228,4 +228,4 @@ subroutine spparks_filmenv(iter,simstate)
   if(isroot) call system('rm -f tocouple')
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before going back to the PF routines
 
-end subroutine spparks_filmenv
+end subroutine kMC_filmdissolve

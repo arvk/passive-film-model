@@ -1,4 +1,4 @@
-subroutine spparks_metfilm(iter,simstate)
+subroutine kMC_h2form(iter,simstate)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
@@ -191,4 +191,4 @@ subroutine spparks_metfilm(iter,simstate)
   end if
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before returning to PF routines
 
-end subroutine spparks_metfilm
+end subroutine kMC_h2form

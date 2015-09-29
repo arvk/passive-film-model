@@ -1,4 +1,4 @@
-subroutine spparks_vacmet(iter,simstate)
+subroutine kMC_vacdebonding(iter,simstate)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
@@ -156,4 +156,4 @@ subroutine spparks_vacmet(iter,simstate)
   end if
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before returning to PF routines
 
-end subroutine spparks_vacmet
+end subroutine kMC_vacdebonding
