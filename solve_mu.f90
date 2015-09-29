@@ -1,4 +1,4 @@
-subroutine para_musolve(iter,ksp_mu,simstate)
+subroutine solve_mu(iter,ksp_mu,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -46,7 +46,7 @@ subroutine para_musolve(iter,ksp_mu,simstate)
      write(6,*) 'Chemical potential field evolution did not converge. Reason: ', mu_converged_reason
   end if
 
-end subroutine para_musolve
+end subroutine solve_mu
 
 
 

@@ -1,4 +1,4 @@
-subroutine para_angsolve(iter,ksp_ang,simstate)
+subroutine solve_ang(iter,ksp_ang,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -47,7 +47,7 @@ subroutine para_angsolve(iter,ksp_ang,simstate)
      write(6,*) 'Orientation field evolution did not converge. Reason: ', ang_converged_reason
   end if
 
-end subroutine para_angsolve
+end subroutine solve_ang
 
 
 

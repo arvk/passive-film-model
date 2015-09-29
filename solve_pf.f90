@@ -1,4 +1,4 @@
-subroutine para_pfsolve(iter,snes_pf,simstate)
+subroutine solve_pf(iter,snes_pf,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -68,7 +68,7 @@ subroutine para_pfsolve(iter,snes_pf,simstate)
   call VecDestroy(function_vec,ierr)
   call VecDestroy(solution_vec,ierr)
 
-end subroutine para_pfsolve
+end subroutine solve_pf
 
 
 

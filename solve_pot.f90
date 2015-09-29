@@ -1,4 +1,4 @@
-subroutine para_potsolve(iter,snes_pot,simstate)
+subroutine solve_pot(iter,snes_pot,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -66,7 +66,7 @@ subroutine para_potsolve(iter,snes_pot,simstate)
   call VecDestroy(vec_feval,ierr)
   call VecDestroy(solution_vec,ierr)
 
-end subroutine para_potsolve
+end subroutine solve_pot
 
 
 

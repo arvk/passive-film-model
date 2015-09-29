@@ -1,4 +1,4 @@
-subroutine para_pHsolve(iter,ksp_pH,simstate)
+subroutine solve_pH(iter,ksp_pH,simstate)
   use commondata
   use fields
   use thermo_constants
@@ -47,7 +47,7 @@ subroutine para_pHsolve(iter,ksp_pH,simstate)
      write(6,*) 'pH field evolution did not converge. Reason: ', pH_converged_reason
   end if
 
-end subroutine para_pHsolve
+end subroutine solve_pH
 
 
 

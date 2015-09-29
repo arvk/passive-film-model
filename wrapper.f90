@@ -105,11 +105,11 @@ program passive_film_model
 
      call VecCopy(simstate%slice,simstate%exslice,ierr)
 
-     call SNESCreate(MPI_COMM_WORLD,snes_pf,ierr); call para_pfsolve(iter,snes_pf,simstate); call SNESDestroy(snes_pf,ierr)
-     call KSPCreate(MPI_COMM_WORLD,ksp_mu,ierr); call para_musolve(iter,ksp_mu,simstate); call KSPDestroy(ksp_mu,ierr)
-     call KSPCreate(MPI_COMM_WORLD,ksp_pH,ierr); call para_pHsolve(iter,ksp_pH,simstate); call KSPDestroy(ksp_pH,ierr)
-     call KSPCreate(MPI_COMM_WORLD,ksp_ang,ierr); call para_angsolve(iter,ksp_ang,simstate); call KSPDestroy(ksp_ang,ierr)
-     call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr); call para_potsolve(iter,snes_pot,simstate); call SNESDestroy(snes_pot,ierr)
+     call SNESCreate(MPI_COMM_WORLD,snes_pf,ierr); call solve_pf(iter,snes_pf,simstate); call SNESDestroy(snes_pf,ierr)
+     call KSPCreate(MPI_COMM_WORLD,ksp_mu,ierr); call solve_mu(iter,ksp_mu,simstate); call KSPDestroy(ksp_mu,ierr)
+     call KSPCreate(MPI_COMM_WORLD,ksp_pH,ierr); call solve_pH(iter,ksp_pH,simstate); call KSPDestroy(ksp_pH,ierr)
+     call KSPCreate(MPI_COMM_WORLD,ksp_ang,ierr); call solve_ang(iter,ksp_ang,simstate); call KSPDestroy(ksp_ang,ierr)
+     call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr); call solve_pot(iter,snes_pot,simstate); call SNESDestroy(snes_pot,ierr)
 
      call spparks_filmenv(iter,simstate)
      call spparks_metfilm(iter,simstate)
