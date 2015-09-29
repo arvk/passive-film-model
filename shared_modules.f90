@@ -54,6 +54,7 @@ module commondata
   PetscScalar :: sulfidation_rate            !! Sulfidation rate / Film growth rate in m/s
   PetscInt :: kg_scale = 5               !! Number of KMC grid points per PF grid
   PetscInt :: kmc_freq = 100             !! Frequency with which kMC calculations are done
+  PetscInt :: stat_freq = 200            !! Simulation stats are reported once every stat_freq iterations
 
   PetscInt, dimension(:), allocatable :: seed  ! Seed for PRNG
 

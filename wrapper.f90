@@ -25,6 +25,8 @@ program passive_film_model
   PetscErrorCode ierr !! MPI error flag
   PetscInt :: status(MPI_STATUS_SIZE)       !! MPI status variables
   PetscInt :: x,y,z                              !! Coordinates inside the simulation cell
+  PetscReal :: phase_volume_in_simcell(0:(nphases-1))  !! Number of gridpoints in the simulation cell occupied by a given phase
+  PetscInt :: fesphase                        !! Index to identify the type of FeS phase
   type(context) simstate                        !! Field variables stored in PETSc vectors and DMDA objects
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
@@ -98,11 +100,11 @@ program passive_film_model
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
 
+
   do iter = 1,nomc
 
      call VecCopy(simstate%slice,simstate%exslice,ierr)
 
-     write(6,*) 'In iteration',iter
      call SNESCreate(MPI_COMM_WORLD,snes_pf,ierr); call para_pfsolve(iter,snes_pf,simstate); call SNESDestroy(snes_pf,ierr)
      call KSPCreate(MPI_COMM_WORLD,ksp_mu,ierr); call para_musolve(iter,ksp_mu,simstate); call KSPDestroy(ksp_mu,ierr)
      call KSPCreate(MPI_COMM_WORLD,ksp_pH,ierr); call para_pHsolve(iter,ksp_pH,simstate); call KSPDestroy(ksp_pH,ierr)
@@ -112,6 +114,13 @@ program passive_film_model
      call spparks_filmenv(iter,simstate)
      call spparks_metfilm(iter,simstate)
      call spparks_vacmet(iter,simstate)
+
+     if (mod(iter,stat_freq).eq.0) then
+        do fesphase = 0,(nphases-1)
+           call VecStrideNorm(simstate%slice,fesphase,NORM_1,phase_volume_in_simcell(fesphase),ierr)
+        end do
+           if (isroot) write(6,'(A,F9.0,A,F10.2,A,F10.2,A,F10.2,A,F10.2,A,F10.2)') " INFO: TIME= ", iter*dt, " s. MET= ", phase_volume_in_simcell(nmet), " MKW= ", phase_volume_in_simcell(nmkw), " PHT= ", phase_volume_in_simcell(npht), " PYR= ", phase_volume_in_simcell(npyr), " ENV= ", phase_volume_in_simcell(nenv)
+        end if
 
   end do
 
