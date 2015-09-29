@@ -11,13 +11,13 @@ subroutine calculate_sulfidation_rates
   !!$$k_{metal}^{gas} = 10^{(0.00473 T) - 5.645 + \frac{0.4 \times (\mu_{env}+63562)}{R T}} \ nm/s $$
   !!Reference: Assessing Corrosion in Oil Refining and Petrochemical Processing, Materials Research, Vol 7, No 1, pp. 163-173, 2004
   !!---
-  sulf_rate_gas(nmet) = 10**((0.00473*T)-5.645+(0.4*(avg_mu_env+63562)/(R*T))) 
+  sulf_rate_gas(nmet) = 10**((0.00473*T)-5.645+(0.4*(avg_mu_env+63562)/(R*T)))
   sulf_rate_gas(nmet) = max(sulf_rate_gas(nmet)*1E-9,0.0d0)
 
   !! $$k_{mackinawite}^{gas} = 0.01372 + 0.04356 \times e^{\frac{\mu_{env}}{R T}} \ nm/s $$
   !! Reference: Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
   !!---
-  sulf_rate_gas(nmkw) = 0.01372 + 0.04356*(exp(avg_mu_env/(R*T))) 
+  sulf_rate_gas(nmkw) = 0.01372 + 0.04356*(exp(avg_mu_env/(R*T)))
   sulf_rate_gas(nmkw) = max(sulf_rate_gas(nmkw)*1E-9,0.0d0)
 
   !! $$k_{pyrrhotite}^{gas} = 10^9 \times e^{\frac{-11766}{T}-0.6478} \ nm/s $$

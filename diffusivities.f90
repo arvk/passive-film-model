@@ -19,7 +19,7 @@ subroutine diffusivities
 
   !! $$D_{S}^{metal} = 1.78 \times e^{-\frac{205000}{R T}}$$
   !! Reference : Scripta Metallurgica, Col 16, pp 537-540, 1982. (Fillastre C. et. al. - Diffusion of sulfur in iron-chromium alloys)
-  D_S_met = 1.78d0*exp((0.0d0-205000)/(R*T)) 
+  D_S_met = 1.78d0*exp((0.0d0-205000)/(R*T))
 
   !!----------------------------------------
 
