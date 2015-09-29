@@ -4,10 +4,10 @@ include ${PETSC_DIR}/conf/variables
 FC=mpif90
 
 # Define compiler flags
-CFLAG= -cpp -traceback -gen-interfaces -warn interfaces -u -fpe3
+CFLAG= -cpp -traceback -zero -unroll0
 
 # Define optimization flags
-OFLAG= -O3 -xHost -ipo
+OFLAG= -O2 -xHost -ipo
 
 # Include files
 INC= -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include
