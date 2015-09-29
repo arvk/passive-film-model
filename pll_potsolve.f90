@@ -23,8 +23,8 @@ subroutine para_potsolve(iter,snes_pot,simstate)
   Vec vec_feval, elpot_vector, solution_vec,rhs_vec !! Vectors to store function values and solutions
   Mat mat_jacob !! Jacobian for electrical potential evolution
   type(context) simstate !! Field variables stored in PETSc vectors and DMDA objects
-  integer, intent(in) :: iter  !! Current iteration number
-  integer :: fesphase !! Index corresponding to FeS phase
+  PetscInt, intent(in) :: iter  !! Current iteration number
+  PetscInt :: fesphase !! Index corresponding to FeS phase
   external FormFunction_pot, FormJacobian_pot
 
 
@@ -97,10 +97,10 @@ subroutine FormRHS_pot(rhs_vec,simstate)
   Vec rhs_vec
   Vec single_phase_vector
   PetscScalar, pointer :: statepointer(:,:,:,:), rhspointer(:,:,:,:)
-  integer :: startx,starty,startz,widthx,widthy,widthz
-  integer :: x,y,z
+  PetscInt :: startx,starty,startz,widthx,widthy,widthz
+  PetscInt :: x,y,z
   type(context) simstate
-  integer :: field
+  PetscInt :: field
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,rhs_vec,rhspointer,ierr)
@@ -180,22 +180,22 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   PetscErrorCode ierr
   Vec input_state, function_value, state_local, state
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  integer :: startx,starty,startz,widthx,widthy,widthz
-  integer :: fesphase,fesphase2
-  integer :: x,y,z
-  real*8 :: myD, sum6myD
-  real*8, parameter :: myM = 1.0d0
-  real*8 :: Mobility
-  real*8 :: w(0:nfields), delo(0:nfields)
-  real*8 :: grady, gradz
-  real*8 :: exponent
-  real*8 :: c0 = 1.0d0 !! Average density of counter charge (moles/m^3)
-  real*8 :: el_charg = 1.60217657E-19*6.022E23
+  PetscInt :: startx,starty,startz,widthx,widthy,widthz
+  PetscInt :: fesphase,fesphase2
+  PetscInt :: x,y,z
+  PetscScalar :: myD, sum6myD
+  PetscScalar, parameter :: myM = 1.0d0
+  PetscScalar :: Mobility
+  PetscScalar :: w(0:nfields), delo(0:nfields)
+  PetscScalar :: grady, gradz
+  PetscScalar :: exponent
+  PetscScalar :: c0 = 1.0d0 !! Average density of counter charge (moles/m^3)
+  PetscScalar :: el_charg = 1.60217657E-19*6.022E23
   type(context) simstate
-  real*8, parameter :: maxconc = 1E2
-  real*8 :: min
+  PetscScalar, parameter :: maxconc = 1E2
+  PetscScalar :: min
   MatNullSpace nullspace
-  integer :: myi
+  PetscInt :: myi
 
   w = 0.0d0
   delo = 0.0d0
@@ -340,27 +340,27 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   PetscErrorCode ierr
   Vec input_state, function_value, state_local, state
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  integer :: startx,starty,startz,widthx,widthy,widthz
-  real*8, allocatable :: D_pot(:,:,:,:,:)
-  integer :: fesphase,fesphase2
-  integer :: x,y,z
-  real*8 :: myD, sum6myD
-  real*8, parameter :: myM = 1.0d0
-  real*8 :: Mobility
-  real*8 :: w(0:nfields), delo(0:nfields)
+  PetscInt :: startx,starty,startz,widthx,widthy,widthz
+  PetscScalar, allocatable :: D_pot(:,:,:,:,:)
+  PetscInt :: fesphase,fesphase2
+  PetscInt :: x,y,z
+  PetscScalar :: myD, sum6myD
+  PetscScalar, parameter :: myM = 1.0d0
+  PetscScalar :: Mobility
+  PetscScalar :: w(0:nfields), delo(0:nfields)
   PetscScalar  v((6*2)+1)
   MatStencil   row(4,1),col(4,(6*2)+1)
-  integer :: nocols
+  PetscInt :: nocols
   Mat pf_jacob, pf_precond
-  real*8 :: grady, gradz
-  real*8 :: exponent
-  real*8 :: c0 = 1.0d0 !! Average density of counter charge (moles/m^3)
-  real*8 :: el_charg = 1.60217657E-19*6.022E23
+  PetscScalar :: grady, gradz
+  PetscScalar :: exponent
+  PetscScalar :: c0 = 1.0d0 !! Average density of counter charge (moles/m^3)
+  PetscScalar :: el_charg = 1.60217657E-19*6.022E23
   type(context) simstate
-  real*8, parameter :: maxconc = 1E2
-  real*8 :: min
+  PetscScalar, parameter :: maxconc = 1E2
+  PetscScalar :: min
   PetscScalar zeromatentry(7)
-  integer :: matfield
+  PetscInt :: matfield
 
 
   call DMCreateLocalVector(simstate%lattval,state_local,ierr)

@@ -3,12 +3,13 @@ subroutine estimate_timestep
   use commondata
   use diffusion_constants
   implicit none
+#include <finclude/petscsys.h>
   !! **Estimate a stable timestep for phase field and chemical potential field evolution**
 
-  real*8 :: dt_stable_diffusion    !! Maximum stable forward-euler timestep for integrating the chemical-potential field
-  real*8 :: dt_stable_phase_field  !! Maximum stable forward-euler timestep for integrating the phase field
-  real*8 :: max_M_sigma            !! Maximum of Mobility*sigma for all the phases
-  real*8 :: fesphase, fesphase2
+  PetscScalar :: dt_stable_diffusion    !! Maximum stable forward-euler timestep for integrating the chemical-potential field
+  PetscScalar :: dt_stable_phase_field  !! Maximum stable forward-euler timestep for integrating the phase field
+  PetscScalar :: max_M_sigma            !! Maximum of Mobility*sigma for all the phases
+  PetscScalar :: fesphase, fesphase2
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 

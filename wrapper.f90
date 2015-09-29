@@ -21,9 +21,10 @@ program passive_film_model
   SNES snes_pf   !! Non-linear phase-field solver
   SNES snes_pot  !! Non-linear electrical potential field solver
   PetscScalar, pointer :: statepointer(:,:,:,:) !! Pointer array referenced to individual gridpoints inside the simulation cell
-  integer :: iter                               !! Current iteration number in the time-stepping loop
-  integer :: ierr,status(MPI_STATUS_SIZE)       !! MPI error and status variables
-  integer :: x,y,z                              !! Coordinates inside the simulation cell
+  PetscInt :: iter                               !! Current iteration number in the time-stepping loop
+  PetscErrorCode ierr !! MPI error flag
+  PetscInt :: status(MPI_STATUS_SIZE)       !! MPI status variables
+  PetscInt :: x,y,z                              !! Coordinates inside the simulation cell
   type(context) simstate                        !! Field variables stored in PETSc vectors and DMDA objects
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!

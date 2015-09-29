@@ -13,26 +13,26 @@ subroutine spparks_vacmet(iter,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  integer :: ierr, my_rank
+  PetscInt :: ierr, my_rank
   integer (C_INT) :: myargc
   character*1 , target :: myargv
   type(c_ptr), target :: myspparks
-  integer, dimension(psx_g,psy_g) :: interface_loc
-  real*8, dimension(psx_g,psy_g) :: distance_interface_moved
-  real*8, dimension(psx_g,psy_g) :: vac_form_bias
-  integer :: x,y,z,xfine,yfine
-  integer :: nint
-  integer :: site_id, partial_x, partial_y, i1, i2, no_h2_already_evolved
+  PetscInt, dimension(psx_g,psy_g) :: interface_loc
+  PetscScalar, dimension(psx_g,psy_g) :: distance_interface_moved
+  PetscScalar, dimension(psx_g,psy_g) :: vac_form_bias
+  PetscInt :: x,y,z,xfine,yfine
+  PetscInt :: nint
+  PetscInt :: site_id, partial_x, partial_y, i1, i2, no_h2_already_evolved
   character*24 :: kmc_numel_string
-  integer, dimension(psx_g*kg_scale,psy_g*kg_scale) :: fine_kmc_array
-  real*8 :: average_from_fine
+  PetscInt, dimension(psx_g*kg_scale,psy_g*kg_scale) :: fine_kmc_array
+  PetscScalar :: average_from_fine
   type(context) simstate
-  integer, intent(in) :: iter  ! Iteration count
-  integer, dimension(psx_g,psy_g) :: coarse_vac_config
-  integer :: coarsex,coarsey
+  PetscInt, intent(in) :: iter  ! Iteration count
+  PetscInt, dimension(psx_g,psy_g) :: coarse_vac_config
+  PetscInt :: coarsex,coarsey
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  integer :: floor
-  real*8 :: max, min
+  PetscInt :: floor
+  PetscScalar :: max, min
 
   interface
 

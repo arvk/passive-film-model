@@ -2,10 +2,10 @@ subroutine distrib_params()
   use commondata
   use fields
   implicit none
-  include 'mpif.h'
+#include <finclude/petscsys.h>
   !!####Distribute simulation parameters to all child processors
 
-  integer :: ierr !! MPI error flag
+  PetscErrorCode ierr !! MPI error flag
 
   call mpi_bcast(psx_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(psy_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)

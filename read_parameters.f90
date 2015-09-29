@@ -2,9 +2,10 @@ subroutine read_parameters()
   use commondata
   use fields
   implicit none
+#include <finclude/petscsys.h>
   !!####Read simulation parameters from user-provided input script
   !!---
-  integer :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl, error_snapshots !! Variables to store exceptions raised during file-read
+  PetscInt :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl, error_snapshots !! Variables to store exceptions raised during file-read
   character*1 :: isdissolve !! Flag to indicate if film dissolution should be modeled
   character*1 :: useelectro !! Flag to indicate if electrical potential distribution should be modeled
 

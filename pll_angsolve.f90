@@ -21,8 +21,8 @@ subroutine para_angsolve(iter,ksp_ang,simstate)
   KSP ksp_ang !! Linear pyrite crystal shape solver
   KSPConvergedReason ang_converged_reason
   Vec solved_ang_vector,state,state_solved !! Vectors to store function values and solutions
-  integer, intent(in) :: iter  !! Current iteration number
-  integer :: x, y, z           !! Coordinates inside the simulation system
+  PetscInt, intent(in) :: iter  !! Current iteration number
+  PetscInt :: x, y, z           !! Coordinates inside the simulation system
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_ang, computeMatrix_ang, computeInitialGuess_ang
 
@@ -178,16 +178,16 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   PetscScalar  v(7)
   MatStencil   row(4,1),col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  real*8 :: D_opyr_max = 1E1   ! Truncation for the orientation field
-  real*8 :: M_opyr_max = 1.0E-26
-  real*8 :: M_opyr_min = 1.0E-29
-  real*8 :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
-  integer :: nocols
-  real*8 :: add_to_v_ij
-  real*8, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
+  PetscScalar :: D_opyr_max = 1E1   ! Truncation for the orientation field
+  PetscScalar :: M_opyr_max = 1.0E-26
+  PetscScalar :: M_opyr_min = 1.0E-29
+  PetscScalar :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
+  PetscInt :: nocols
+  PetscScalar :: add_to_v_ij
+  PetscScalar, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
   type(context) simstate
   PetscScalar zeromatentry(7)
-  integer :: matfield
+  PetscInt :: matfield
 
 
   call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
@@ -391,8 +391,8 @@ end subroutine ComputeMatrix_ang
 
 double precision function angdiff(or1,or2)
   implicit none
-  real*8, intent(in) :: or1,or2
-  real*8 :: Pi = 3.14159265d0
+  PetscScalar, intent(in) :: or1,or2
+  PetscScalar :: Pi = 3.14159265d0
 
   if (or1>or2) then
 

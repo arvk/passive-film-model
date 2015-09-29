@@ -2,11 +2,11 @@ subroutine distrib_pf()
   use commondata
   use fields
   implicit none
-  include 'mpif.h'
+#include <finclude/petscsys.h>
   !! **Distribute field variables -- different \(FeS\) phase fractions, chemical potential etc. to child processors**
 
-  integer :: x, y, z                      !! Coordinates inside the simulation system
-  integer :: ierr,status(MPI_STATUS_SIZE) !! MPI error and status flags
+  PetscInt :: x, y, z                      !! Coordinates inside the simulation system
+  PetscInt :: ierr,status(MPI_STATUS_SIZE) !! MPI error and status flags
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 

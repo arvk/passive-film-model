@@ -1,10 +1,11 @@
 subroutine seed_prng
   use commondata
   implicit none
+#include <finclude/petscsys.h>
   !! **Seed a PRNG from /dev/random or the current system date and time**
 
-  integer :: n,istat  !! PRNG seed indices
-  integer, dimension(8) :: datetime !! Current system date and time values
+  PetscInt :: n,istat  !! PRNG seed indices
+  PetscInt, dimension(8) :: datetime !! Current system date and time values
 
    open(89, file="/dev/urandom", access="stream", form="unformatted", action="read", status="old", iostat=istat)
   if (istat == 0) then

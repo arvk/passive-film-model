@@ -3,12 +3,13 @@ subroutine thermo
   use commondata
   use fields
   implicit none
+#include <finclude/petscsys.h>
   !! **Calculate thermodynamic properties of different \(FeS\) phases -- Phase boundaries, densities, surface energies and field mobilities.**
 
-  integer :: mu_x_10k                              !! Integer equal to 10000*mu. Useful for looping
-  real*8 :: my_mu                                  !! Chemical potential of sulfur
-  real*8 :: my_met, my_mkw, my_pht, my_pyr         !! Free energy of each FeS phase
-  real*8 :: min_met_mkw, min_mkw_pht, min_pht_pyr  !! Difference in free energy between two phases
+  PetscInt :: mu_x_10k                              !! Integer equal to 10000*mu. Useful for looping
+  PetscScalar :: my_mu                                  !! Chemical potential of sulfur
+  PetscScalar :: my_met, my_mkw, my_pht, my_pyr         !! Free energy of each FeS phase
+  PetscScalar :: min_met_mkw, min_mkw_pht, min_pht_pyr  !! Difference in free energy between two phases
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
