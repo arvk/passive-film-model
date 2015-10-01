@@ -5,6 +5,7 @@ subroutine kMC_filmdissolve(iter,simstate)
   implicit none
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
+#include <finclude/petscvec.h90>
 #include <finclude/petscmat.h>
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
@@ -26,12 +27,13 @@ subroutine kMC_filmdissolve(iter,simstate)
   PetscInt, dimension(psx_g*kg_scale,psy_g*kg_scale) :: fine_kmc_array
   PetscScalar :: average_from_fine
   type(context) simstate
-  PetscScalar no_of_env_cells
   PetscInt, intent(in) :: iter  ! Iteration count
-  DM latticemu
-  Vec onlymus_petscorder, onlymus_naturalorder, onlymus_maxstride, onlymus_alongz
   PetscScalar, pointer :: statepointer(:,:,:,:)
-
+  VecScatter gatherslicetoroot
+  Vec gatheredslice
+  PetscScalar, pointer :: gatheredpointer(:)
+  Vec slice_naturalorder
+  PetscScalar env_at_lattice_site_above, env_at_this_lattice_site
 
   interface
 
@@ -74,37 +76,34 @@ subroutine kMC_filmdissolve(iter,simstate)
   myargc = 0
   myargv = C_NULL_CHAR
 
+  call DMDACreateNaturalVector(simstate%lattval,slice_naturalorder,ierr)
+  call DMDAGlobalToNaturalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,slice_naturalorder,ierr)
+  call DMDAGlobalToNaturalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,slice_naturalorder,ierr)
 
-  call DMDACreate3D(MPI_COMM_WORLD,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE,DM_BOUNDARY_NONE, &
-       & DMDA_STENCIL_STAR,psx_g,psy_g,psz_g,PETSC_DECIDE,PETSC_DECIDE,PETSC_DECIDE,1, &
-       & 1,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,PETSC_NULL_INTEGER,latticemu,ierr)
+  call VecScatterCreateToAll(simstate%slice,gatherslicetoroot,gatheredslice,ierr)
+  call VecScatterBegin(gatherslicetoroot,slice_naturalorder,gatheredslice,INSERT_VALUES,SCATTER_FORWARD,ierr)
+  call VecScatterEnd(gatherslicetoroot,slice_naturalorder,gatheredslice,INSERT_VALUES,SCATTER_FORWARD,ierr)
 
-  call DMCreateGlobalVector(latticemu,onlymus_petscorder,ierr)
-  call VecStrideGather(simstate%slice,nenv,onlymus_petscorder,INSERT_VALUES,ierr)
+  call VecGetArrayF90(gatheredslice,gatheredpointer,ierr)
 
-  call DMDACreateNaturalVector(latticemu,onlymus_naturalorder,ierr)
-  call DMDAGlobalToNaturalBegin(latticemu,onlymus_petscorder,INSERT_VALUES,onlymus_naturalorder,ierr)
-  call DMDAGlobalToNaturalEnd(latticemu,onlymus_petscorder,INSERT_VALUES,onlymus_naturalorder,ierr)
-
-  call VecCreate(MPI_COMM_WORLD,onlymus_maxstride,ierr)
-  call VecSetBlockSize(onlymus_maxstride,psx_g*psy_g,ierr)
-  call VecSetSizes(onlymus_maxstride,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(onlymus_maxstride,ierr)
-  call VecCopy(onlymus_naturalorder,onlymus_maxstride,ierr)
-
-
-  call VecCreate(MPI_COMM_WORLD,onlymus_alongz,ierr)
-  call VecSetSizes(onlymus_alongz,PETSC_DECIDE,psz_g,ierr)
-  call VecSetUp(onlymus_alongz,ierr)
-
-     do x = 1,psx_g
-        do y = 1,psy_g
-           call VecStrideGather(onlymus_maxstride,(psx_g*(y-1))+(x-1),onlymus_alongz,INSERT_VALUES,ierr)
-           call VecSum(onlymus_alongz,no_of_env_cells,ierr)
-           interface_loc(x,y) = psz_g - no_of_env_cells
-           vac_form_bias(x,y) = (1.0d0-sin(3.14d0*x*y/800.0d0))*0.20d0
+  do x = 1,psx_g
+     do y = 1,psy_g
+        do z = psz_g-1,1,-1
+           env_at_this_lattice_site = gatheredpointer(nfields*(((z-1)*psx_g*psy_g)+((y-1)*psx_g)+(x-1))+nenv+1)
+           env_at_lattice_site_above = gatheredpointer(nfields*(((z-1+1)*psx_g*psy_g)+((y-1)*psx_g)+(x-1))+nenv+1)
+           if ((env_at_lattice_site_above-env_at_this_lattice_site).gt.0.1d0) then
+              interface_loc(x,y) = z
+              vac_form_bias(x,y) = (1.0d0-sin(3.14d0*x*y/800.0d0))*0.20d0
+              exit
+           end if
         end do
      end do
+  end do
+
+  call VecRestoreArrayF90(gatheredslice,gatheredpointer,ierr)
+
+  call VecScatterDestroy(gatherslicetoroot,ierr)
+  call VecDestroy(gatheredslice)
 
 
   if(isroot)then
