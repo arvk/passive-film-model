@@ -33,7 +33,10 @@ subroutine kMC_filmdissolve(iter,simstate)
   Vec gatheredslice
   PetscScalar, pointer :: gatheredpointer(:)
   Vec slice_naturalorder
-  PetscScalar env_at_lattice_site_above, env_at_this_lattice_site
+  PetscScalar env_at_lattice_site_above, env_at_this_lattice_site, pH_at_this_lattice_site
+  PetscScalar, dimension(0:(nphases-1)) :: raw_dissolution_rate, vac_form_prob
+  PetscInt fesphase
+  PetscScalar, parameter :: R = 8.314 ! J/mol-K
 
   interface
 
@@ -76,6 +79,14 @@ subroutine kMC_filmdissolve(iter,simstate)
   myargc = 0
   myargv = C_NULL_CHAR
 
+
+
+
+
+
+
+
+
   call DMDACreateNaturalVector(simstate%lattval,slice_naturalorder,ierr)
   call DMDAGlobalToNaturalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,slice_naturalorder,ierr)
   call DMDAGlobalToNaturalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,slice_naturalorder,ierr)
@@ -86,6 +97,9 @@ subroutine kMC_filmdissolve(iter,simstate)
 
   call VecGetArrayF90(gatheredslice,gatheredpointer,ierr)
 
+  vac_form_bias = 0.0d0
+  interface_loc = 0.0d0
+
   do x = 1,psx_g
      do y = 1,psy_g
         do z = psz_g-1,1,-1
@@ -93,7 +107,32 @@ subroutine kMC_filmdissolve(iter,simstate)
            env_at_lattice_site_above = gatheredpointer(nfields*(((z-1+1)*psx_g*psy_g)+((y-1)*psx_g)+(x-1))+nenv+1)
            if ((env_at_lattice_site_above-env_at_this_lattice_site).gt.0.1d0) then
               interface_loc(x,y) = z
-              vac_form_bias(x,y) = (1.0d0-sin(3.14d0*x*y/800.0d0))*0.20d0
+
+              pH_at_this_lattice_site = gatheredpointer(nfields*(((z-1)*psx_g*psy_g)+((y-1)*psx_g)+(x-1))+npH+1)
+
+              ! Define raw dissolution rates (in nm/s)
+              !---------------------------------------
+              raw_dissolution_rate(nmet) = 0.257d0
+              ! REF = Electrodissolution Kinetics of Iron in Chloride Solutions by Robert J. Chin* and Ken Nobe, JECS Vol 119, No. 11, Nov. 1972
+              ! Full explression is raw_dissolution_rate_met = 0.257d0*((0.0d0-log10(14-pH))**0.6)*exp((0.85*F/RT)*(V+0.45))
+              raw_dissolution_rate(nmkw) = 0.015d0
+              ! REF = CORROSION MECHANISMS AND MATERIAL PERFORMANCE IN ENVIRONMENTS CONTAINING HYDROGEN SULFIDE AND ELEMENTAL SULFUR, Liane Smith and Bruce Craig, SACNUC Workshop 22nd and 23rd October, 2008, Brussels and References therein
+              raw_dissolution_rate(npht) = 289.15*exp(0.0d0-(65900/(R*T)))*(10**(-1.46*pH_at_this_lattice_site))
+              ! REF = "Pyrrhotite dissolution in acidic media" Chirita. P. et.al. Applied Geochemistry 41 (2014) 1-10. DOI: 10.1016/j.apgeochem.2013.11.013
+              raw_dissolution_rate(npyr) = 0.00017244d0
+              ! REF = "Interferometric study of pyrite surface reactivity in acidic conditions", Asta, M. P. et.al. American Mineralogist, Volume 93, pages 508–519, 2008
+              raw_dissolution_rate(nenv) = 0.0d0
+
+              ! Convert dissolution rates to probabilities for kMC
+              do fesphase = 0,(nphases-1)
+                 vac_form_prob(fesphase) = max((raw_dissolution_rate(fesphase)-0.0055d0)/0.00077d0,0.0d0)
+              end do
+
+              ! Final probabilities are weighted by phase fractions at the interface
+              do fesphase = 0,(nphases-1)
+                 vac_form_bias(x,y) = vac_form_bias(x,y) + (vac_form_prob(fesphase)*(gatheredpointer(nfields*(((z-1)*psx_g*psy_g)+((y-1)*psx_g)+(x-1))+fesphase+1)/(1.0d0-env_at_this_lattice_site)))
+              end do
+
               exit
            end if
         end do
