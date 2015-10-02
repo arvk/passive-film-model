@@ -148,7 +148,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
            ! Calculate sulfur source and sinks due to phase transformations
            S_source_sink = 0.0d0
            do fesphase = 0,nphases-1
-              S_source_sink = S_source_sink + rhoS(fesphase)*(statepointer(fesphase,i,j,k)-exstatepointer(fesphase,i,j,k))
+              S_source_sink = S_source_sink + (rhoS(fesphase)*(statepointer(fesphase,i,j,k)-exstatepointer(fesphase,i,j,k))/dt)
            end do
 
            bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) - (S_source_sink/Chi)
