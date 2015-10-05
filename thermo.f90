@@ -61,7 +61,7 @@ subroutine thermo
 
   ! Assign field mobilities
   Mob_pf(npht,nmet) = 3.00E-08 ; Mob_pf(nmet,npht) = 3.00E-08
-  Mob_pf(nmkw,nmet) = 1.40E-06 ; Mob_pf(nmet,nmkw) = 1.40E-06
+  Mob_pf(nmkw,nmet) = 1.00E-04 ; Mob_pf(nmet,nmkw) = 1.00E-04
   Mob_pf(nmet,npyr) = 3.00E-08 ; Mob_pf(npyr,nmet) = 3.00E-08
   Mob_pf(npht,npyr) = 5.00E-07 ; Mob_pf(npyr,npht) = 5.00E-07
   Mob_pf(nmkw,npyr) = 3.00E-08 ; Mob_pf(npyr,nmkw) = 3.00E-08
@@ -72,16 +72,16 @@ subroutine thermo
   Mob_pf(nenv,npyr) = 4.00E-15 ; Mob_pf(npyr,nenv) = 4.00E-15
 
   ! Assign surface energies
-  sigma(nmkw,nenv) = 1E-12 ; sigma(nenv,nmkw) = 1E-12
-  sigma(nmkw,nmet) = 1E-12 ; sigma(nmet,nmkw) = 1E-12
-  sigma(nmkw,npht) = 1E-12 ; sigma(npht,nmkw) = 1E-12
-  sigma(npht,nenv) = 1E-12 ; sigma(nenv,npht) = 1E-12
-  sigma(npht,nmet) = 1E-12 ; sigma(nmet,npht) = 1E-12
-  sigma(nmet,nenv) = 1E-12 ; sigma(nenv,nmet) = 1E-12
-  sigma(npyr,nmet) = 1E-12 ; sigma(nmet,npyr) = sigma_pyr_0
-  sigma(npyr,nmkw) = 1E-12 ; sigma(nmkw,npyr) = sigma_pyr_0
-  sigma(npyr,npht) = 1E-12 ; sigma(npht,npyr) = sigma_pyr_0
-  sigma(npyr,nenv) = 1E-12 ; sigma(nenv,npyr) = sigma_pyr_0
+  sigma(nmkw,nenv) = 1.00E-16 ; sigma(nenv,nmkw) = 1.00E-16
+  sigma(nmkw,nmet) = 1.00E-16 ; sigma(nmet,nmkw) = 1.00E-16
+  sigma(nmkw,npht) = 1.00E-16 ; sigma(npht,nmkw) = 1.00E-16
+  sigma(npht,nenv) = 1.00E-16 ; sigma(nenv,npht) = 1.00E-16
+  sigma(npht,nmet) = 1.00E-16 ; sigma(nmet,npht) = 1.00E-16
+  sigma(nmet,nenv) = 1.00E-16 ; sigma(nenv,nmet) = 1.00E-16
+  sigma(npyr,nmet) = sigma_pyr_0 ; sigma(nmet,npyr) = sigma_pyr_0
+  sigma(npyr,nmkw) = sigma_pyr_0 ; sigma(nmkw,npyr) = sigma_pyr_0
+  sigma(npyr,npht) = sigma_pyr_0 ; sigma(npht,npyr) = sigma_pyr_0
+  sigma(npyr,nenv) = sigma_pyr_0 ; sigma(nenv,npyr) = sigma_pyr_0
 
   ! Assign relative permittivity to FeS phases
   epsilon0 = 8.854187817E-12 ! Define vacuum permittivity

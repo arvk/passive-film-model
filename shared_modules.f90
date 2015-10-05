@@ -85,14 +85,14 @@ module thermo_constants
   PetscScalar, parameter :: R = 8.3144621
 
   ! Double well potential heights
-  PetscScalar, parameter :: double_well_barrier = 100.0d0 ! in J/mol
+  PetscScalar, parameter :: double_well_barrier = 20.0d0 ! in J/mol
   PetscScalar, parameter :: hill = (16.0d0/3.0d0)*double_well_barrier
   !! Magnitude of the barrier in the double-well potential
 
   PetscScalar, allocatable :: Mob_pf(:,:) !! Field mobilities
 
   PetscScalar, allocatable :: sigma(:,:)  !! Energy of interfaces between phases
-  PetscScalar, parameter :: sigma_pyr_0 = 1E-12 !! Energy of interfaces between pyrite and other phases
+  PetscScalar, parameter :: sigma_pyr_0 = 1E-16 !! Energy of interfaces between pyrite and other phases
 
   PetscScalar, allocatable :: w_pf(:)  !! Free energy of different FeS phases
 
