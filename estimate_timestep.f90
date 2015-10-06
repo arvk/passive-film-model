@@ -30,7 +30,7 @@ subroutine estimate_timestep
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  dt = min(dt_stable_phase_field,dt_stable_diffusion)/0.75d0
+  dt = 0.1d0
 
   if (isroot) write(6,'(A,F9.5,A)') " INFO: Timestep for phase-field integration is ",dt, " seconds."
 
