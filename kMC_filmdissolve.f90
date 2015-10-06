@@ -142,8 +142,8 @@ subroutine kMC_filmdissolve(iter,simstate)
   call VecRestoreArrayF90(gatheredslice,gatheredpointer,ierr)
 
   call VecScatterDestroy(gatherslicetoroot,ierr)
-  call VecDestroy(gatheredslice)
-
+  call VecDestroy(gatheredslice,ierr)
+  call VecDestroy(slice_naturalorder,ierr)
 
   if(isroot)then
 
