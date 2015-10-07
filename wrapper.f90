@@ -89,9 +89,9 @@ program passive_film_model
      call KSPCreate(MPI_COMM_WORLD,ksp_ang,ierr); call solve_ang(iter,ksp_ang,simstate); call KSPDestroy(ksp_ang,ierr)
      call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr); call solve_pot(iter,snes_pot,simstate); call SNESDestroy(snes_pot,ierr)
 
-     call kMC_filmdissolve(iter,simstate)
-     call kMC_h2form(iter,simstate)
-     call kMC_vacdebonding(iter,simstate)
+     if (mod(iter,kmc_freq).eq.0) call kMC_filmdissolve(iter,simstate)
+     if (mod(iter,kmc_freq).eq.0) call kMC_h2form(iter,simstate)
+     if (mod(iter,kmc_freq).eq.0) call kMC_vacdebonding(iter,simstate)
 
      if (mod(iter,stat_freq).eq.0) then
         do fesphase = 0,(nphases-1)
