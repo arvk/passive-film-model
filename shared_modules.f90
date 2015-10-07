@@ -41,7 +41,7 @@ module commondata
   PetscInt :: nomc              !! Number of PF iterations
   PetscInt :: T                 !! Temperature of the simulation box
   PetscScalar :: pH_in              !! Scalar pH input
-  PetscInt :: noimg             !! Number of output files
+  PetscInt :: num_images             !! Number of output files
   PetscScalar :: metal_potential    !! Electric potential of the metal
   PetscBool :: include_dissolve  !! Include film dissolution
   PetscBool :: include_electro   !! Include potential distribution

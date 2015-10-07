@@ -31,7 +31,7 @@ subroutine write_parameters()
      write(8000,'(A11)') "ELECTRO = N"
   end if
 
-  write(8000,'(A12,I5.5)') "SNAPSHOTS = ", noimg
+  write(8000,'(A12,I5.5)') "SNAPSHOTS = ", num_images
 
   close(8000)
 

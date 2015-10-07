@@ -151,18 +151,18 @@ subroutine read_parameters()
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !! Input Tag = SNAPSHOTS ; How many output snapshots?
-  ! Output variable = noimg
+  ! Output variable = num_images
   call system("cat param.in | sed 's/!.*//g' | grep '^ *SNAPSHOTS' | sed 's/SNAPSHOTS//g'| sed 's/=//g' > .nosnapshots.readin")
-  open(unit = 7109, file = ".nosnapshots.readin", status = 'old');   read(7109,*,IOSTAT=error_snapshots) noimg ; close(7109)
+  open(unit = 7109, file = ".nosnapshots.readin", status = 'old');   read(7109,*,IOSTAT=error_snapshots) num_images ; close(7109)
   call system ("rm .nosnapshots.readin")
 
   if (error_snapshots .lt. 0) then ! If no snapshots count is read in
-     noimg = min(nomc,100)
+     num_images = min(nomc,100)
      write(6,*) "WARNING: No SNAPSHOTS specified. 100 output files will be created."
   end if
 
-  if (noimg .le. 0) then ! If number of snapshots is negative
-     noimg = min(nomc,100)
+  if (num_images .le. 0) then ! If number of snapshots is negative
+     num_images = min(nomc,100)
      write(6,*) "WARNING: Error in reading SNAPSHOTS. 100 output files will be created."
   end if
 

@@ -33,6 +33,8 @@ program passive_film_model
   PetscInt :: x,y,z                              !! Coordinates inside the simulation cell
   PetscReal :: phase_volume_in_simcell(0:(nphases-1))  !! Number of gridpoints in the simulation cell occupied by a given phase
   PetscInt :: fesphase                        !! Index to identify the type of FeS phase
+  PetscViewer :: snapshot_writer              !! Pointer to write-out simcell snapshot to file
+  character*5 :: image_ID                       !! Index of current image (derived from current iteration number)
   type(context) simstate                        !! Field variables stored in PETSc vectors and DMDA objects
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
@@ -100,9 +102,15 @@ program passive_film_model
            if (isroot) write(6,'(A,F9.0,A,F10.2,A,F10.2,A,F10.2,A,F10.2,A,F10.2)') " INFO: TIME= ", iter*dt, " s. MET= ", phase_volume_in_simcell(nmet), " MKW= ", phase_volume_in_simcell(nmkw), " PHT= ", phase_volume_in_simcell(npht), " PYR= ", phase_volume_in_simcell(npyr), " ENV= ", phase_volume_in_simcell(nenv)
         end if
 
+     if (mod(iter,(nomc/num_images)).eq.0) then
+        write(image_ID,'(I5.5)') iter/max(floor(real(nomc/num_images)),1)
+        call PetscViewerASCIIOpen(MPI_COMM_WORLD,"SIMCELL_"//image_ID//".out",snapshot_writer,ierr)
+        call VecView(simstate%slice,snapshot_writer,ierr)
+        call PetscViewerDestroy(snapshot_writer,ierr)
+     end if
+
   end do
 
-  call VecView(simstate%slice,PETSC_NULL_OBJECT,ierr)
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
