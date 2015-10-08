@@ -30,7 +30,7 @@ subroutine estimate_timestep
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  dt = 0.1d0
+  dt = 0.5d0
 
   if (isroot) write(6,'(A,F9.5,A)') " INFO: Timestep for phase-field integration is ",dt, " seconds."
 

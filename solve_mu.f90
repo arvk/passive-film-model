@@ -156,7 +156,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
            ! INCLUDE SULFIDATION
            if ((statepointer(nenv,i,j,min(k+3,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k,simstate%startz))).gt.0.1d0) then
               do fesphase = nmet,npyr
-                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + ((2.0d0/3.0d0)*((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/(dpf*drho_dmu(fesphase)))*statepointer(fesphase,i,j,k))
+                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + ((4.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/(dpf*drho_dmu(fesphase)))*statepointer(fesphase,i,j,k))
               end do
               bpointer(nmus,i,j,k) = min(bpointer(nmus,i,j,k),avg_mu_env/dt)
            end if
