@@ -63,9 +63,9 @@ subroutine thermo
   Mob_pf(npht,nmet) = 3.00E-08 ; Mob_pf(nmet,npht) = 3.00E-08
   Mob_pf(nmkw,nmet) = 5.00E-06 ; Mob_pf(nmet,nmkw) = 5.00E-06
   Mob_pf(nmet,npyr) = 3.00E-08 ; Mob_pf(npyr,nmet) = 3.00E-08
-  Mob_pf(npht,npyr) = 5.00E-07 ; Mob_pf(npyr,npht) = 5.00E-07
+  Mob_pf(npht,npyr) = 5.00E-06 ; Mob_pf(npyr,npht) = 5.00E-06
   Mob_pf(nmkw,npyr) = 3.00E-08 ; Mob_pf(npyr,nmkw) = 3.00E-08
-  Mob_pf(npht,nmkw) = 6.00E-07 ; Mob_pf(nmkw,npht) = 6.00E-07
+  Mob_pf(npht,nmkw) = 5.00E-06 ; Mob_pf(nmkw,npht) = 5.00E-06
   Mob_pf(npht,nenv) = 4.00E-15 ; Mob_pf(nenv,npht) = 4.00E-15
   Mob_pf(nmkw,nenv) = 4.00E-15 ; Mob_pf(nenv,nmkw) = 4.00E-15
   Mob_pf(nmet,nenv) = 4.00E-15 ; Mob_pf(nenv,nmet) = 4.00E-15
