@@ -52,7 +52,7 @@ module commondata
   PetscScalar :: dt                          !! Timestep for PF evolution
   PetscScalar :: avg_mu_env                  !! Sulfur chemical potential in the environment
   PetscScalar :: sulfidation_rate            !! Sulfidation rate / Film growth rate in m/s
-  PetscInt :: kg_scale = 5               !! Number of KMC grid points per PF grid
+  PetscInt :: kg_scale = 100             !! Number of KMC grid points per PF grid
   PetscInt :: kmc_freq = 100             !! Frequency with which kMC calculations are done
   PetscInt :: stat_freq = 200            !! Simulation stats are reported once every stat_freq iterations
 
