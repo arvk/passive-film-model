@@ -32,6 +32,7 @@ program passive_film_model
   PetscInt :: status(MPI_STATUS_SIZE)       !! MPI status variables
   PetscInt :: x,y,z                              !! Coordinates inside the simulation cell
   PetscReal :: phase_volume_in_simcell(0:(nphases-1))  !! Number of gridpoints in the simulation cell occupied by a given phase
+  PetscScalar :: metal_content_in_simcell     !! Amount of metal phase in the simulation cell
   PetscInt :: fesphase                        !! Index to identify the type of FeS phase
   PetscViewer :: snapshot_writer              !! Pointer to write-out simcell snapshot to file
   character*5 :: image_ID                       !! Index of current image (derived from current iteration number)
@@ -77,6 +78,8 @@ program passive_film_model
 
   call calculate_sulfidation_rates()    ! Calculate sulfidation rates on different FeS phases
 
+  call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
+
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
@@ -93,7 +96,7 @@ program passive_film_model
 
      if (mod(iter,kmc_freq).eq.0) call kMC_filmdissolve(iter,simstate)
      if (mod(iter,kmc_freq).eq.0) call kMC_h2form(iter,simstate)
-     if (mod(iter,kmc_freq).eq.0) call kMC_vacdebonding(iter,simstate)
+     if (mod(iter,kmc_freq).eq.0) call kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
 
      if (mod(iter,stat_freq).eq.0) then
         do fesphase = 0,(nphases-1)

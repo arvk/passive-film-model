@@ -1,4 +1,4 @@
-subroutine kMC_vacdebonding(iter,simstate)
+subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
@@ -33,6 +33,8 @@ subroutine kMC_vacdebonding(iter,simstate)
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscInt :: floor
   PetscScalar :: max, min
+  PetscScalar :: metal_content_in_simcell                   !! Amount of metal phase in the simulation cell
+  PetscScalar :: metal_content_in_simcell_last_timestep     !! Amount of metal phase in the simulation cell
 
   interface
 
@@ -76,6 +78,9 @@ subroutine kMC_vacdebonding(iter,simstate)
   myargv = C_NULL_CHAR
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
+
+  metal_content_in_simcell_last_timestep = metal_content_in_simcell
+  call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
 
   if(isroot)then
 
