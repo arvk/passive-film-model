@@ -1,4 +1,4 @@
-subroutine kMC_filmdissolve(iter,simstate)
+subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
@@ -37,6 +37,7 @@ subroutine kMC_filmdissolve(iter,simstate)
   PetscScalar, dimension(0:(nphases-1)) :: raw_dissolution_rate, vac_form_prob
   PetscInt fesphase
   PetscScalar, parameter :: R = 8.314 ! J/mol-K
+  PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
 
   interface
 
@@ -261,6 +262,8 @@ subroutine kMC_filmdissolve(iter,simstate)
 
      call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
+
+     call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Wait for ALL RANKS to complete coupling the kMC to PF before erasing the 'toucouple' file
   if(isroot) call system('rm -f tocouple')

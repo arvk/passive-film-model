@@ -2,6 +2,7 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
+  use diffusion_constants
   implicit none
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
@@ -33,8 +34,9 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscInt :: floor
   PetscScalar :: max, min
-  PetscScalar :: metal_content_in_simcell                   !! Amount of metal phase in the simulation cell
+  PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
   PetscScalar :: metal_content_in_simcell_last_timestep     !! Amount of metal phase in the simulation cell
+  PetscScalar :: DeltaC
 
   interface
 
@@ -82,6 +84,9 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
   metal_content_in_simcell_last_timestep = metal_content_in_simcell
   call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
 
+! Calculate \DeltaC => Vacancy concentration at the metal-mkw interface
+  DeltaC = ((metal_content_in_simcell_last_timestep - metal_content_in_simcell)*(10*dpf*dpf))/(D_Fe_met*psx_g*psy_g*dt*kmc_freq)
+
   if(isroot)then
 
      call system('rm -f vacmet.spparksscript')
@@ -96,16 +101,16 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
      write(666,*) 'create_box cell'
      write(666,*) 'create_sites box'
      write(666,*) 'set i1 value 2 region cell'
-     write(666,*) 'ecoord 0  0.2'
-     write(666,*) 'ecoord 1  0.1'
-     write(666,*) 'ecoord 2 -0.0'
-     write(666,*) 'ecoord 3 -0.1'
-     write(666,*) 'ecoord 4 -0.2'
-     write(666,*) 'barrier hop 0.2'
+     write(666,*) 'ecoord 0  0.20'
+     write(666,*) 'ecoord 1  0.15'
+     write(666,*) 'ecoord 2  0.05'
+     write(666,*) 'ecoord 3  0.00'
+     write(666,*) 'ecoord 4 -0.05'
+     write(666,*) 'barrier hop 0.05'
      write(666,*) 'solve_style tree'
      write(666,*) 'sector yes'
      write(666,'(A,F16.8,A)') 'dump mydump text ', dt*kmc_freq, ' raw_vacmet_output x y i1'
-     write(666,*) 'set i1 value 1 fraction 0.01'
+     write(666,*) 'set i1 value 1 fraction ', max(min(DeltaC,0.99d0),0.01d0)
      write(666,'(A,F16.8)') 'dump_modify mydump delay ', dt*kmc_freq
      write(666,'(A,F16.8)') 'run ', dt*kmc_freq
      close(666)
@@ -131,6 +136,8 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
 
   call system('rm -f input.vacmet')
   open (unit = 667, file = 'vacmet_spparks_output.template', status = 'old')
+
+  coarse_vac_config = 0.0d0
 
   do x = 1,psx_g*psy_g*kg_scale*kg_scale
      read(667,'(I5, I5, I4)') partial_x, partial_y, i1
