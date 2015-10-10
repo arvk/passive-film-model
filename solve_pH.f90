@@ -10,7 +10,6 @@ subroutine solve_pH(iter,ksp_pH,simstate)
 #include <finclude/petscmat.h>
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
 #include <finclude/petscdm.h>
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
@@ -26,11 +25,11 @@ subroutine solve_pH(iter,ksp_pH,simstate)
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_pH, computeMatrix_pH, computeInitialGuess_pH
 
+  call KSPSetDM(ksp_pH,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_pH,computeRHS_pH,simstate,ierr)
   call KSPSetComputeOperators(ksp_pH,computeMatrix_pH,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_pH,computeInitialGuess_pH,simstate,ierr)
 
-  call KSPSetDM(ksp_pH,simstate%lattval,ierr)
   call KSPSetFromOptions(ksp_pH,ierr)
   call KSPSolve(ksp_pH,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_pH,state_solved,ierr)
@@ -80,7 +79,7 @@ subroutine computeInitialGuess_pH(ksp_pH,b,simstate,ierr)
 
   KSP ksp_pH
   PetscErrorCode ierr
-  Vec state, b
+  Vec b
   type(context) simstate
 
   call VecCopy(simstate%slice,b,ierr)
@@ -124,22 +123,39 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
 
   KSP ksp_pH
   PetscErrorCode ierr
-  Vec onlypH, b
-  PetscInt :: i,j,k
+  Vec b
+  PetscInt :: i,j,k,field,fesphase
   type(context) simstate
+  PetscScalar, pointer :: statepointer(:,:,:,:), bpointer(:,:,:,:)
 
-  call VecCreate(MPI_COMM_WORLD,onlypH,ierr)
-  call VecSetSizes(onlypH,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(onlypH,ierr)
-  call VecStrideGather(simstate%slice,npH,onlypH,INSERT_VALUES,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,b,bpointer,ierr)
 
-  call VecScale(onlypH,(1.0d0/dt),ierr)
-  call VecStrideScatter(onlypH,npH,b,INSERT_VALUES,ierr)
+  do k=simstate%startz,simstate%startz+simstate%widthz-1
+     do j=simstate%starty,simstate%starty+simstate%widthy-1
+        do i=simstate%startx,simstate%startx+simstate%widthx-1
+
+           do field = 0, (nfields-1)
+              bpointer(field,i,j,k) = 0.0d0
+           end do
+
+           bpointer(npH,i,j,k) = statepointer(npH,i,j,k) * (1.0d0/dt)
+
+           if ((statepointer(nenv,i,j,min(k+3,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k,simstate%startz))).gt.0.1d0) then
+              do fesphase = nmet,npyr
+                 statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) = statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) + ((8.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/(dpf))*statepointer(fesphase,i,j,k))
+              end do
+           end if
+
+        end do
+     end do
+  end do
+
+  call DMDAVecRestoreArrayF90(simstate%lattval,b,bpointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
   call VecAssemblyBegin(b,ierr)
   call VecAssemblyEnd(b,ierr)
-
-  call VecDestroy(onlypH,ierr)
   return
 end subroutine computeRHS_pH
 
@@ -285,23 +301,13 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
            row(MatStencil_k,1) = k
            row(MatStencil_c,1) = npH
 
-
-           if (k.eq.psz_g-1) then
-
-              v(1) = 1.0d0
-              col(MatStencil_i,1) = i
-              col(MatStencil_j,1) = j
-              col(MatStencil_k,1) = k
-              col(MatStencil_c,1) = npH
-
-              call MatSetValuesStencil(matprecond,1,row,1,col,v,INSERT_VALUES,ierr)
-
-           else
-
-              D = D_H_env*statepointer(nenv,i,j,k)
-
               nocols = 0
               add_to_v_ij = 0.0d0
+
+
+           if ((k .ne. (psz_g-1)) .and. (statepointer(nenv,i,j,k) .gt. 0.1d0)) then
+
+              D = D_H_env
 
               if (k.gt.0) then
                  nocols = nocols + 1
@@ -369,6 +375,8 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
                  add_to_v_ij = add_to_v_ij + v(nocols)
               end if
 
+           end if
+
               nocols = nocols + 1
               v(nocols) = (1.0d0/dt) - add_to_v_ij
               col(MatStencil_i,nocols) = i
@@ -378,7 +386,6 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
 
               call MatSetValuesStencil(matprecond,1,row,nocols,col,v,INSERT_VALUES,ierr)
 
-           end if
 
         end do
      end do
