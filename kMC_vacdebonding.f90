@@ -37,6 +37,8 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
   PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
   PetscScalar :: metal_content_in_simcell_last_timestep     !! Amount of metal phase in the simulation cell
   PetscScalar :: DeltaC
+  PetscRandom :: random_context !! Context to seed and generate random numbers
+  PetscReal :: random_number  !! Pseudo random number generated from a PETSc context
 
   interface
 
@@ -89,6 +91,8 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
 
   if(isroot)then
 
+     call PetscRandomCreate(PETSC_COMM_SELF,random_context,ierr)
+     call PetscRandomSetType(random_context,PETSCRAND,ierr)
      call system('rm -f vacmet.spparksscript')
      open(unit = 666, file = 'vacmet.spparksscript', status = 'new')
      write(666,*) 'seed 1273'
@@ -110,10 +114,19 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
      write(666,*) 'solve_style tree'
      write(666,*) 'sector yes'
      write(666,'(A,F16.8,A)') 'dump mydump text ', dt*kmc_freq, ' raw_vacmet_output x y i1'
-     write(666,*) 'set i1 value 1 fraction ', max(min(DeltaC,0.99d0),0.01d0)
+
+     do x = 0,psx_g-1
+        do y = 0,psy_g-1
+           call PetscRandomGetValueReal(random_context,random_number,ierr)
+           write(666,'(A,F6.3,A,I5,A,I5,A,I5,A,I5)') ' set i1 value 1 fraction ', max(min(DeltaC*2.0d0*random_number,0.99d0),0.01d0), ' if x > ',x*kg_scale,  ' if x < ',(x+1)*kg_scale,  ' if y > ',y*kg_scale,  ' if y < ',(y+1)*kg_scale
+        end do
+     end do
+
      write(666,'(A,F16.8)') 'dump_modify mydump delay ', dt*kmc_freq
      write(666,'(A,F16.8)') 'run ', dt*kmc_freq
      close(666)
+
+     call PetscRandomDestroy(random_context,ierr)
   end if
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
