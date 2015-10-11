@@ -51,6 +51,7 @@ subroutine thermo
   rho_env = 0.0015d0*(13303/T)  ! REF= 0.15% assumed
 
 
+  rhoFe = 140984.780662d0                ! REF= Wikipedia
   rhoS(nmkw) = 48683.0d0           ! REF= Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
   rhoS(nmet) = 0.0015d0*140401     ! REF= 0.15% assumed
   rhoS(npht) = 52275.0d0           ! REF= de Villiers et. al. American Minerologist, 95(1): 148-152

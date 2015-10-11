@@ -2,6 +2,7 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
+  use thermo_constants
   implicit none
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
@@ -248,6 +249,13 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
 
      do x = simstate%startx , simstate%startx + simstate%widthx-1
         do y = simstate%starty , simstate%starty + simstate%widthy-1
+
+           do z=simstate%startz,simstate%startz+simstate%widthz-1
+              if ((statepointer(nenv,x,y,min(z+3,simstate%startz+simstate%widthz-1))-statepointer(nenv,x,y,max(z,simstate%startz))).gt.0.1d0) then
+                 statepointer(npH,x,y,min(z+3,simstate%startz+simstate%widthz-1)) = max(statepointer(npH,x,y,min(z+3,simstate%startz+simstate%widthz-1)) - (distance_interface_moved(x+1,y+1)*rhoFe),10**(0-pH_in))
+              end if
+           end do
+
            do z = max(simstate%startz,interface_loc(x+1,y+1)) , simstate%startz + simstate%widthz-1
               statepointer(nmet,x,y,z) = 0.0d0
               statepointer(nmkw,x,y,z) = 0.0d0

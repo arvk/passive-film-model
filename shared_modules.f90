@@ -104,6 +104,7 @@ module thermo_constants
   PetscScalar, allocatable :: drho_dmu(:)  !! Derivative of sulfur concentration with chemical potential
 
   PetscScalar, allocatable :: rhoS(:)  !! Sulfur density in different FeS phases
+  PetscScalar :: rhoFe                 !! Density of solid Fe (moles/m^3)
 
   PetscScalar, allocatable :: sulf_rate_gas(:) !! Collected sulfidation rates for different FeS phases in gaseous environments
   PetscScalar, allocatable :: sulf_rate_liq(:) !! Collected sulfidation rates for different FeS phases in gaseous environments
