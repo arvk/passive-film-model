@@ -66,6 +66,7 @@ subroutine thermo
   Mob_pf(nenv,npyr) = 4.00E-15 ; Mob_pf(npyr,nenv) = 4.00E-15
 
   ! Assign surface energies
+  sigma_pyr_0 = 1.00E-16
   sigma(nmkw,nenv) = 1.00E-16 ; sigma(nenv,nmkw) = 1.00E-16
   sigma(nmkw,nmet) = 1.00E-16 ; sigma(nmet,nmkw) = 1.00E-16
   sigma(nmkw,npht) = 1.00E-16 ; sigma(npht,nmkw) = 1.00E-16

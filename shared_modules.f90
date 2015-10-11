@@ -91,7 +91,7 @@ module thermo_constants
   PetscScalar, allocatable :: Mob_pf(:,:) !! Field mobilities
 
   PetscScalar, allocatable :: sigma(:,:)  !! Energy of interfaces between phases
-  PetscScalar, parameter :: sigma_pyr_0 = 1E-16 !! Energy of interfaces between pyrite and other phases
+  PetscScalar :: sigma_pyr_0              !! Energy of interfaces between pyrite and other phases
 
   PetscScalar, allocatable :: w_pf(:)  !! Free energy of different FeS phases
 
