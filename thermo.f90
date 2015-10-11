@@ -44,14 +44,7 @@ subroutine thermo
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Density of sulfur in each phase (no. of moles of S / m^3 )
-  rho_mkw = 48683.0d0           ! REF= Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
-  rho_met = 0.0015d0*140401     ! REF= 0.15% assumed
-  rho_pht = 52275.0d0           ! REF= de Villiers et. al. American Minerologist, 95(1): 148-152
-  rho_pyr = 2.0d0*41667.0d0     ! REF= Muscat et. al. PRB 65(5):054107, 2002
-  rho_env = 0.0015d0*(13303/T)  ! REF= 0.15% assumed
-
-
-  rhoFe = 140984.780662d0                ! REF= Wikipedia
+  rhoFe = 140984.780662d0          ! REF= Wikipedia
   rhoS(nmkw) = 48683.0d0           ! REF= Mkw density data from Lennie et. al. Mineralogical Magazine, December, Vol. 59, pp. 677-683
   rhoS(nmet) = 0.0015d0*140401     ! REF= 0.15% assumed
   rhoS(npht) = 52275.0d0           ! REF= de Villiers et. al. American Minerologist, 95(1): 148-152

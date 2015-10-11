@@ -81,7 +81,6 @@ module thermo_constants
   save
 
   PetscScalar :: mus_met_mkw_eqb, mus_mkw_pht_eqb, mus_pht_pyr_eqb !! mu_S boundary between phases
-  PetscScalar :: rho_met, rho_mkw, rho_pht, rho_pyr, rho_env       !! Sulfur density
   PetscScalar, parameter :: R = 8.3144621
 
   ! Double well potential heights
