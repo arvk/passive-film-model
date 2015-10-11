@@ -35,7 +35,11 @@ subroutine diffusivities
 
   !! $$D_{Fe}^{pyrrhotite} = 10^{-\frac{7056}{R T}-2.679}$$
   !! Reference :  Mechanisms Governing the Growth, Reactivity and Stability of Iron Sulfides, Ph.D Thesis William Herbert, MIT
-  D_Fe_pht = 10**((0-7056/T)-2.679)
+  if (T.lt.(273.15+315)) then
+     D_Fe_pht = 10**((0-7056/T)-2.679)
+  else
+     D_Fe_pht = 10**((0-4220/T)-7.311)
+  end if
 
   !! $$D_{S}^{pyrrhotite} = D_{Fe}^{pyrrhotite}/10$$
   !! Reference : Assumption of one order of magnitude lesser
