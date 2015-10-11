@@ -1,4 +1,4 @@
-subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
+subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_context)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
@@ -37,7 +37,7 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
   PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
   PetscScalar :: metal_content_in_simcell_last_timestep     !! Amount of metal phase in the simulation cell
   PetscScalar :: DeltaC
-  PetscRandom :: random_context !! Context to seed and generate random numbers
+  PetscRandom, intent(inout) :: random_context !! Context to seed and generate random numbers
   PetscReal :: random_number  !! Pseudo random number generated from a PETSc context
 
   interface
@@ -91,8 +91,6 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
 
   if(isroot)then
 
-     call PetscRandomCreate(PETSC_COMM_SELF,random_context,ierr)
-     call PetscRandomSetType(random_context,PETSCRAND,ierr)
      call system('rm -f vacmet.spparksscript')
      open(unit = 666, file = 'vacmet.spparksscript', status = 'new')
      write(666,*) 'seed 1273'
@@ -126,7 +124,6 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
      write(666,'(A,F16.8)') 'run ', dt*kmc_freq
      close(666)
 
-     call PetscRandomDestroy(random_context,ierr)
   end if
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 

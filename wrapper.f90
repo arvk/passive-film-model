@@ -36,6 +36,7 @@ program passive_film_model
   PetscInt :: fesphase                        !! Index to identify the type of FeS phase
   PetscViewer :: snapshot_writer              !! Pointer to write-out simcell snapshot to file
   character*5 :: image_ID                       !! Index of current image (derived from current iteration number)
+  PetscRandom :: random_context                 !! Context to seed and generate random numbers
   type(context) simstate                        !! Field variables stored in PETSc vectors and DMDA objects
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
@@ -80,6 +81,9 @@ program passive_film_model
 
   call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
 
+  call PetscRandomCreate(PETSC_COMM_SELF,random_context,ierr)
+  call PetscRandomSetType(random_context,PETSCRAND,ierr)
+
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
@@ -94,9 +98,9 @@ program passive_film_model
      call KSPCreate(MPI_COMM_WORLD,ksp_ang,ierr); call solve_ang(iter,ksp_ang,simstate); call KSPDestroy(ksp_ang,ierr)
      call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr); call solve_pot(iter,snes_pot,simstate); call SNESDestroy(snes_pot,ierr)
 
-     if (mod(iter,kmc_freq).eq.0) call kMC_vacdebonding(iter,simstate,metal_content_in_simcell)
+     if (mod(iter,kmc_freq).eq.0) call kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_context)
      if (mod(iter,kmc_freq).eq.0) call kMC_h2form(iter,simstate)
-     if (mod(iter,kmc_freq).eq.0) call kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
+     if (mod(iter,kmc_freq).eq.0) call kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_context)
 
      if (mod(iter,stat_freq).eq.0) then
         do fesphase = 0,(nphases-1)
@@ -121,6 +125,7 @@ program passive_film_model
   call VecDestroy(simstate%slice,ierr)
   call VecDestroy(simstate%exslice,ierr)
   call DMDestroy(simstate%lattval,ierr)
+  call PetscRandomDestroy(random_context,ierr)
 
   ! Finalize Parallelization
   call PetscFinalize(ierr)
