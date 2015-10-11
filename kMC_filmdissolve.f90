@@ -37,7 +37,6 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
   PetscScalar env_at_lattice_site_above, env_at_this_lattice_site, pH_at_this_lattice_site
   PetscScalar, dimension(0:(nphases-1)) :: raw_dissolution_rate, vac_form_prob
   PetscInt fesphase
-  PetscScalar, parameter :: R = 8.314 ! J/mol-K
   PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
 
   interface
