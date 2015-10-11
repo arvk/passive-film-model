@@ -38,6 +38,8 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
   PetscScalar, dimension(0:(nphases-1)) :: raw_dissolution_rate, vac_form_prob
   PetscInt fesphase
   PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
+  PetscRandom :: random_context !! Context to seed and generate random numbers
+  PetscReal :: random_number  !! Pseudo random number generated from a PETSc context
 
   interface
 
@@ -96,6 +98,9 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
   call VecScatterBegin(gatherslicetoroot,slice_naturalorder,gatheredslice,INSERT_VALUES,SCATTER_FORWARD,ierr)
   call VecScatterEnd(gatherslicetoroot,slice_naturalorder,gatheredslice,INSERT_VALUES,SCATTER_FORWARD,ierr)
 
+  call PetscRandomCreate(PETSC_COMM_SELF,random_context,ierr)
+  call PetscRandomSetType(random_context,PETSCRAND,ierr)
+
   call VecGetArrayF90(gatheredslice,gatheredpointer,ierr)
 
   vac_form_bias = 0.0d0
@@ -126,7 +131,8 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
 
               ! Convert dissolution rates to probabilities for kMC
               do fesphase = 0,(nphases-1)
-                 vac_form_prob(fesphase) = max((raw_dissolution_rate(fesphase)-0.0055d0)/0.00077d0,0.0d0)
+                 call PetscRandomGetValueReal(random_context,random_number,ierr)
+                 vac_form_prob(fesphase) = max(((2.0d0*random_number*raw_dissolution_rate(fesphase))-0.0055d0)/0.00077d0,0.0d0)
               end do
 
               ! Final probabilities are weighted by phase fractions at the interface
@@ -141,6 +147,8 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell)
   end do
 
   call VecRestoreArrayF90(gatheredslice,gatheredpointer,ierr)
+
+  call PetscRandomDestroy(random_context,ierr)
 
   call VecScatterDestroy(gatherslicetoroot,ierr)
   call VecDestroy(gatheredslice,ierr)
