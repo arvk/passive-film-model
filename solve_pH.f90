@@ -29,7 +29,7 @@ subroutine solve_pH(iter,ksp_pH,simstate)
   call KSPSetComputeRHS(ksp_pH,computeRHS_pH,simstate,ierr)
   call KSPSetComputeOperators(ksp_pH,computeMatrix_pH,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_pH,computeInitialGuess_pH,simstate,ierr)
-
+  call KSPSetOptionsPrefix(ksp_pH,'pH_',ierr)
   call KSPSetFromOptions(ksp_pH,ierr)
   call KSPSolve(ksp_pH,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_pH,state_solved,ierr)

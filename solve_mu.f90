@@ -29,7 +29,7 @@ subroutine solve_mu(iter,ksp_mu,simstate)
   call KSPSetComputeRHS(ksp_mu,computeRHS_mu,simstate,ierr)
   call KSPSetComputeOperators(ksp_mu,computeMatrix_mu,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_mu,computeInitialGuess_mu,simstate,ierr)
-
+  call KSPSetOptionsPrefix(ksp_mu,'mu_',ierr)
   call KSPSetFromOptions(ksp_mu,ierr)
   call KSPSolve(ksp_mu,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_mu,state_solved,ierr)

@@ -10,7 +10,6 @@ subroutine solve_ang(iter,ksp_ang,simstate)
 #include <finclude/petscmat.h>
 #include <finclude/petscpc.h>
 #include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
 #include <finclude/petscdm.h>
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
@@ -26,11 +25,11 @@ subroutine solve_ang(iter,ksp_ang,simstate)
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_ang, computeMatrix_ang, computeInitialGuess_ang
 
+  call KSPSetDM(ksp_ang,simstate%lattval,ierr)
   call KSPSetComputeRHS(ksp_ang,computeRHS_ang,simstate,ierr)
   call KSPSetComputeOperators(ksp_ang,computeMatrix_ang,simstate,ierr)
   call KSPSetComputeInitialGuess(ksp_ang,computeInitialGuess_ang,simstate,ierr)
-
-  call KSPSetDM(ksp_ang,simstate%lattval,ierr)
+  call KSPSetOptionsPrefix(ksp_ang,'ang_',ierr)
   call KSPSetFromOptions(ksp_ang,ierr)
   call KSPSolve(ksp_ang,PETSC_NULL_OBJECT,PETSC_NULL_OBJECT,ierr)
   call KSPGetSolution(ksp_ang,state_solved,ierr)
