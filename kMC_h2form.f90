@@ -1,4 +1,4 @@
-subroutine kMC_h2form(iter,simstate)
+subroutine kMC_h2form(iter,simstate,random_context)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
@@ -34,6 +34,8 @@ subroutine kMC_h2form(iter,simstate)
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscInt :: floor
   PetscScalar :: max, min
+  PetscRandom, intent(inout) :: random_context !! Context to seed and generate random numbers
+  PetscReal :: random_number  !! Pseudo random number generated from a PETSc context
 
   interface
 
@@ -80,10 +82,12 @@ subroutine kMC_h2form(iter,simstate)
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning SPPARKS functions
 
+  call PetscRandomGetValueReal(random_context,random_number,ierr)
+
   if(isroot)then
      call system('rm -f metfilm.spparksscript')
      open(unit = 666, file = 'metfilm.spparksscript', status = 'new')
-     write(666,*) 'seed 1273'
+     write(666,*) 'seed ', floor(100000.0d0*random_number)+1
      write(666,*) 'app_style metfilm'
      write(666,*) 'dimension 2'
      write(666,*) 'boundary p p p'

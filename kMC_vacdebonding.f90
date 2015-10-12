@@ -89,11 +89,13 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_contex
 ! Calculate \DeltaC => Vacancy concentration at the metal-mkw interface
   DeltaC = ((metal_content_in_simcell_last_timestep - metal_content_in_simcell)*(10*dpf*dpf))/(D_Fe_met*psx_g*psy_g*dt*kmc_freq)
 
+  call PetscRandomGetValueReal(random_context,random_number,ierr)
+
   if(isroot)then
 
      call system('rm -f vacmet.spparksscript')
      open(unit = 666, file = 'vacmet.spparksscript', status = 'new')
-     write(666,*) 'seed 1273'
+     write(666,*) 'seed ', floor(100000.0d0*random_number)+1
      write(666,*) 'app_style diffusion nonlinear hop'
      write(666,*) 'dimension 2'
      write(666,*) 'boundary p p p'

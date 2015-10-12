@@ -101,7 +101,7 @@ program passive_film_model
      end if
 
      if (mod(iter,kmc_freq).eq.0) call kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_context)
-     if (mod(iter,kmc_freq).eq.0) call kMC_h2form(iter,simstate)
+     if (mod(iter,kmc_freq).eq.0) call kMC_h2form(iter,simstate,random_context)
      if (mod(iter,kmc_freq).eq.0) call kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_context)
 
      if (mod(iter,stat_freq).eq.0) then

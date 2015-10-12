@@ -179,14 +179,14 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
   end if
 
 
-
+  call PetscRandomGetValueReal(random_context,random_number,ierr)
 
   if(isroot)then
 
      call system('rm -f filmenv.spparksscript')
 
      open(unit = 667, file = 'filmenv.spparksscript', status = 'new')
-     write(667,*) 'seed 1273'
+     write(667,*) 'seed ', floor(100000.0d0*random_number)+1
      write(667,*) 'app_style filmenv 0.25'
      write(667,*) 'dimension 2'
      write(667,*) 'boundary p p p'
