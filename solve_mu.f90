@@ -112,6 +112,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
   type(context) simstate
   PetscInt :: i, j, k, fesphase, field
   PetscScalar :: Chi, S_source_sink
+  PetscScalar :: local_Efield, sulfid_bias_Efield
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,simstate%exslice,exstatepointer,ierr)
@@ -155,8 +156,15 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
 
            ! INCLUDE SULFIDATION
            if ((statepointer(nenv,i,j,min(k+3,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k,simstate%startz))).gt.0.1d0) then
+
+              sulfid_bias_Efield = 1.0d0
+              if (include_electro) then
+                 local_Efield = (statepointer(npot,i,j,min(k+1,simstate%startz+simstate%widthz-1)) - statepointer(npot,i,j,k))/dpf
+                 sulfid_bias_Efield = exp((local_Efield*0.143583*1E-10*96500)/(R*T))
+              end if
+
               do fesphase = nmet,npyr
-                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + ((4.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/(dpf*drho_dmu(fesphase)))*statepointer(fesphase,i,j,k))
+                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + (sulfid_bias_Efield*(4.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/(dpf*drho_dmu(fesphase)))*statepointer(fesphase,i,j,k))
               end do
               bpointer(nmus,i,j,k) = min(bpointer(nmus,i,j,k),avg_mu_env/dt)
            end if

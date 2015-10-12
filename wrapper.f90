@@ -96,7 +96,9 @@ program passive_film_model
      call KSPCreate(MPI_COMM_WORLD,ksp_mu,ierr); call solve_mu(iter,ksp_mu,simstate); call KSPDestroy(ksp_mu,ierr)
      call KSPCreate(MPI_COMM_WORLD,ksp_pH,ierr); call solve_pH(iter,ksp_pH,simstate); call KSPDestroy(ksp_pH,ierr)
      call KSPCreate(MPI_COMM_WORLD,ksp_ang,ierr); call solve_ang(iter,ksp_ang,simstate); call KSPDestroy(ksp_ang,ierr)
-     call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr); call solve_pot(iter,snes_pot,simstate); call SNESDestroy(snes_pot,ierr)
+     if (include_electro) then
+        call SNESCreate(MPI_COMM_WORLD,snes_pot,ierr); call solve_pot(iter,snes_pot,simstate); call SNESDestroy(snes_pot,ierr)
+     end if
 
      if (mod(iter,kmc_freq).eq.0) call kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_context)
      if (mod(iter,kmc_freq).eq.0) call kMC_h2form(iter,simstate)

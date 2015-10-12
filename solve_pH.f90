@@ -127,6 +127,7 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
   PetscInt :: i,j,k,field,fesphase
   type(context) simstate
   PetscScalar, pointer :: statepointer(:,:,:,:), bpointer(:,:,:,:)
+  PetscScalar :: local_Efield, sulfid_bias_Efield
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,b,bpointer,ierr)
@@ -142,8 +143,15 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
            bpointer(npH,i,j,k) = statepointer(npH,i,j,k) * (1.0d0/dt)
 
            if ((statepointer(nenv,i,j,min(k+3,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k,simstate%startz))).gt.0.1d0) then
+
+              sulfid_bias_Efield = 1.0d0
+              if (include_electro) then
+                 local_Efield = (statepointer(npot,i,j,min(k+1,simstate%startz+simstate%widthz-1)) - statepointer(npot,i,j,k))/dpf
+                 sulfid_bias_Efield = exp((local_Efield*0.143583*1E-10*96500)/(R*T))
+              end if
+
               do fesphase = nmet,npyr
-                 statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) = statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) + ((8.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/(dpf))*statepointer(fesphase,i,j,k))
+                 statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) = statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) + (sulfid_bias_Efield*(8.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/(dpf))*statepointer(fesphase,i,j,k))
               end do
            end if
 
