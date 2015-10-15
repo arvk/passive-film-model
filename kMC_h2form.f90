@@ -37,8 +37,17 @@ subroutine kMC_h2form(iter,simstate,random_context)
   PetscScalar :: max, min
   PetscRandom, intent(inout) :: random_context !! Context to seed and generate random numbers
   PetscReal :: random_number  !! Pseudo random number generated from a PETSc context
-  PetscScalar :: mkw_modulus, mkw_surf_energy, blist_size, blist_rad_curv, mkw_thickness, threshold_P, delamination_height, vol_spher_cap, threshold_H2_molecules
-  PetscScalar :: Pi = 3.14159265d0
+
+  PetscScalar :: mkw_modulus  !! Elastic modulus of mackinawite. Source: Own work
+  PetscScalar :: mkw_surf_energy !! Surface energy of mackinawite Source: Own work
+  PetscScalar :: blist_size !! Lateral size of the H2 blister
+  PetscScalar :: blist_rad_curv !! Radius of curvature of the blister
+  PetscScalar :: mkw_thickness !! Thickness of the mackinawite film that undergoes blistering
+  PetscScalar :: threshold_P !! Critical pressure for stable blister formation
+  PetscScalar :: delamination_height !! Distance between two (001) planes of mackinawite before delamination occurs
+  PetscScalar :: vol_spher_cap !! Volume of the blister. Bilster is assumed to be a spherical cap
+  PetscScalar :: threshold_H2_molecules !! Number of H2 molecules inside a stable blister
+  PetscScalar :: Pi = 3.14159265d0 !! \(\pi\)
 
   interface
 
@@ -188,6 +197,9 @@ subroutine kMC_h2form(iter,simstate,random_context)
 
   ! Number of H2 molecules = N_a * PV/RT
   !    where, N_a = Avogadro number, P = Pressure, V = Volume of blister, R = gas constant, T = temperature
+
+  ! REFERENCE: In situ study of the initiation of hydrogen bubbles at the aluminium metal/oxide interface, Nature Materials 14, 899-903 (2015) DOI: 10.1038/nmat4336
+  ! REFERENCE: Hydrogen bubbles in metals, J.B. Condon, T. Schober, Journal of Nuclear Materials, Volume 207, December 1993, Pages 1-24, DOI: 10.1016/0022-3115(93)90244-S
 
   ! Calculate parameters
   mkw_modulus = 15E9    ! in Pa
