@@ -82,6 +82,7 @@ module thermo_constants
 
   PetscScalar :: mus_met_mkw_eqb, mus_mkw_pht_eqb, mus_pht_pyr_eqb !! mu_S boundary between phases
   PetscScalar, parameter :: R = 8.3144621
+  PetscScalar, parameter :: Faraday_constant = 96485.3329d0
 
   ! Double well potential heights
   PetscScalar, parameter :: double_well_barrier = 20.0d0 ! in J/mol

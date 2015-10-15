@@ -34,7 +34,7 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
   Vec gatheredslice
   PetscScalar, pointer :: gatheredpointer(:)
   Vec slice_naturalorder
-  PetscScalar env_at_lattice_site_above, env_at_this_lattice_site, pH_at_this_lattice_site
+  PetscScalar env_at_lattice_site_above, env_at_this_lattice_site, pH_at_this_lattice_site, pot_at_this_lattice_site
   PetscScalar, dimension(0:(nphases-1)) :: raw_dissolution_rate, vac_form_prob
   PetscInt fesphase
   PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
@@ -112,12 +112,16 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
               interface_loc(x,y) = z
 
               pH_at_this_lattice_site = gatheredpointer(nfields*(((z-1)*psx_g*psy_g)+((y-1)*psx_g)+(x-1))+npH+1)
+              pot_at_this_lattice_site = gatheredpointer(nfields*(((z-1)*psx_g*psy_g)+((y-1)*psx_g)+(x-1))+npot+1)
 
               ! Define raw dissolution rates (in nm/s)
               !---------------------------------------
-              raw_dissolution_rate(nmet) = 0.257d0
+              if (pH_at_this_lattice_site .gt. 1E-2) then
+                 raw_dissolution_rate(nmet) = 1.781E7*((1E-14/pH_at_this_lattice_site)**0.6)*exp((0.85*Faraday_constant/(R*T))*(pot_at_this_lattice_site+0.45))
+              else
+                 raw_dissolution_rate(nmet) = 1.781E7*((1E-14/1E-2)**0.6)*exp((0.85*Faraday_constant/(R*T))*(pot_at_this_lattice_site+0.45))
+              end if
               ! REF = Electrodissolution Kinetics of Iron in Chloride Solutions by Robert J. Chin* and Ken Nobe, JECS Vol 119, No. 11, Nov. 1972
-              ! Full explression is raw_dissolution_rate_met = 0.257d0*((0.0d0-log10(14-pH))**0.6)*exp((0.85*F/RT)*(V+0.45))
               raw_dissolution_rate(nmkw) = 0.015d0
               ! REF = CORROSION MECHANISMS AND MATERIAL PERFORMANCE IN ENVIRONMENTS CONTAINING HYDROGEN SULFIDE AND ELEMENTAL SULFUR, Liane Smith and Bruce Craig, SACNUC Workshop 22nd and 23rd October, 2008, Brussels and References therein
               raw_dissolution_rate(npht) = 289.15*exp(0.0d0-(65900/(R*T)))*(10**(-1.46*pH_at_this_lattice_site))
