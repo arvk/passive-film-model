@@ -2,6 +2,7 @@ subroutine kMC_h2form(iter,simstate,random_context)
   use, intrinsic :: iso_c_binding
   use commondata
   use fields
+  use thermo_constants
   implicit none
 #include <finclude/petscsys.h>
 #include <finclude/petscvec.h>
@@ -36,6 +37,8 @@ subroutine kMC_h2form(iter,simstate,random_context)
   PetscScalar :: max, min
   PetscRandom, intent(inout) :: random_context !! Context to seed and generate random numbers
   PetscReal :: random_number  !! Pseudo random number generated from a PETSc context
+  PetscScalar :: mkw_modulus, mkw_surf_energy, blist_size, blist_rad_curv, mkw_thickness, threshold_P, delamination_height, vol_spher_cap, threshold_H2_molecules
+  PetscScalar :: Pi = 3.14159265d0
 
   interface
 
@@ -175,19 +178,41 @@ subroutine kMC_h2form(iter,simstate,random_context)
   end do
   close(667)
 
+
+  ! Calculate scaling factors
+
+  ! Equations to use
+  ! ================
+  ! Threshold Pressure = 4*sigma*(t^2)/(3*R_c^2) + 2*gamma/R_c
+  !    where, sigma = Elastic modulus, t = thickness of film, R_c = blister radius, gamma = surface energy
+
+  ! Number of H2 molecules = N_a * PV/RT
+  !    where, N_a = Avogadro number, P = Pressure, V = Volume of blister, R = gas constant, T = temperature
+
+  ! Calculate parameters
+  mkw_modulus = 15E9    ! in Pa
+  mkw_surf_energy = 0.1 ! in J/m^2
+  blist_size = dpf/2    ! in m
+  call VecStrideNorm(simstate%slice,nmkw,NORM_1,mkw_thickness,ierr) ; mkw_thickness = (mkw_thickness/(psx_g*psy_g))*dpf ! in m
+  blist_rad_curv = 2.27E-6 ! in m
+  delamination_height = 5.5E-10 ! in m
+  vol_spher_cap = Pi * delamination_height*((3*blist_size*blist_size)+(delamination_height*delamination_height))/6 ! in m
+
+  threshold_P = ((4*mkw_modulus*mkw_thickness*mkw_thickness)/(3*blist_rad_curv*blist_rad_curv)) + ((2*mkw_surf_energy)/blist_rad_curv)
+  threshold_H2_molecules = 6.022E23 * threshold_P * vol_spher_cap / (R*T)
+
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   do x = simstate%startx , simstate%startx + simstate%widthx-1
      do y = simstate%starty , simstate%starty + simstate%widthy-1
         do z = simstate%startz , simstate%startz + simstate%widthz-2
            if (((statepointer(nmet,x,y,z).gt.0.5d0).and.(statepointer(nmkw,x,y,z).lt.0.5d0)) .and. ((statepointer(nmet,x,y,z+1).lt.0.5d0).and.(statepointer(nmkw,x,y,z+1).gt.0.5d0))) then
-              statepointer(nvoi,x,y,z) = statepointer(nvoi,x,y,z) - (coarse_h2_evolved(x+1,y+1)/300.0d0)
+              statepointer(nvoi,x,y,z) = statepointer(nvoi,x,y,z) - (coarse_h2_evolved(x+1,y+1)/threshold_H2_molecules)
               statepointer(nvoi,x,y,z) = min(max(statepointer(nvoi,x,y,z),0.0d0),1.0d0)
            end if
         end do
      end do
   end do
   call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
-
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before file IO
   if(isroot)then
