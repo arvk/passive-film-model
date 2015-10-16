@@ -177,9 +177,8 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   PetscScalar  v(7)
   MatStencil   row(4,1),col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  PetscScalar :: D_opyr_max = 1E1   ! Truncation for the orientation field
-  PetscScalar :: M_opyr_max = 1.0E-26
-  PetscScalar :: M_opyr_min = 1.0E-29
+  PetscScalar :: M_opyr_max = 1.0E3
+  PetscScalar :: M_opyr_min = 1.0E-2
   PetscScalar :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
   PetscInt :: nocols
   PetscScalar :: add_to_v_ij
@@ -188,6 +187,9 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   PetscScalar zeromatentry(7)
   PetscInt :: matfield
 
+  PetscScalar :: Mob_ang_field
+  PetscScalar :: Diff_ang_field
+  PetscScalar :: Del_ang_field
 
   call DMCreateLocalVector(simstate%lattval,statelocal,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,statelocal,ierr)
@@ -288,9 +290,16 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
            add_to_v_ij = 0.0d0
 
 
+           Mob_ang_field = M_opyr_min + statepointer(npyr,i,j,k)*(M_opyr_max-M_opyr_min)
+
+           Del_ang_field = abs(statepointer(nang,i,j,min(k+1,psz_g-1))-statepointer(nang,i,j,max(k-1,0))) + &
+                & abs(statepointer(nang,i,min(j+1,psy_g-1),k)-statepointer(nang,i,max(j-1,0),k)) + &
+                & abs(statepointer(nang,min(i+1,psx_g-1),j,k)-statepointer(nang,max(i-1,0),j,k))
+           Del_ang_field = (Del_ang_field/dpf)+1.0d0
+
            if (k.gt.0) then
               nocols = nocols + 1
-              v(nocols) = 0.0d0 - (0.5d0*D_opyr_max*(min(M_opyr_min/(((statepointer(nang,i,j,k-1))**4)+infinitesimal),M_opyr_max) + min(M_opyr_min/(((statepointer(nang,i,j,k))**4)+infinitesimal),M_opyr_max))/(dpf*dpf))
+              v(nocols) = 0.0d0 - ((0.5d0*gb_S*statepointer(npyr,i,j,k-1)*statepointer(npyr,i,j,k-1)*Mob_ang_field/Del_ang_field)+(0.5d0*gb_S*statepointer(npyr,i,j,k)*statepointer(npyr,i,j,k)*Mob_ang_field/Del_ang_field))
               col(MatStencil_i,nocols) = i
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k-1
@@ -301,7 +310,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
 
            if (j.gt.0) then
               nocols = nocols + 1
-              v(nocols) = 0.0d0 - (0.5d0*D_opyr_max*(min(M_opyr_min/(((statepointer(nang,i,j-1,k))**4)+infinitesimal),M_opyr_max) + min(M_opyr_min/(((statepointer(nang,i,j,k))**4)+infinitesimal),M_opyr_max))/(dpf*dpf))
+              v(nocols) = 0.0d0 - ((0.5d0*gb_S*statepointer(npyr,i,j-1,k)*statepointer(npyr,i,j-1,k)*Mob_ang_field/Del_ang_field)+(0.5d0*gb_S*statepointer(npyr,i,j,k)*statepointer(npyr,i,j,k)*Mob_ang_field/Del_ang_field))
               col(MatStencil_i,nocols) = i
               col(MatStencil_j,nocols) = j-1
               col(MatStencil_k,nocols) = k
@@ -312,7 +321,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
 
            if (i.gt.0) then
               nocols = nocols + 1
-              v(nocols) = 0.0d0 - (0.5d0*D_opyr_max*(min(M_opyr_min/(((statepointer(nang,i-1,j,k))**4)+infinitesimal),M_opyr_max) + min(M_opyr_min/(((statepointer(nang,i,j,k))**4)+infinitesimal),M_opyr_max))/(dpf*dpf))
+              v(nocols) = 0.0d0 - ((0.5d0*gb_S*statepointer(npyr,i-1,j,k)*statepointer(npyr,i-1,j,k)*Mob_ang_field/Del_ang_field)+(0.5d0*gb_S*statepointer(npyr,i,j,k)*statepointer(npyr,i,j,k)*Mob_ang_field/Del_ang_field))
               col(MatStencil_i,nocols) = i-1
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k
@@ -324,7 +333,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
 
            if (i.lt.psx_g-1) then
               nocols = nocols + 1
-              v(nocols) = 0.0d0 - (0.5d0*D_opyr_max*(min(M_opyr_min/(((statepointer(nang,i+1,j,k))**4)+infinitesimal),M_opyr_max) + min(M_opyr_min/(((statepointer(nang,i,j,k))**4)+infinitesimal),M_opyr_max))/(dpf*dpf))
+              v(nocols) = 0.0d0 - ((0.5d0*gb_S*statepointer(npyr,i+1,j,k)*statepointer(npyr,i+1,j,k)*Mob_ang_field/Del_ang_field)+(0.5d0*gb_S*statepointer(npyr,i,j,k)*statepointer(npyr,i,j,k)*Mob_ang_field/Del_ang_field))
               col(MatStencil_i,nocols) = i+1
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k
@@ -336,7 +345,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
 
            if (j.lt.psy_g-1) then
               nocols = nocols + 1
-              v(nocols) = 0.0d0 - (0.5d0*D_opyr_max*(min(M_opyr_min/(((statepointer(nang,i,j+1,k))**4)+infinitesimal),M_opyr_max) + min(M_opyr_min/(((statepointer(nang,i,j,k))**4)+infinitesimal),M_opyr_max))/(dpf*dpf))
+              v(nocols) = 0.0d0 - ((0.5d0*gb_S*statepointer(npyr,i,j+1,k)*statepointer(npyr,i,j+1,k)*Mob_ang_field/Del_ang_field)+(0.5d0*gb_S*statepointer(npyr,i,j,k)*statepointer(npyr,i,j,k)*Mob_ang_field/Del_ang_field))
               col(MatStencil_i,nocols) = i
               col(MatStencil_j,nocols) = j+1
               col(MatStencil_k,nocols) = k
@@ -347,7 +356,7 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
 
            if (k.lt.psz_g-1) then
               nocols = nocols + 1
-              v(nocols) = 0.0d0 - (0.5d0*D_opyr_max*(min(M_opyr_min/(((statepointer(nang,i,j,k+1))**4)+infinitesimal),M_opyr_max) + min(M_opyr_min/(((statepointer(nang,i,j,k))**4)+infinitesimal),M_opyr_max))/(dpf*dpf))
+              v(nocols) = 0.0d0 - ((0.5d0*gb_S*statepointer(npyr,i,j,k+1)*statepointer(npyr,i,j,k+1)*Mob_ang_field/Del_ang_field)+(0.5d0*gb_S*statepointer(npyr,i,j,k)*statepointer(npyr,i,j,k)*Mob_ang_field/Del_ang_field))
               col(MatStencil_i,nocols) = i
               col(MatStencil_j,nocols) = j
               col(MatStencil_k,nocols) = k+1
