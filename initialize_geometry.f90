@@ -20,6 +20,8 @@ subroutine initialize_geometry(simstate)
   PetscScalar :: avg_mu_met                           !! Chemical potential in the metal region
   PetscScalar, parameter :: infinitesimal = 0.00001d0 !! A hard-coded 'small' number
   PetscScalar, pointer :: statepointer(:,:,:,:) !! Pointer array referenced to individual gridpoints inside the simulation cell
+  PetscRandom :: random_orientation_context     !! Context to seed and generate random numbers for the orientation field
+  PetscReal :: random_number                    !! Pseudo random number generated from a PETSc context
   type(context), intent(inout) :: simstate      !! Field variables stored in PETSc vectors and DMDA objects
 
      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
@@ -73,15 +75,14 @@ subroutine initialize_geometry(simstate)
 
      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-     call random_seed(put=seed)
-     call random_number(opyr_g)
-     opyr_g = opyr_g * (3.14159265d0/2.0d0)   ! Populate the global orientation field with random numbers
-
+  call PetscRandomCreate(MPI_COMM_WORLD,random_orientation_context,ierr)
+  call PetscRandomSetType(random_orientation_context,PETSCRAND,ierr)
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
   do x = simstate%startx , simstate%startx + simstate%widthx-1
      do y = simstate%starty , simstate%starty + simstate%widthy-1
         do z = simstate%startz , simstate%startz + simstate%widthz-1
+           call PetscRandomGetValueReal(random_orientation_context,random_number,ierr)
            statepointer(nmet,x,y,z) = met_g(x+1,y+1,z+1)
            statepointer(nmkw,x,y,z) = mkw_g(x+1,y+1,z+1)
            statepointer(npht,x,y,z) = pht_g(x+1,y+1,z+1)
@@ -89,7 +90,7 @@ subroutine initialize_geometry(simstate)
            statepointer(nenv,x,y,z) = env_g(x+1,y+1,z+1)
            statepointer(nmus,x,y,z) = mu_g(x+1,y+1,z+1)
            statepointer(npH,x,y,z) = 10**(0.0d0-pH_in)
-           statepointer(nang,x,y,z) = opyr_g(x+1,y+1,z+1)
+           statepointer(nang,x,y,z) = random_number * (3.14159265d0/2.0d0)   ! Populate the global orientation field with random numbers
            statepointer(npot,x,y,z) = elpot_g(x+1,y+1,z+1)
            statepointer(nvoi,x,y,z) = 1.0d0
         end do
@@ -97,7 +98,7 @@ subroutine initialize_geometry(simstate)
   end do
   call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
-
+  call PetscRandomDestroy(random_orientation_context,ierr)
 
 end subroutine initialize_geometry
 
