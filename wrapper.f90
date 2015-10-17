@@ -73,7 +73,6 @@ program passive_film_model
   call diffusivities()     ! Calculate phase diffusivities
   call seed_prng()         ! Seed the Pseudo-random-number-generator
   call thermo()            ! Calculate phase stabilities
-  call estimate_timestep() ! Estimate timestep for all field evolution equations
 
   call initialize_geometry(simstate)
 
@@ -85,6 +84,8 @@ program passive_film_model
   call PetscRandomSetType(random_context,PETSCRAND,ierr)
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+
+  if (isroot) write(6,'(A,F9.5,A)') " INFO: Timestep for phase-field integration is ",dt, " seconds."
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
 

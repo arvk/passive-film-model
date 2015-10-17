@@ -49,7 +49,7 @@ module commondata
 
   ! Simulation parameters
   PetscScalar, parameter :: dpf = 100E-9       !! Phase-field grid size
-  PetscScalar :: dt                          !! Timestep for PF evolution
+  PetscScalar, parameter :: dt = 0.5d0         !! Timestep for PF evolution
   PetscScalar :: avg_mu_env                  !! Sulfur chemical potential in the environment
   PetscScalar :: sulfidation_rate            !! Sulfidation rate / Film growth rate in m/s
   PetscInt :: kg_scale = 100             !! Number of KMC grid points per PF grid
