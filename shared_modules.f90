@@ -11,7 +11,6 @@ module fields
   ! Global phase fields
   PetscScalar, dimension(:,:,:), allocatable :: met_g, mkw_g, pht_g, pyr_g, env_g !! Global PF grid for metal, pyrrhotite, pyrite and environment
   PetscScalar, dimension(:,:,:), allocatable :: mu_g                              !! Global mu_S grid
-  PetscScalar, dimension(:,:,:), allocatable :: opyr_g                            !! Global orientation field for pyrite
   PetscScalar, dimension(:,:,:), allocatable :: elpot_g                           !! Global electrical potential
 
       type context
@@ -55,8 +54,6 @@ module commondata
   PetscInt :: kg_scale = 100             !! Number of KMC grid points per PF grid
   PetscInt :: kmc_freq = 3600            !! Frequency with which kMC calculations are done
   PetscInt :: stat_freq = 1200           !! Simulation stats are reported once every stat_freq iterations
-
-  PetscInt, dimension(:), allocatable :: seed  ! Seed for PRNG
 
   PetscInt, parameter :: nfields = 10 !! Number of field variables at each grid point
   PetscInt, parameter :: nphases = 5 !! Number of FeS phases

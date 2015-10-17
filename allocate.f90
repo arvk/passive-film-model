@@ -6,13 +6,6 @@ subroutine allocate_matrices()
 #include <finclude/petscsys.h>
   !!####Allocate all matrices responsible for storing the field variables
 
-  PetscInt :: seed_size !! Size of the seed for the PRNG
-
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
-
-  call random_seed(size=seed_size)
-  allocate(seed(seed_size)) ! Allocate PRNG Seed
-
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Allocate global matrices
@@ -22,7 +15,6 @@ subroutine allocate_matrices()
   allocate(pyr_g(psx_g,psy_g,psz_g))
   allocate(env_g(psx_g,psy_g,psz_g))
   allocate(mu_g(psx_g,psy_g,psz_g))
-  allocate(opyr_g(psx_g,psy_g,psz_g))
   allocate(elpot_g(psx_g,psy_g,psz_g))
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
