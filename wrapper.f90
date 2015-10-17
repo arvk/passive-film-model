@@ -71,7 +71,6 @@ program passive_film_model
 
   call allocate_matrices() ! Allocate all field matrices
   call diffusivities()     ! Calculate phase diffusivities
-  call seed_prng()         ! Seed the Pseudo-random-number-generator
   call thermo()            ! Calculate phase stabilities
 
   call initialize_geometry(simstate)
