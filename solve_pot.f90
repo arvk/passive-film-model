@@ -179,9 +179,8 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
 
   SNES snes_pot
   PetscErrorCode ierr
-  Vec input_state, function_value, state_local, state
-  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  PetscInt :: startx,starty,startz,widthx,widthy,widthz
+  Vec input_state, function_value, state_local, static_local
+  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
   PetscInt :: fesphase,fesphase2
   PetscInt :: x,y,z
   PetscScalar :: myD, sum6myD
@@ -190,10 +189,10 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   PetscScalar :: w(0:nfields), delo(0:nfields)
   PetscScalar :: grady, gradz
   PetscScalar :: exponent
-  PetscScalar :: c0 = 1.0d0 !! Average density of counter charge (moles/m^3)
+  PetscScalar :: c0 !! Average density of counter charge (moles/m^3)
   PetscScalar :: el_charg = 1.60217657E-19*6.022E23
   type(context) simstate
-  PetscScalar, parameter :: maxconc = 1E2
+  PetscScalar, parameter :: maxconc = 10**(0-1)*1E3
   PetscScalar :: min
   MatNullSpace nullspace
   PetscInt :: myi
@@ -201,12 +200,21 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   w = 0.0d0
   delo = 0.0d0
 
-  call DMCreateLocalVector(simstate%lattval,state_local,ierr)
+  c0 = 10**(0.0d0-pH_in)*1E3
+
+  call DMGetLocalVector(simstate%lattval,state_local,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
 
+  call DMGetLocalVector(simstate%lattval,static_local,ierr)
+  call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,static_local,ierr)
+  call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,static_local,ierr)
+
+  allocate(staticpointer(0:(nfields-1),simstate%startx-1:simstate%startx+simstate%widthx,simstate%starty-1:simstate%starty+simstate%widthy,simstate%startz-1:simstate%startz+simstate%widthz))
+
   call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,function_value,functionpointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,static_local,staticpointer,ierr)
 
 
   do z=simstate%startz,simstate%startz+simstate%widthz-1
@@ -230,7 +238,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
                  if (z.ne.0) then    ! z-1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x,y,z-1)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y,z-1)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
                     functionpointer(npot,x,y,z) = functionpointer(npot,x,y,z) + myD*(statepointer(npot,x,y,z-1)-statepointer(npot,x,y,z))
                  end if
@@ -238,7 +246,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
                  if (y.ne.0) then    ! y-1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x,y-1,z)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y-1,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
                     functionpointer(npot,x,y,z) = functionpointer(npot,x,y,z) + myD*(statepointer(npot,x,y-1,z)-statepointer(npot,x,y,z))
                  end if
@@ -246,7 +254,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
                  if (x.ne.0) then    ! x-1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x-1,y,z)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x-1,y,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
                     functionpointer(npot,x,y,z) = functionpointer(npot,x,y,z) + myD*(statepointer(npot,x-1,y,z)-statepointer(npot,x,y,z))
                  end if
@@ -254,7 +262,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
                  if (x.ne.psx_g-1) then    ! x+1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x+1,y,z)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x+1,y,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
                     functionpointer(npot,x,y,z) = functionpointer(npot,x,y,z) + myD*(statepointer(npot,x+1,y,z)-statepointer(npot,x,y,z))
                  end if
@@ -262,7 +270,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
                  if (y.ne.psy_g-1) then    ! y+1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x,y+1,z)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y+1,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
                     functionpointer(npot,x,y,z) = functionpointer(npot,x,y,z) + myD*(statepointer(npot,x,y+1,z)-statepointer(npot,x,y,z))
                  end if
@@ -270,7 +278,7 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
                  if (z.ne.psz_g-1) then    ! z+1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x,y,z+1)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y,z+1)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
                     functionpointer(npot,x,y,z) = functionpointer(npot,x,y,z) + myD*(statepointer(npot,x,y,z+1)-statepointer(npot,x,y,z))
                  end if
@@ -292,13 +300,17 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
      end do
   end do
 
+
   call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecRestoreArrayF90(simstate%lattval,function_value,functionpointer,ierr)
+  call DMDAVecRestoreArrayF90(simstate%lattval,static_local,staticpointer,ierr)
+
+  call DMRestoreLocalVector(simstate%lattval,state_local,ierr)
+  call DMRestoreLocalVector(simstate%lattval,static_local,ierr)
 
   call VecAssemblyBegin(function_value,ierr)
   call VecAssemblyEnd(function_value,ierr)
 
-  call VecDestroy(state_local,ierr)
   return
 end subroutine FormFunction_pot
 
@@ -339,10 +351,8 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
 
   SNES snes_pot
   PetscErrorCode ierr
-  Vec input_state, function_value, state_local, state
-  PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:)
-  PetscInt :: startx,starty,startz,widthx,widthy,widthz
-  PetscScalar, allocatable :: D_pot(:,:,:,:,:)
+  Vec input_state, function_value, state_local, state, static_local
+  PetscScalar, pointer :: statepointer(:,:,:,:), staticpointer(:,:,:,:)
   PetscInt :: fesphase,fesphase2
   PetscInt :: x,y,z
   PetscScalar :: myD, sum6myD
@@ -355,21 +365,21 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   Mat pf_jacob, pf_precond
   PetscScalar :: grady, gradz
   PetscScalar :: exponent
-  PetscScalar :: c0 = 1.0d0 !! Average density of counter charge (moles/m^3)
+  PetscScalar :: c0 !! Average density of counter charge (moles/m^3)
   PetscScalar :: el_charg = 1.60217657E-19*6.022E23
-  type(context) simstate
-  PetscScalar, parameter :: maxconc = 1E2
+  PetscScalar, parameter :: maxconc = 10**(0-1)*1E2
   PetscScalar :: min
   PetscScalar zeromatentry(7)
-  PetscInt :: matfield
+  PetscInt :: matfield, matfield2
+  type(context) simstate
 
+  c0 = 10**(0.0d0-pH_in)*1E3
 
-  call DMCreateLocalVector(simstate%lattval,state_local,ierr)
-  call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
-  call DMGlobalToLocalEnd(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
-  call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
+  allocate(staticpointer(0:(nfields-1),simstate%startx-1:simstate%startx+simstate%widthx,simstate%starty-1:simstate%starty+simstate%widthy,simstate%startz-1:simstate%startz+simstate%widthz))
 
-
+  call DMGetLocalVector(simstate%lattval,static_local,ierr)
+  call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,static_local,ierr)
+  call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,static_local,ierr)
 
   zeromatentry(1) = 0.0d0
   zeromatentry(2) = 0.0d0
@@ -389,6 +399,8 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
               row(MatStencil_k,1) = z
               row(MatStencil_c,1) = matfield
 
+              do matfield2 = 0,nfields-1   ! Column
+
               nocols = 0
 
               if (z.ne.0) then    ! z-1
@@ -396,7 +408,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z-1
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (y.ne.0) then    ! z-1
@@ -404,7 +416,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y-1
                  col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (x.ne.0) then    ! z-1
@@ -412,7 +424,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  col(MatStencil_i,nocols) = x-1
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (x.ne.psx_g-1) then    ! z-1
@@ -420,7 +432,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  col(MatStencil_i,nocols) = x+1
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (y.ne.psy_g-1) then    ! z-1
@@ -428,7 +440,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y+1
                  col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               if (z.ne.psz_g-1) then    ! z-1
@@ -436,10 +448,13 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z+1
-                 col(MatStencil_c,nocols) = matfield
+                 col(MatStencil_c,nocols) = matfield2
               end if
 
               call MatSetValuesStencil(pf_precond,1,row,nocols,col,zeromatentry,INSERT_VALUES,ierr)
+
+           end do
+
 
            end do
         end do
@@ -449,8 +464,8 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   call MatAssemblyBegin(pf_precond,MAT_FLUSH_ASSEMBLY,ierr)
   call MatAssemblyEnd(pf_precond,MAT_FLUSH_ASSEMBLY,ierr)
 
-
-
+  call DMDAVecGetArrayF90(simstate%lattval,input_state,statepointer,ierr)
+  call DMDAVecGetArrayF90(simstate%lattval,static_local,staticpointer,ierr)
 
   do z=simstate%startz,simstate%startz+simstate%widthz-1
      do y=simstate%starty,simstate%starty+simstate%widthy-1
@@ -461,26 +476,14 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
            row(MatStencil_k,1) = z
            row(MatStencil_c,1) = npot
 
-           if (statepointer(nenv,x,y,z).gt.0.97) then
-
-              if (z.eq.psz_g-1) then    ! z-1
-
-                 v(1) = 1.0d0
-                 col(MatStencil_i,1) = x
-                 col(MatStencil_j,1) = y
-                 col(MatStencil_k,1) = z
-                 col(MatStencil_c,1) = npot
-
-                 call MatSetValuesStencil(pf_precond,1,row,1,col,v,ADD_VALUES,ierr)
-
-              else
+           if ((staticpointer(nenv,x,y,z).gt.0.97) .and. (z.ne.(psz_g-1)))  then
 
                  nocols = 0
 
                  if (z.ne.0) then    ! z-1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x,y,z-1)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y,z-1)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
 
                     nocols = nocols + 1
@@ -501,7 +504,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  if (y.ne.0) then    ! y-1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x,y-1,z)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y-1,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
 
                     nocols = nocols + 1
@@ -522,7 +525,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  if (x.ne.0) then    ! x-1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x-1,y,z)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x-1,y,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
 
                     nocols = nocols + 1
@@ -543,7 +546,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  if (x.ne.psx_g-1) then    ! x+1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x+1,y,z)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x+1,y,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
 
                     nocols = nocols + 1
@@ -564,7 +567,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  if (y.ne.psy_g-1) then    ! y+1
                     myD = 0.0d0
                     do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x,y+1,z)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y+1,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
 
                     nocols = nocols + 1
@@ -585,7 +588,7 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
                  if (z.ne.psz_g-1) then    ! z+1
                     myD = 0.0d0
                    do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(statepointer(fesphase,x,y,z+1)+statepointer(fesphase,x,y,z))/(dpf*dpf)
+                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y,z+1)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
                     end do
 
                     nocols = nocols + 1
@@ -613,7 +616,6 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
 
                  call MatSetValuesStencil(pf_precond,1,row,nocols,col,v,ADD_VALUES,ierr)
 
-              end if
 
            else
 
@@ -631,8 +633,6 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
      end do
   end do
 
-  call DMDAVecRestoreArrayF90(simstate%lattval,state_local,statepointer,ierr)
-
   call MatAssemblyBegin(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
   call MatAssemblyEnd(pf_precond,MAT_FINAL_ASSEMBLY,ierr)
 
@@ -641,6 +641,8 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
      call MatAssemblyEnd(pf_jacob,MAT_FINAL_ASSEMBLY,ierr)
   end if
 
-  call VecDestroy(state_local,ierr)
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! Barrier before beginning time loop
+  call DMRestoreLocalVector(simstate%lattval,static_local,ierr)
+
   return
 end subroutine FormJacobian_pot

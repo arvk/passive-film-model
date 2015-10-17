@@ -96,7 +96,7 @@ module thermo_constants
 
   PetscScalar, allocatable :: w_pf(:)  !! Free energy of different FeS phases
 
-  PetscScalar :: gb_S = 0.0d0 !! Stability of boundary between different pyrite grains
+  PetscScalar :: gb_S = 1.0d0 !! Stability of boundary between different pyrite grains
 
   PetscScalar :: epsilon0  !! Vacuum permittivity
   PetscScalar, allocatable :: permittivity(:)  !! Relative permittivity
