@@ -189,16 +189,18 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   PetscScalar :: w(0:nfields), delo(0:nfields)
   PetscScalar :: grady, gradz
   PetscScalar :: exponent
-  PetscScalar :: c0 = 0.1d0 !! Average density of counter charge (moles/m^3)
+  PetscScalar :: c0 !! Average density of counter charge (moles/m^3)
   PetscScalar :: el_charg = 1.60217657E-19*6.022E23
   type(context) simstate
-  PetscScalar, parameter :: maxconc = 1E2
+  PetscScalar, parameter :: maxconc = 10**(0-1)*1E3
   PetscScalar :: min
   MatNullSpace nullspace
   PetscInt :: myi
 
   w = 0.0d0
   delo = 0.0d0
+
+  c0 = 10**(0.0d0-pH_in)*1E3
 
   call DMGetLocalVector(simstate%lattval,state_local,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,input_state,INSERT_VALUES,state_local,ierr)
@@ -363,13 +365,15 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   Mat pf_jacob, pf_precond
   PetscScalar :: grady, gradz
   PetscScalar :: exponent
-  PetscScalar :: c0 = 0.1d0 !! Average density of counter charge (moles/m^3)
+  PetscScalar :: c0 !! Average density of counter charge (moles/m^3)
   PetscScalar :: el_charg = 1.60217657E-19*6.022E23
-  PetscScalar, parameter :: maxconc = 1E2
+  PetscScalar, parameter :: maxconc = 10**(0-1)*1E2
   PetscScalar :: min
   PetscScalar zeromatentry(7)
   PetscInt :: matfield, matfield2
   type(context) simstate
+
+  c0 = 10**(0.0d0-pH_in)*1E3
 
   allocate(staticpointer(0:(nfields-1),simstate%startx-1:simstate%startx+simstate%widthx,simstate%starty-1:simstate%starty+simstate%widthy,simstate%startz-1:simstate%startz+simstate%widthz))
 
