@@ -93,10 +93,8 @@ subroutine FormRHS_pot(rhs_vec,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  SNES snes_pot
   PetscErrorCode ierr
   Vec rhs_vec
-  Vec single_phase_vector
   PetscScalar, pointer :: statepointer(:,:,:,:), rhspointer(:,:,:,:)
   PetscInt :: startx,starty,startz,widthx,widthy,widthz
   PetscInt :: x,y,z
@@ -181,24 +179,15 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   PetscErrorCode ierr
   Vec input_state, function_value, state_local, static_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
-  PetscInt :: fesphase,fesphase2
+  PetscInt :: fesphase
   PetscInt :: x,y,z
-  PetscScalar :: myD, sum6myD
-  PetscScalar, parameter :: myM = 1.0d0
-  PetscScalar :: Mobility
-  PetscScalar :: w(0:nfields), delo(0:nfields)
-  PetscScalar :: grady, gradz
+  PetscScalar :: myD
   PetscScalar :: exponent
   PetscScalar :: c0 !! Average density of counter charge (moles/m^3)
   PetscScalar :: el_charg = 1.60217657E-19*6.022E23
   type(context) simstate
   PetscScalar, parameter :: maxconc = 10**(0-1)*1E3
-  PetscScalar :: min
-  MatNullSpace nullspace
   PetscInt :: myi
-
-  w = 0.0d0
-  delo = 0.0d0
 
   c0 = 10**(0.0d0-pH_in)*1E3
 
@@ -353,22 +342,17 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   PetscErrorCode ierr
   Vec input_state, function_value, state_local, state, static_local
   PetscScalar, pointer :: statepointer(:,:,:,:), staticpointer(:,:,:,:)
-  PetscInt :: fesphase,fesphase2
+  PetscInt :: fesphase
   PetscInt :: x,y,z
-  PetscScalar :: myD, sum6myD
-  PetscScalar, parameter :: myM = 1.0d0
-  PetscScalar :: Mobility
-  PetscScalar :: w(0:nfields), delo(0:nfields)
+  PetscScalar :: myD
   PetscScalar  v((6*2)+1)
   MatStencil   row(4,1),col(4,(6*2)+1)
   PetscInt :: nocols
   Mat pf_jacob, pf_precond
-  PetscScalar :: grady, gradz
   PetscScalar :: exponent
   PetscScalar :: c0 !! Average density of counter charge (moles/m^3)
   PetscScalar :: el_charg = 1.60217657E-19*6.022E23
   PetscScalar, parameter :: maxconc = 10**(0-1)*1E2
-  PetscScalar :: min
   PetscScalar zeromatentry(7)
   PetscInt :: matfield, matfield2
   type(context) simstate
