@@ -22,8 +22,6 @@ subroutine initialize_geometry(simstate)
   PetscScalar, pointer :: statepointer(:,:,:,:) !! Pointer array referenced to individual gridpoints inside the simulation cell
   type(context), intent(inout) :: simstate      !! Field variables stored in PETSc vectors and DMDA objects
 
-  if (isroot) then
-
      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
      met_z_end = 15*(psz_g/16)
@@ -78,11 +76,6 @@ subroutine initialize_geometry(simstate)
      call random_seed(put=seed)
      call random_number(opyr_g)
      opyr_g = opyr_g * (3.14159265d0/2.0d0)   ! Populate the global orientation field with random numbers
-
-  end if
-
-  call distrib_pf()    ! Distribute all PF-MU-OR-ELPOT matrices to non-parent processors
-
 
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
