@@ -115,10 +115,14 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_contex
      write(666,*) 'sector yes'
      write(666,'(A,F16.8,A)') 'dump mydump text ', dt*kmc_freq, ' raw_vacmet_output x y i1'
 
+     write(666,'(A,F6.3)') ' set i1 value 1 fraction ', max(min(DeltaC,0.99d0),0.01d0)
+
      do x = 0,psx_g-1
         do y = 0,psy_g-1
            call PetscRandomGetValueReal(random_context,random_number,ierr)
-           write(666,'(A,F6.3,A,I5,A,I5,A,I5,A,I5)') ' set i1 value 1 fraction ', max(min(DeltaC*2.0d0*random_number,0.99d0),0.01d0), ' if x > ',x*kg_scale,  ' if x < ',(x+1)*kg_scale,  ' if y > ',y*kg_scale,  ' if y < ',(y+1)*kg_scale
+           if (random_number*2.0d0*DeltaC .gt. 0.01d0) then
+              write(666,'(A,F6.3,A,I5,A,I5,A,I5,A,I5)') ' set i1 value 1 fraction ', max(min(DeltaC*2.0d0*random_number,0.99d0),0.01d0), ' if x > ',x*kg_scale,  ' if x < ',(x+1)*kg_scale,  ' if y > ',y*kg_scale,  ' if y < ',(y+1)*kg_scale
+           end if
         end do
      end do
 
