@@ -30,13 +30,13 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
   type(context) simstate
   PetscInt, intent(in) :: iter  ! Iteration count
   PetscScalar, pointer :: statepointer(:,:,:,:)
-  VecScatter gatherslicetoroot
-  Vec gatheredslice
+  VecScatter :: gatherslicetoroot
+  Vec :: gatheredslice
   PetscScalar, pointer :: gatheredpointer(:)
-  Vec slice_naturalorder
-  PetscScalar env_at_lattice_site_above, env_at_this_lattice_site, pH_at_this_lattice_site, pot_at_this_lattice_site
+  Vec :: slice_naturalorder
+  PetscScalar :: env_at_lattice_site_above, env_at_this_lattice_site, pH_at_this_lattice_site, pot_at_this_lattice_site
   PetscScalar, dimension(0:(nphases-1)) :: raw_dissolution_rate, vac_form_prob
-  PetscInt fesphase
+  PetscInt :: fesphase
   PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
   PetscRandom, intent(inout) :: random_context !! Context to seed and generate random numbers
   PetscReal :: random_number  !! Pseudo random number generated from a PETSc context
@@ -230,54 +230,54 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Wait for RANK 0 to write the 'toucouple' file before reading it
 
-     open (unit = 667, file = 'tocouple', status = 'old')
-     do x = 1,psx_g*psy_g*kg_scale*kg_scale
-        read(667,'(I6, I6, I6)') xfine, yfine, fine_kmc_array(xfine+1,yfine+1)
-     end do
-     close(667)
+  open (unit = 667, file = 'tocouple', status = 'old')
+  do x = 1,psx_g*psy_g*kg_scale*kg_scale
+     read(667,'(I6, I6, I6)') xfine, yfine, fine_kmc_array(xfine+1,yfine+1)
+  end do
+  close(667)
 
-     do x = 0,psx_g-1
-        do y = 0,psy_g-1
-           average_from_fine = 0.0d0
-           do xfine = 0,kg_scale-1
-              do yfine = 0,kg_scale-1
-                 average_from_fine = average_from_fine + fine_kmc_array((x*kg_scale)+xfine+1,(y*kg_scale)+yfine+1)
-              end do
-           end do
-           average_from_fine = average_from_fine/(kg_scale*kg_scale)
-           distance_interface_moved(x+1,y+1) = interface_loc(x+1,y+1) - (average_from_fine/kg_scale)
-           interface_loc(x+1,y+1) = floor(average_from_fine/kg_scale)
-        end do
-     end do
-
-
-     call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
-
-     do x = simstate%startx , simstate%startx + simstate%widthx-1
-        do y = simstate%starty , simstate%starty + simstate%widthy-1
-
-           do z=simstate%startz,simstate%startz+simstate%widthz-1
-              if ((statepointer(nenv,x,y,min(z+3,simstate%startz+simstate%widthz-1))-statepointer(nenv,x,y,max(z,simstate%startz))).gt.0.1d0) then
-                 statepointer(npH,x,y,min(z+3,simstate%startz+simstate%widthz-1)) = max(statepointer(npH,x,y,min(z+3,simstate%startz+simstate%widthz-1)) - (distance_interface_moved(x+1,y+1)*rhoFe),10**(0-pH_in))
-              end if
-           end do
-
-           do z = max(simstate%startz,interface_loc(x+1,y+1)) , simstate%startz + simstate%widthz-1
-              statepointer(nmet,x,y,z) = 0.0d0
-              statepointer(nmkw,x,y,z) = 0.0d0
-              statepointer(npht,x,y,z) = 0.0d0
-              statepointer(npyr,x,y,z) = 0.0d0
-              statepointer(nenv,x,y,z) = 1.0d0
-              statepointer(nmus,x,y,z) = avg_mu_env
-              statepointer(nvoi,x,y,z) = 1.0d0
+  do x = 0,psx_g-1
+     do y = 0,psy_g-1
+        average_from_fine = 0.0d0
+        do xfine = 0,kg_scale-1
+           do yfine = 0,kg_scale-1
+              average_from_fine = average_from_fine + fine_kmc_array((x*kg_scale)+xfine+1,(y*kg_scale)+yfine+1)
            end do
         end do
+        average_from_fine = average_from_fine/(kg_scale*kg_scale)
+        distance_interface_moved(x+1,y+1) = interface_loc(x+1,y+1) - (average_from_fine/kg_scale)
+        interface_loc(x+1,y+1) = floor(average_from_fine/kg_scale)
      end do
+  end do
 
-     call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+
+  call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
+
+  do x = simstate%startx , simstate%startx + simstate%widthx-1
+     do y = simstate%starty , simstate%starty + simstate%widthy-1
+
+        do z=simstate%startz,simstate%startz+simstate%widthz-1
+           if ((statepointer(nenv,x,y,min(z+3,simstate%startz+simstate%widthz-1))-statepointer(nenv,x,y,max(z,simstate%startz))).gt.0.1d0) then
+              statepointer(npH,x,y,min(z+3,simstate%startz+simstate%widthz-1)) = max(statepointer(npH,x,y,min(z+3,simstate%startz+simstate%widthz-1)) - (distance_interface_moved(x+1,y+1)*rhoFe),10**(0-pH_in))
+           end if
+        end do
+
+        do z = max(simstate%startz,interface_loc(x+1,y+1)) , simstate%startz + simstate%widthz-1
+           statepointer(nmet,x,y,z) = 0.0d0
+           statepointer(nmkw,x,y,z) = 0.0d0
+           statepointer(npht,x,y,z) = 0.0d0
+           statepointer(npyr,x,y,z) = 0.0d0
+           statepointer(nenv,x,y,z) = 1.0d0
+           statepointer(nmus,x,y,z) = avg_mu_env
+           statepointer(nvoi,x,y,z) = 1.0d0
+        end do
+     end do
+  end do
+
+  call DMDAVecRestoreArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
 
 
-     call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
+  call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! Wait for ALL RANKS to complete coupling the kMC to PF before erasing the 'toucouple' file
   if(isroot) call system('rm -f tocouple')

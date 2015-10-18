@@ -14,7 +14,7 @@ subroutine initialize_geometry(simstate)
 #include <finclude/petscdmda.h90>
   !! **Initialize the simulation system containing a metal surface in contact with the given environment**
 
-  PetscErrorCode ierr !! MPI error flag
+  PetscErrorCode :: ierr !! MPI error flag
   PetscInt :: x,y,z                               !! Coordinates inside the simulation system
   PetscInt :: met_z_end                           !! Location of boundary between metal and environment
   PetscScalar :: avg_mu_met                           !! Chemical potential in the metal region
@@ -24,56 +24,56 @@ subroutine initialize_geometry(simstate)
   PetscReal :: random_number                    !! Pseudo random number generated from a PETSc context
   type(context), intent(inout) :: simstate      !! Field variables stored in PETSc vectors and DMDA objects
 
-     !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-     met_z_end = 15*(psz_g/16)
+  met_z_end = 15*(psz_g/16)
 
-     do x = 1,psx_g
-        do y = 1,psy_g
+  do x = 1,psx_g
+     do y = 1,psy_g
 
-           do z = 1,met_z_end         ! Initialize metal region
-              met_g(x,y,z) = 1.0d0-infinitesimal
-              mkw_g(x,y,z) = 0.0d0+infinitesimal
-              pht_g(x,y,z) = 0.0d0+infinitesimal
-              pyr_g(x,y,z) = 0.0d0+infinitesimal
-              env_g(x,y,z) = 0.0d0+infinitesimal
-           end do
-
-           do z = met_z_end+1,psz_g   ! Initialize environmental region
-              met_g(x,y,z) = 0.0d0+infinitesimal
-              mkw_g(x,y,z) = 0.0d0+infinitesimal
-              pht_g(x,y,z) = 0.0d0+infinitesimal
-              pyr_g(x,y,z) = 0.0d0+infinitesimal
-              env_g(x,y,z) = 1.0d0-infinitesimal
-           end do
-
+        do z = 1,met_z_end         ! Initialize metal region
+           met_g(x,y,z) = 1.0d0-infinitesimal
+           mkw_g(x,y,z) = 0.0d0+infinitesimal
+           pht_g(x,y,z) = 0.0d0+infinitesimal
+           pyr_g(x,y,z) = 0.0d0+infinitesimal
+           env_g(x,y,z) = 0.0d0+infinitesimal
         end do
-     end do
 
-     !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
-
-     avg_mu_met = mus_met_mkw_eqb - (R*T*0.5d0)
-     avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0)
-
-     do x = 1,psx_g
-        do y = 1,psy_g
-
-           do z = 1,met_z_end
-              mu_g(x,y,z) = avg_mu_met    ! Initialize metal region
-           end do
-
-           do z = met_z_end+1,psz_g
-              mu_g(x,y,z) = avg_mu_env    ! Initialize environmental region
-           end do
-
+        do z = met_z_end+1,psz_g   ! Initialize environmental region
+           met_g(x,y,z) = 0.0d0+infinitesimal
+           mkw_g(x,y,z) = 0.0d0+infinitesimal
+           pht_g(x,y,z) = 0.0d0+infinitesimal
+           pyr_g(x,y,z) = 0.0d0+infinitesimal
+           env_g(x,y,z) = 1.0d0-infinitesimal
         end do
+
      end do
+  end do
 
-     !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-     elpot_g = metal_potential            ! Initialize global electrical potential
+  avg_mu_met = mus_met_mkw_eqb - (R*T*0.5d0)
+  avg_mu_env = mus_mkw_pht_eqb - (R*T*2.5d0)
 
-     !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  do x = 1,psx_g
+     do y = 1,psy_g
+
+        do z = 1,met_z_end
+           mu_g(x,y,z) = avg_mu_met    ! Initialize metal region
+        end do
+
+        do z = met_z_end+1,psz_g
+           mu_g(x,y,z) = avg_mu_env    ! Initialize environmental region
+        end do
+
+     end do
+  end do
+
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+
+  elpot_g = metal_potential            ! Initialize global electrical potential
+
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   call PetscRandomCreate(MPI_COMM_WORLD,random_orientation_context,ierr)
   call PetscRandomSetType(random_orientation_context,PETSCRAND,ierr)

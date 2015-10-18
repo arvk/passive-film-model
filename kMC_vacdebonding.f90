@@ -86,7 +86,7 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_contex
   metal_content_in_simcell_last_timestep = metal_content_in_simcell
   call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
 
-! Calculate \DeltaC => Vacancy concentration at the metal-mkw interface
+  ! Calculate \DeltaC => Vacancy concentration at the metal-mkw interface
   DeltaC = ((metal_content_in_simcell_last_timestep - metal_content_in_simcell)*(10*dpf*dpf))/(D_Fe_met*psx_g*psy_g*dt*kmc_freq)
 
   call PetscRandomGetValueReal(random_context,random_number,ierr)

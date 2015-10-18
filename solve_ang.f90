@@ -14,12 +14,12 @@ subroutine solve_ang(iter,ksp_ang,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  PetscErrorCode ierr
-  KSP ksp_ang !! Linear pyrite crystal shape solver
-  KSPConvergedReason ang_converged_reason
-  Vec solved_ang_vector,state,state_solved !! Vectors to store function values and solutions
+  PetscErrorCode :: ierr
+  KSP :: ksp_ang !! Linear pyrite crystal shape solver
+  KSPConvergedReason :: ang_converged_reason
+  Vec :: solved_ang_vector,state,state_solved !! Vectors to store function values and solutions
   PetscInt, intent(in) :: iter  !! Current iteration number
   PetscInt :: x, y, z           !! Coordinates inside the simulation system
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
@@ -72,9 +72,9 @@ subroutine computeInitialGuess_ang(ksp_ang,b,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_ang
-  PetscErrorCode ierr
-  Vec b
+  KSP :: ksp_ang
+  PetscErrorCode :: ierr
+  Vec :: b
   type(context) simstate
 
   call VecCopy(simstate%slice,b,ierr)
@@ -109,9 +109,9 @@ subroutine computeRHS_ang(ksp_ang,b,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_ang
-  PetscErrorCode ierr
-  Vec state, b, onlyang
+  KSP :: ksp_ang
+  PetscErrorCode :: ierr
+  Vec :: state, b, onlyang
   type(context) simstate
 
   call VecCreate(MPI_COMM_WORLD,onlyang,ierr)
@@ -145,7 +145,7 @@ subroutine computeRHS_ang(ksp_ang,b,simstate,ierr)
   ! orc = (orc1+orc3+orc5)-(orc2+orc4+orc6)
 
   call VecDestroy(onlyang,ierr)
- return
+  return
 end subroutine computeRHS_ang
 
 
@@ -169,13 +169,13 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_ang
-  PetscErrorCode ierr
-  Vec state,statelocal
-  Mat matoper, matprecond
-  PetscInt     i,j,k,x,y,z
-  PetscScalar  v(7)
-  MatStencil   row(4,1),col(4,7)
+  KSP :: ksp_ang
+  PetscErrorCode :: ierr
+  Vec :: state,statelocal
+  Mat :: matoper, matprecond
+  PetscInt :: i, j, k, x, y, z
+  PetscScalar :: v(7)
+  MatStencil :: row(4,1),col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscScalar :: M_opyr_max = 1.0E3
   PetscScalar :: M_opyr_min = 1.0E-2
@@ -184,9 +184,8 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   PetscScalar :: add_to_v_ij
   PetscScalar, parameter :: infinitesimal = 1E-15  ! A hard-coded 'small' number
   type(context) simstate
-  PetscScalar zeromatentry(7)
+  PetscScalar :: zeromatentry(7)
   PetscInt :: matfield
-
   PetscScalar :: Mob_ang_field
   PetscScalar :: Diff_ang_field
   PetscScalar :: Del_ang_field
@@ -365,15 +364,15 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
               add_to_v_ij = add_to_v_ij + v(nocols)
            end if
 
-              nocols = nocols + 1
-              v(nocols) = (1.0d0/dt)
-              col(MatStencil_i,nocols) = i
-              col(MatStencil_j,nocols) = j
-              col(MatStencil_k,nocols) = k
-              col(MatStencil_c,nocols) = nang
-              v(nocols) = V(nocols) - add_to_v_ij
+           nocols = nocols + 1
+           v(nocols) = (1.0d0/dt)
+           col(MatStencil_i,nocols) = i
+           col(MatStencil_j,nocols) = j
+           col(MatStencil_k,nocols) = k
+           col(MatStencil_c,nocols) = nang
+           v(nocols) = V(nocols) - add_to_v_ij
 
-              call MatSetValuesStencil(matprecond,1,row,nocols,col,v,ADD_VALUES,ierr)
+           call MatSetValuesStencil(matprecond,1,row,nocols,col,v,ADD_VALUES,ierr)
 
         end do
      end do

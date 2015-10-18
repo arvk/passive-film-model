@@ -15,13 +15,13 @@ subroutine solve_pot(iter,snes_pot,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  PetscErrorCode ierr
-  SNES snes_pot !! Non-linear electrical potential solver
-  SNESConvergedReason pot_converged_reason
-  Vec vec_feval, elpot_vector, solution_vec,rhs_vec !! Vectors to store function values and solutions
-  Mat mat_jacob !! Jacobian for electrical potential evolution
+  PetscErrorCode :: ierr
+  SNES :: snes_pot !! Non-linear electrical potential solver
+  SNESConvergedReason :: pot_converged_reason
+  Vec :: vec_feval, elpot_vector, solution_vec,rhs_vec !! Vectors to store function values and solutions
+  Mat :: mat_jacob !! Jacobian for electrical potential evolution
   type(context) simstate !! Field variables stored in PETSc vectors and DMDA objects
   PetscInt, intent(in) :: iter  !! Current iteration number
   PetscInt :: fesphase !! Index corresponding to FeS phase
@@ -51,12 +51,12 @@ subroutine solve_pot(iter,snes_pot,simstate)
 
 
   if (pot_converged_reason .ge. 0) then
-  call VecCreate(MPI_COMM_WORLD,elpot_vector,ierr)
-  call VecSetSizes(elpot_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
-  call VecSetUp(elpot_vector,ierr)
-  call VecStrideGather(solution_vec,npot,elpot_vector,INSERT_VALUES,ierr)
-  call VecStrideScatter(elpot_vector,npot,simstate%slice,INSERT_VALUES,ierr)
-  call VecDestroy(elpot_vector,ierr)
+     call VecCreate(MPI_COMM_WORLD,elpot_vector,ierr)
+     call VecSetSizes(elpot_vector,PETSC_DECIDE,psx_g*psy_g*psz_g,ierr)
+     call VecSetUp(elpot_vector,ierr)
+     call VecStrideGather(solution_vec,npot,elpot_vector,INSERT_VALUES,ierr)
+     call VecStrideScatter(elpot_vector,npot,simstate%slice,INSERT_VALUES,ierr)
+     call VecDestroy(elpot_vector,ierr)
   else
      write(6,*) 'Potential field did not converge. Reason: ', pot_converged_reason
   end if
@@ -93,8 +93,8 @@ subroutine FormRHS_pot(rhs_vec,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  PetscErrorCode ierr
-  Vec rhs_vec
+  PetscErrorCode :: ierr
+  Vec :: rhs_vec
   PetscScalar, pointer :: statepointer(:,:,:,:), rhspointer(:,:,:,:)
   PetscInt :: startx,starty,startz,widthx,widthy,widthz
   PetscInt :: x,y,z
@@ -175,9 +175,9 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  SNES snes_pot
-  PetscErrorCode ierr
-  Vec input_state, function_value, state_local, static_local
+  SNES :: snes_pot
+  PetscErrorCode :: ierr
+  Vec :: input_state, function_value, state_local, static_local
   PetscScalar, pointer :: statepointer(:,:,:,:), functionpointer(:,:,:,:), staticpointer(:,:,:,:)
   PetscInt :: fesphase
   PetscInt :: x,y,z
@@ -338,9 +338,9 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  SNES snes_pot
-  PetscErrorCode ierr
-  Vec input_state, function_value, state_local, state, static_local
+  SNES :: snes_pot
+  PetscErrorCode :: ierr
+  Vec :: input_state, function_value, state_local, state, static_local
   PetscScalar, pointer :: statepointer(:,:,:,:), staticpointer(:,:,:,:)
   PetscInt :: fesphase
   PetscInt :: x,y,z
@@ -385,59 +385,59 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
 
               do matfield2 = 0,nfields-1   ! Column
 
-              nocols = 0
+                 nocols = 0
 
-              if (z.ne.0) then    ! z-1
-                 nocols = nocols + 1
-                 col(MatStencil_i,nocols) = x
-                 col(MatStencil_j,nocols) = y
-                 col(MatStencil_k,nocols) = z-1
-                 col(MatStencil_c,nocols) = matfield2
-              end if
+                 if (z.ne.0) then    ! z-1
+                    nocols = nocols + 1
+                    col(MatStencil_i,nocols) = x
+                    col(MatStencil_j,nocols) = y
+                    col(MatStencil_k,nocols) = z-1
+                    col(MatStencil_c,nocols) = matfield2
+                 end if
 
-              if (y.ne.0) then    ! z-1
-                 nocols = nocols + 1
-                 col(MatStencil_i,nocols) = x
-                 col(MatStencil_j,nocols) = y-1
-                 col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield2
-              end if
+                 if (y.ne.0) then    ! z-1
+                    nocols = nocols + 1
+                    col(MatStencil_i,nocols) = x
+                    col(MatStencil_j,nocols) = y-1
+                    col(MatStencil_k,nocols) = z
+                    col(MatStencil_c,nocols) = matfield2
+                 end if
 
-              if (x.ne.0) then    ! z-1
-                 nocols = nocols + 1
-                 col(MatStencil_i,nocols) = x-1
-                 col(MatStencil_j,nocols) = y
-                 col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield2
-              end if
+                 if (x.ne.0) then    ! z-1
+                    nocols = nocols + 1
+                    col(MatStencil_i,nocols) = x-1
+                    col(MatStencil_j,nocols) = y
+                    col(MatStencil_k,nocols) = z
+                    col(MatStencil_c,nocols) = matfield2
+                 end if
 
-              if (x.ne.psx_g-1) then    ! z-1
-                 nocols = nocols + 1
-                 col(MatStencil_i,nocols) = x+1
-                 col(MatStencil_j,nocols) = y
-                 col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield2
-              end if
+                 if (x.ne.psx_g-1) then    ! z-1
+                    nocols = nocols + 1
+                    col(MatStencil_i,nocols) = x+1
+                    col(MatStencil_j,nocols) = y
+                    col(MatStencil_k,nocols) = z
+                    col(MatStencil_c,nocols) = matfield2
+                 end if
 
-              if (y.ne.psy_g-1) then    ! z-1
-                 nocols = nocols + 1
-                 col(MatStencil_i,nocols) = x
-                 col(MatStencil_j,nocols) = y+1
-                 col(MatStencil_k,nocols) = z
-                 col(MatStencil_c,nocols) = matfield2
-              end if
+                 if (y.ne.psy_g-1) then    ! z-1
+                    nocols = nocols + 1
+                    col(MatStencil_i,nocols) = x
+                    col(MatStencil_j,nocols) = y+1
+                    col(MatStencil_k,nocols) = z
+                    col(MatStencil_c,nocols) = matfield2
+                 end if
 
-              if (z.ne.psz_g-1) then    ! z-1
-                 nocols = nocols + 1
-                 col(MatStencil_i,nocols) = x
-                 col(MatStencil_j,nocols) = y
-                 col(MatStencil_k,nocols) = z+1
-                 col(MatStencil_c,nocols) = matfield2
-              end if
+                 if (z.ne.psz_g-1) then    ! z-1
+                    nocols = nocols + 1
+                    col(MatStencil_i,nocols) = x
+                    col(MatStencil_j,nocols) = y
+                    col(MatStencil_k,nocols) = z+1
+                    col(MatStencil_c,nocols) = matfield2
+                 end if
 
-              call MatSetValuesStencil(pf_precond,1,row,nocols,col,zeromatentry,INSERT_VALUES,ierr)
+                 call MatSetValuesStencil(pf_precond,1,row,nocols,col,zeromatentry,INSERT_VALUES,ierr)
 
-           end do
+              end do
 
 
            end do
@@ -462,143 +462,143 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
 
            if ((staticpointer(nenv,x,y,z).gt.0.97) .and. (z.ne.(psz_g-1)))  then
 
-                 nocols = 0
+              nocols = 0
 
-                 if (z.ne.0) then    ! z-1
-                    myD = 0.0d0
-                    do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y,z-1)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
-                    end do
-
-                    nocols = nocols + 1
-                    v(nocols) = myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z-1
-                    col(MatStencil_c,nocols) = npot
-
-                    nocols = nocols + 1
-                    v(nocols) = 0.0d0 - myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-                 end if
-
-                 if (y.ne.0) then    ! y-1
-                    myD = 0.0d0
-                    do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y-1,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
-                    end do
-
-                    nocols = nocols + 1
-                    v(nocols) = myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y-1
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-
-                    nocols = nocols + 1
-                    v(nocols) = 0.0d0 - myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-                 end if
-
-                 if (x.ne.0) then    ! x-1
-                    myD = 0.0d0
-                    do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x-1,y,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
-                    end do
-
-                    nocols = nocols + 1
-                    v(nocols) = myD
-                    col(MatStencil_i,nocols) = x-1
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-
-                    nocols = nocols + 1
-                    v(nocols) = 0.0d0 - myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-                 end if
-
-                 if (x.ne.psx_g-1) then    ! x+1
-                    myD = 0.0d0
-                    do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x+1,y,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
-                    end do
-
-                    nocols = nocols + 1
-                    v(nocols) = myD
-                    col(MatStencil_i,nocols) = x+1
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-
-                    nocols = nocols + 1
-                    v(nocols) = 0.0d0 - myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-                 end if
-
-                 if (y.ne.psy_g-1) then    ! y+1
-                    myD = 0.0d0
-                    do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y+1,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
-                    end do
-
-                    nocols = nocols + 1
-                    v(nocols) = myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y+1
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-
-                    nocols = nocols + 1
-                    v(nocols) = 0.0d0 - myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-                 end if
-
-                 if (z.ne.psz_g-1) then    ! z+1
-                    myD = 0.0d0
-                   do fesphase = nmet,nenv
-                       myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y,z+1)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
-                    end do
-
-                    nocols = nocols + 1
-                    v(nocols) = myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z+1
-                    col(MatStencil_c,nocols) = npot
-
-                    nocols = nocols + 1
-                    v(nocols) = 0.0d0 - myD
-                    col(MatStencil_i,nocols) = x
-                    col(MatStencil_j,nocols) = y
-                    col(MatStencil_k,nocols) = z
-                    col(MatStencil_c,nocols) = npot
-                 end if
+              if (z.ne.0) then    ! z-1
+                 myD = 0.0d0
+                 do fesphase = nmet,nenv
+                    myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y,z-1)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
+                 end do
 
                  nocols = nocols + 1
-                 exponent = (statepointer(npot,x,y,z)*96485)/(R*T)
-                 v(nocols) = 0.0d0 - (c0*el_charg*(exp(0.0d0-exponent)+exp(0.0d0+exponent))*(96485/(R*T)))
+                 v(nocols) = myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z-1
+                 col(MatStencil_c,nocols) = npot
+
+                 nocols = nocols + 1
+                 v(nocols) = 0.0d0 - myD
                  col(MatStencil_i,nocols) = x
                  col(MatStencil_j,nocols) = y
                  col(MatStencil_k,nocols) = z
                  col(MatStencil_c,nocols) = npot
+              end if
 
-                 call MatSetValuesStencil(pf_precond,1,row,nocols,col,v,ADD_VALUES,ierr)
+              if (y.ne.0) then    ! y-1
+                 myD = 0.0d0
+                 do fesphase = nmet,nenv
+                    myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y-1,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
+                 end do
+
+                 nocols = nocols + 1
+                 v(nocols) = myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y-1
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+
+                 nocols = nocols + 1
+                 v(nocols) = 0.0d0 - myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+              end if
+
+              if (x.ne.0) then    ! x-1
+                 myD = 0.0d0
+                 do fesphase = nmet,nenv
+                    myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x-1,y,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
+                 end do
+
+                 nocols = nocols + 1
+                 v(nocols) = myD
+                 col(MatStencil_i,nocols) = x-1
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+
+                 nocols = nocols + 1
+                 v(nocols) = 0.0d0 - myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+              end if
+
+              if (x.ne.psx_g-1) then    ! x+1
+                 myD = 0.0d0
+                 do fesphase = nmet,nenv
+                    myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x+1,y,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
+                 end do
+
+                 nocols = nocols + 1
+                 v(nocols) = myD
+                 col(MatStencil_i,nocols) = x+1
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+
+                 nocols = nocols + 1
+                 v(nocols) = 0.0d0 - myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+              end if
+
+              if (y.ne.psy_g-1) then    ! y+1
+                 myD = 0.0d0
+                 do fesphase = nmet,nenv
+                    myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y+1,z)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
+                 end do
+
+                 nocols = nocols + 1
+                 v(nocols) = myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y+1
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+
+                 nocols = nocols + 1
+                 v(nocols) = 0.0d0 - myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+              end if
+
+              if (z.ne.psz_g-1) then    ! z+1
+                 myD = 0.0d0
+                 do fesphase = nmet,nenv
+                    myD = myD + 0.5d0*permittivity(fesphase)*epsilon0*(staticpointer(fesphase,x,y,z+1)+staticpointer(fesphase,x,y,z))/(dpf*dpf)
+                 end do
+
+                 nocols = nocols + 1
+                 v(nocols) = myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z+1
+                 col(MatStencil_c,nocols) = npot
+
+                 nocols = nocols + 1
+                 v(nocols) = 0.0d0 - myD
+                 col(MatStencil_i,nocols) = x
+                 col(MatStencil_j,nocols) = y
+                 col(MatStencil_k,nocols) = z
+                 col(MatStencil_c,nocols) = npot
+              end if
+
+              nocols = nocols + 1
+              exponent = (statepointer(npot,x,y,z)*96485)/(R*T)
+              v(nocols) = 0.0d0 - (c0*el_charg*(exp(0.0d0-exponent)+exp(0.0d0+exponent))*(96485/(R*T)))
+              col(MatStencil_i,nocols) = x
+              col(MatStencil_j,nocols) = y
+              col(MatStencil_k,nocols) = z
+              col(MatStencil_c,nocols) = npot
+
+              call MatSetValuesStencil(pf_precond,1,row,nocols,col,v,ADD_VALUES,ierr)
 
 
            else

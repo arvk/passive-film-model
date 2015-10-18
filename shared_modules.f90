@@ -5,7 +5,6 @@ module fields
   save
 #include <finclude/petscsysdef.h>
 
-
   PetscInt :: psx_g,psy_g,psz_g !! Number of gridpoints in the simulation cell along 3 directions
 
   ! Global phase fields
@@ -13,13 +12,13 @@ module fields
   PetscScalar, dimension(:,:,:), allocatable :: mu_g                              !! Global mu_S grid
   PetscScalar, dimension(:,:,:), allocatable :: elpot_g                           !! Global electrical potential
 
-      type context
+  type context
 #include <finclude/petscdmdef.h>
-         DM lattval
-         Vec slice, exslice   !! All field variables that define the system state
-         PetscInt :: startx,starty,startz !! Coordinates that define the bottom-left corner of the local part of the simulation cell
-         PetscInt :: widthx,widthy,widthz !! Size of the local part of the simulation cell
-      end type context
+     DM lattval
+     Vec slice, exslice   !! All field variables that define the system state
+     PetscInt :: startx,starty,startz !! Coordinates that define the bottom-left corner of the local part of the simulation cell
+     PetscInt :: widthx,widthy,widthz !! Size of the local part of the simulation cell
+  end type context
 
 end module fields
 

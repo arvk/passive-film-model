@@ -5,7 +5,7 @@ subroutine distrib_params()
 #include <finclude/petscsys.h>
   !!####Distribute simulation parameters to all child processors
 
-  PetscErrorCode ierr !! MPI error flag
+  PetscErrorCode :: ierr !! MPI error flag
 
   call mpi_bcast(psx_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)
   call mpi_bcast(psy_g,1,MPI_INT,0,MPI_COMM_WORLD,ierr)

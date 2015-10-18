@@ -14,12 +14,12 @@ subroutine solve_pH(iter,ksp_pH,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  PetscErrorCode ierr
-  KSP ksp_pH  !! Linear pH field solver
-  KSPConvergedReason pH_converged_reason
-  Vec state, solved_pH_vector, state_solved !! Vectors to store function values and solutions
+  PetscErrorCode :: ierr
+  KSP :: ksp_pH  !! Linear pH field solver
+  KSPConvergedReason :: pH_converged_reason
+  Vec :: state, solved_pH_vector, state_solved !! Vectors to store function values and solutions
   PetscInt, intent(in) :: iter  !! Current iteration number
   PetscInt :: x, y, z           !! Coordinates inside the simulation system
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
@@ -77,9 +77,9 @@ subroutine computeInitialGuess_pH(ksp_pH,b,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_pH
-  PetscErrorCode ierr
-  Vec b
+  KSP :: ksp_pH
+  PetscErrorCode :: ierr
+  Vec :: b
   type(context) simstate
 
   call VecCopy(simstate%slice,b,ierr)
@@ -121,10 +121,10 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_pH
-  PetscErrorCode ierr
-  Vec b
-  PetscInt :: i,j,k,field,fesphase
+  KSP :: ksp_pH
+  PetscErrorCode :: ierr
+  Vec :: b
+  PetscInt :: i, j, k, field, fesphase
   type(context) simstate
   PetscScalar, pointer :: statepointer(:,:,:,:), bpointer(:,:,:,:)
   PetscScalar :: local_Efield, sulfid_bias_Efield
@@ -188,19 +188,19 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_pH
-  PetscErrorCode ierr
-  Vec state,statelocal
-  Mat matoper, matprecond
-  PetscInt     i,j,k,x,y,z
-  PetscScalar  v(7)
-  MatStencil   row(4,1),col(4,7)
+  KSP :: ksp_pH
+  PetscErrorCode :: ierr
+  Vec :: state, statelocal
+  Mat :: matoper, matprecond
+  PetscInt :: i, j, k, x, y, z
+  PetscScalar :: v(7)
+  MatStencil :: row(4,1), col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscScalar :: D
   PetscInt :: nocols
   PetscScalar :: add_to_v_ij
   type(context) simstate
-  PetscScalar zeromatentry(7)
+  PetscScalar :: zeromatentry(7)
   PetscInt :: matfield
 
 
@@ -309,8 +309,8 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
            row(MatStencil_k,1) = k
            row(MatStencil_c,1) = npH
 
-              nocols = 0
-              add_to_v_ij = 0.0d0
+           nocols = 0
+           add_to_v_ij = 0.0d0
 
 
            if ((k .ne. (psz_g-1)) .and. (statepointer(nenv,i,j,k) .gt. 0.1d0)) then
@@ -385,14 +385,14 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
 
            end if
 
-              nocols = nocols + 1
-              v(nocols) = (1.0d0/dt) - add_to_v_ij
-              col(MatStencil_i,nocols) = i
-              col(MatStencil_j,nocols) = j
-              col(MatStencil_k,nocols) = k
-              col(MatStencil_c,nocols) = npH
+           nocols = nocols + 1
+           v(nocols) = (1.0d0/dt) - add_to_v_ij
+           col(MatStencil_i,nocols) = i
+           col(MatStencil_j,nocols) = j
+           col(MatStencil_k,nocols) = k
+           col(MatStencil_c,nocols) = npH
 
-              call MatSetValuesStencil(matprecond,1,row,nocols,col,v,INSERT_VALUES,ierr)
+           call MatSetValuesStencil(matprecond,1,row,nocols,col,v,INSERT_VALUES,ierr)
 
 
         end do

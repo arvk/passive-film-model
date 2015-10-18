@@ -6,10 +6,7 @@ subroutine diffusivities
   implicit none
   !! **Diffusivity of \(Fe\) and \(S\) atoms in different \(FeS\) phases**
 
-
-  !!---
-
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !!#### Sulfur diffusivity in \(\frac{m^2}{s}\)
 
@@ -69,31 +66,31 @@ subroutine diffusivities
   !!----------------------------------------
 
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
 
   !!#### Hydrogen diffusivity in \(\frac{m^2}{s}\)
 
   !! $$D_{H}^{environment} = 9.31 \times 10^{-9}$$
   !! Reference : http://mail.sci.ccny.cuny.edu/~pzhang/EAS44600/EAS446lec16.pdf
-   D_H_env = 9.31E-9
+  D_H_env = 9.31E-9
 
   !!----------------------------------------
 
-   !! $$D_{H}^{metal} = 1.57 \times 10^{-7} \times e^{-\frac{8492}{R T}}$$
-   !! Reference : Physical Review B 70 , 064102-7 (2004)
-   D_H_met = 1.5E-7 * exp(0-(8492/(R*T)))
+  !! $$D_{H}^{metal} = 1.57 \times 10^{-7} \times e^{-\frac{8492}{R T}}$$
+  !! Reference : Physical Review B 70 , 064102-7 (2004)
+  D_H_met = 1.5E-7 * exp(0-(8492/(R*T)))
 
   !!----------------------------------------
 
-   !! $$D_{H}^{pyrrhotite} = 1.75 \times 10^{-9}$$
-   !! Reference : Int. J. Electrochem. Sci.,8, (2013) 2880-2891
-   D_H_pht = 1.75E-9
+  !! $$D_{H}^{pyrrhotite} = 1.75 \times 10^{-9}$$
+  !! Reference : Int. J. Electrochem. Sci.,8, (2013) 2880-2891
+  D_H_pht = 1.75E-9
 
   !!----------------------------------------
 
-   !! $$D_{H}^{pyrite} = D_{H}^{metal}$$
-   !! Reference : Assumed. Cannot find a suitable reference
-   D_H_pyr = D_H_met
+  !! $$D_{H}^{pyrite} = D_{H}^{metal}$$
+  !! Reference : Assumed. Cannot find a suitable reference
+  D_H_pyr = D_H_met
 
 end subroutine diffusivities

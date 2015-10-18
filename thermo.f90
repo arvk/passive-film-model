@@ -11,7 +11,7 @@ subroutine thermo
   PetscScalar :: my_met, my_mkw, my_pht, my_pyr         !! Free energy of each FeS phase
   PetscScalar :: min_met_mkw, min_mkw_pht, min_pht_pyr  !! Difference in free energy between two phases
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Estimate the phase-stability region
   min_met_mkw = 50000.0d0; min_mkw_pht = 50000.0d0; min_pht_pyr = 50000.0d0
@@ -41,7 +41,7 @@ subroutine thermo
 
   end do
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Density of sulfur in each phase (no. of moles of S / m^3 )
   rhoFe = 140984.780662d0          ! REF= Wikipedia
@@ -51,7 +51,7 @@ subroutine thermo
   rhoS(npyr) = 2.0d0*41667.0d0     ! REF= Muscat et. al. PRB 65(5):054107, 2002
   rhoS(nenv) = 0.0015d0*(13303/T)  ! REF= 0.15% assumed
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Assign field mobilities
   Mob_pf(npht,nmet) = 3.00E-08 ; Mob_pf(nmet,npht) = 3.00E-08
@@ -86,14 +86,12 @@ subroutine thermo
   permittivity(npyr) = 11.0d0
   permittivity(nenv) = 80.0d0
 
-
   ! Calculate derivative of sulfur concentration with chemical potential
   drho_dmu(nmet) = (0.0015d0*140401)/(R*T)
   drho_dmu(nmkw) = 0.95d0*48683.0d0/(2*250896.0d0)
   drho_dmu(npht) = 52275.0d0/(2*250896.0d0)
   drho_dmu(nenv) = (0.0015d0*(13303/T))/(R*T)
   drho_dmu(npyr) = (2*41667.0d0)/(2*250896.0d0)
-
 
 end subroutine thermo
 

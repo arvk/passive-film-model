@@ -22,13 +22,13 @@ program passive_film_model
   !!##This program simulates the growth and breakdown of iron sulfide films formed in sour corrosive conditions using a combined phase-field and kinetic Monte Carlo algorithm.
   !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  KSP ksp_mu     !! Linear chemical potential field solver
-  KSP ksp_pH     !! Linear pH field solver
-  KSP ksp_ang    !! Linear pyrite crystal shape solver
-  SNES snes_pf   !! Non-linear phase-field solver
-  SNES snes_pot  !! Non-linear electrical potential field solver
+  KSP :: ksp_mu     !! Linear chemical potential field solver
+  KSP :: ksp_pH     !! Linear pH field solver
+  KSP :: ksp_ang    !! Linear pyrite crystal shape solver
+  SNES :: snes_pf   !! Non-linear phase-field solver
+  SNES :: snes_pot  !! Non-linear electrical potential field solver
   PetscInt :: iter                               !! Current iteration number in the time-stepping loop
-  PetscErrorCode ierr !! MPI error flag
+  PetscErrorCode :: ierr !! MPI error flag
   PetscInt :: status(MPI_STATUS_SIZE)       !! MPI status variables
   PetscInt :: x,y,z                              !! Coordinates inside the simulation cell
   PetscReal :: phase_volume_in_simcell(0:(nphases-1))  !! Number of gridpoints in the simulation cell occupied by a given phase
@@ -39,7 +39,7 @@ program passive_film_model
   PetscRandom :: random_context                 !! Context to seed and generate random numbers
   type(context) simstate                        !! Field variables stored in PETSc vectors and DMDA objects
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Initialize Parallelization
   call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
@@ -82,7 +82,7 @@ program passive_film_model
   call PetscRandomCreate(PETSC_COMM_SELF,random_context,ierr)
   call PetscRandomSetType(random_context,PETSCRAND,ierr)
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   if (isroot) write(6,'(A,F9.5,A)') " INFO: Timestep for phase-field integration is ",dt, " seconds."
 
@@ -108,8 +108,8 @@ program passive_film_model
         do fesphase = 0,(nphases-1)
            call VecStrideNorm(simstate%slice,fesphase,NORM_1,phase_volume_in_simcell(fesphase),ierr)
         end do
-           if (isroot) write(6,'(A,F9.0,A,F10.2,A,F10.2,A,F10.2,A,F10.2,A,F10.2)') " INFO: TIME= ", iter*dt, " s. MET= ", phase_volume_in_simcell(nmet), " MKW= ", phase_volume_in_simcell(nmkw), " PHT= ", phase_volume_in_simcell(npht), " PYR= ", phase_volume_in_simcell(npyr), " ENV= ", phase_volume_in_simcell(nenv)
-        end if
+        if (isroot) write(6,'(A,F9.0,A,F10.2,A,F10.2,A,F10.2,A,F10.2,A,F10.2)') " INFO: TIME= ", iter*dt, " s. MET= ", phase_volume_in_simcell(nmet), " MKW= ", phase_volume_in_simcell(nmkw), " PHT= ", phase_volume_in_simcell(npht), " PYR= ", phase_volume_in_simcell(npyr), " ENV= ", phase_volume_in_simcell(nenv)
+     end if
 
      if (mod(iter,(nomc/num_images)).eq.0) then
         write(image_ID,'(I5.5)') iter/max(floor(real(nomc/num_images)),1)
@@ -121,7 +121,7 @@ program passive_film_model
   end do
 
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Destroy Unused objects
   call VecDestroy(simstate%slice,ierr)

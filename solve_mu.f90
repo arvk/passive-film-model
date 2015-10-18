@@ -14,12 +14,12 @@ subroutine solve_mu(iter,ksp_mu,simstate)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
-  PetscErrorCode ierr
-  KSP ksp_mu !! Linear chemical potential solver
-  KSPConvergedReason mu_converged_reason
-  Vec state, solved_mu_vector, state_solved !! Vectors to store function values and solutions
+  PetscErrorCode :: ierr
+  KSP :: ksp_mu !! Linear chemical potential solver
+  KSPConvergedReason :: mu_converged_reason
+  Vec :: state, solved_mu_vector, state_solved !! Vectors to store function values and solutions
   PetscInt, intent(in) :: iter  !! Current iteration number
   PetscInt :: x, y, z           !! Coordinates inside the simulation system
   type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
@@ -70,9 +70,9 @@ subroutine computeInitialGuess_mu(ksp_mu,b,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_mu
-  PetscErrorCode ierr
-  Vec b
+  KSP :: ksp_mu
+  PetscErrorCode :: ierr
+  Vec :: b
   type(context) simstate
 
   call VecCopy(simstate%slice,b,ierr)
@@ -105,9 +105,9 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_mu
-  PetscErrorCode ierr
-  Vec state, exstate, b
+  KSP :: ksp_mu
+  PetscErrorCode :: ierr
+  Vec :: state, exstate, b
   PetscScalar, pointer :: statepointer(:,:,:,:), exstatepointer(:,:,:,:), bpointer(:,:,:,:)
   type(context) simstate
   PetscInt :: i, j, k, fesphase, field
@@ -173,9 +173,9 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
               bpointer(nmus,i,j,k) = avg_mu_env * (1.0d0/dt)
            end if
 
-          if (k.eq.0) then
-             bpointer(nmus,i,j,k) = (mus_met_mkw_eqb - (R*T*0.5d0)) * (1.0d0/dt)
-          end if
+           if (k.eq.0) then
+              bpointer(nmus,i,j,k) = (mus_met_mkw_eqb - (R*T*0.5d0)) * (1.0d0/dt)
+           end if
 
         end do
      end do
@@ -211,19 +211,19 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
 
-  KSP ksp_mu
-  PetscErrorCode ierr
-  Vec statelocal
-  Mat matoper, matprecond
-  PetscInt     i,j,k,x,y,z
-  PetscScalar  v(7)
-  MatStencil   row(4,1),col(4,7)
+  KSP :: ksp_mu
+  PetscErrorCode :: ierr
+  Vec :: statelocal
+  Mat :: matoper, matprecond
+  PetscInt :: i, j, k, x, y, z
+  PetscScalar :: v(7)
+  MatStencil :: row(4,1), col(4,7)
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscScalar :: D_inter_met, D_inter_mkw, D_inter_pht, D_inter_pyr, D_inter_env
   PetscInt :: nocols
   PetscScalar :: add_to_v_ij
   type(context) simstate
-  PetscScalar zeromatentry(7)
+  PetscScalar :: zeromatentry(7)
   PetscInt :: matfield
 
 
@@ -344,125 +344,125 @@ subroutine ComputeMatrix_mu(ksp_mu,matoper,matprecond,simstate,ierr)
 
            if ((k.ne.psz_g-1).and.(k.ne.0).and.(statepointer(nenv,i,j,k).lt.0.97d0)) then
 
-           if (k.gt.0) then
-              nocols = nocols + 1
+              if (k.gt.0) then
+                 nocols = nocols + 1
 
-              v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j,k-1)) - &
-                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j,k-1)) - &
-                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j,k-1)) - &
-                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j,k-1)) - &
-                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j,k-1))
+                 v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j,k-1)) - &
+                      & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j,k-1)) - &
+                      & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j,k-1)) - &
+                      & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j,k-1)) - &
+                      & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j,k-1))
 
-              col(MatStencil_i,nocols) = i
-              col(MatStencil_j,nocols) = j
-              col(MatStencil_k,nocols) = k-1
-              col(MatStencil_c,nocols) = nmus
-              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
-              add_to_v_ij = add_to_v_ij + v(nocols)
+                 col(MatStencil_i,nocols) = i
+                 col(MatStencil_j,nocols) = j
+                 col(MatStencil_k,nocols) = k-1
+                 col(MatStencil_c,nocols) = nmus
+                 v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
+                 add_to_v_ij = add_to_v_ij + v(nocols)
+              end if
+
+
+              if (j.gt.0) then
+                 nocols = nocols + 1
+
+                 v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j-1,k)) - &
+                      & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j-1,k)) - &
+                      & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j-1,k)) - &
+                      & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j-1,k)) - &
+                      & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j-1,k))
+
+                 col(MatStencil_i,nocols) = i
+                 col(MatStencil_j,nocols) = j-1
+                 col(MatStencil_k,nocols) = k
+                 col(MatStencil_c,nocols) = nmus
+                 v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
+                 add_to_v_ij = add_to_v_ij + v(nocols)
+              end if
+
+              if (i.gt.0) then
+                 nocols = nocols + 1
+
+                 v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i-1,j,k)) - &
+                      & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i-1,j,k)) - &
+                      & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i-1,j,k)) - &
+                      & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i-1,j,k)) - &
+                      & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i-1,j,k))
+
+                 col(MatStencil_i,nocols) = i-1
+                 col(MatStencil_j,nocols) = j
+                 col(MatStencil_k,nocols) = k
+                 col(MatStencil_c,nocols) = nmus
+                 v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
+                 add_to_v_ij = add_to_v_ij + v(nocols)
+              end if
+
+
+              if (i.lt.psx_g-1) then
+                 nocols = nocols + 1
+
+                 v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i+1,j,k)) - &
+                      & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i+1,j,k)) - &
+                      & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i+1,j,k)) - &
+                      & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i+1,j,k)) - &
+                      & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i+1,j,k))
+
+                 col(MatStencil_i,nocols) = i+1
+                 col(MatStencil_j,nocols) = j
+                 col(MatStencil_k,nocols) = k
+                 col(MatStencil_c,nocols) = nmus
+                 v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
+                 add_to_v_ij = add_to_v_ij + v(nocols)
+              end if
+
+
+              if (j.lt.psy_g-1) then
+                 nocols = nocols + 1
+
+                 v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j+1,k)) - &
+                      & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j+1,k)) - &
+                      & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j+1,k)) - &
+                      & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j+1,k)) - &
+                      & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j+1,k))
+
+                 col(MatStencil_i,nocols) = i
+                 col(MatStencil_j,nocols) = j+1
+                 col(MatStencil_k,nocols) = k
+                 col(MatStencil_c,nocols) = nmus
+                 v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
+                 add_to_v_ij = add_to_v_ij + v(nocols)
+              end if
+
+              if ((statepointer(nenv,i,j,min(k+2,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k,simstate%startz))).lt.0.1d0) then
+
+                 if (k.lt.psz_g-1) then
+                    nocols = nocols + 1
+
+                    v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j,k+1)) - &
+                         & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j,k+1)) - &
+                         & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j,k+1)) - &
+                         & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j,k+1)) - &
+                         & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j,k+1))
+
+                    col(MatStencil_i,nocols) = i
+                    col(MatStencil_j,nocols) = j
+                    col(MatStencil_k,nocols) = k+1
+                    col(MatStencil_c,nocols) = nmus
+                    v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
+                    add_to_v_ij = add_to_v_ij + v(nocols)
+                 end if
+
+              end if
+
            end if
 
+           nocols = nocols + 1
+           v(nocols) = (1.0d0/dt) - add_to_v_ij
+           col(MatStencil_i,nocols) = i
+           col(MatStencil_j,nocols) = j
+           col(MatStencil_k,nocols) = k
+           col(MatStencil_c,nocols) = nmus
 
-           if (j.gt.0) then
-              nocols = nocols + 1
-
-              v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j-1,k)) - &
-                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j-1,k)) - &
-                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j-1,k)) - &
-                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j-1,k)) - &
-                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j-1,k))
-
-              col(MatStencil_i,nocols) = i
-              col(MatStencil_j,nocols) = j-1
-              col(MatStencil_k,nocols) = k
-              col(MatStencil_c,nocols) = nmus
-              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
-              add_to_v_ij = add_to_v_ij + v(nocols)
-           end if
-
-           if (i.gt.0) then
-              nocols = nocols + 1
-
-              v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i-1,j,k)) - &
-                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i-1,j,k)) - &
-                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i-1,j,k)) - &
-                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i-1,j,k)) - &
-                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i-1,j,k))
-
-              col(MatStencil_i,nocols) = i-1
-              col(MatStencil_j,nocols) = j
-              col(MatStencil_k,nocols) = k
-              col(MatStencil_c,nocols) = nmus
-              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
-              add_to_v_ij = add_to_v_ij + v(nocols)
-           end if
-
-
-           if (i.lt.psx_g-1) then
-              nocols = nocols + 1
-
-              v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i+1,j,k)) - &
-                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i+1,j,k)) - &
-                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i+1,j,k)) - &
-                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i+1,j,k)) - &
-                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i+1,j,k))
-
-              col(MatStencil_i,nocols) = i+1
-              col(MatStencil_j,nocols) = j
-              col(MatStencil_k,nocols) = k
-              col(MatStencil_c,nocols) = nmus
-              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
-              add_to_v_ij = add_to_v_ij + v(nocols)
-           end if
-
-
-           if (j.lt.psy_g-1) then
-              nocols = nocols + 1
-
-              v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j+1,k)) - &
-                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j+1,k)) - &
-                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j+1,k)) - &
-                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j+1,k)) - &
-                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j+1,k))
-
-              col(MatStencil_i,nocols) = i
-              col(MatStencil_j,nocols) = j+1
-              col(MatStencil_k,nocols) = k
-              col(MatStencil_c,nocols) = nmus
-              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
-              add_to_v_ij = add_to_v_ij + v(nocols)
-           end if
-
-           if ((statepointer(nenv,i,j,min(k+2,simstate%startz+simstate%widthz-1))-statepointer(nenv,i,j,max(k,simstate%startz))).lt.0.1d0) then
-
-           if (k.lt.psz_g-1) then
-              nocols = nocols + 1
-
-              v(nocols) = 0.0d0 - 0.5d0*D_inter_met*(statepointer(nmet,i,j,k)+statepointer(nmet,i,j,k+1)) - &
-                   & 0.5d0*D_inter_mkw*(statepointer(nmkw,i,j,k)+statepointer(nmkw,i,j,k+1)) - &
-                   & 0.5d0*D_inter_pht*(statepointer(npht,i,j,k)+statepointer(npht,i,j,k+1)) - &
-                   & 0.5d0*D_inter_pyr*(statepointer(npyr,i,j,k)+statepointer(npyr,i,j,k+1)) - &
-                   & 0.5d0*D_inter_env*(statepointer(nenv,i,j,k)+statepointer(nenv,i,j,k+1))
-
-              col(MatStencil_i,nocols) = i
-              col(MatStencil_j,nocols) = j
-              col(MatStencil_k,nocols) = k+1
-              col(MatStencil_c,nocols) = nmus
-              v(nocols) = (v(nocols)*statepointer(nvoi,i,j,k))/(dpf*dpf)
-              add_to_v_ij = add_to_v_ij + v(nocols)
-           end if
-
-        end if
-
-     end if
-
-              nocols = nocols + 1
-              v(nocols) = (1.0d0/dt) - add_to_v_ij
-              col(MatStencil_i,nocols) = i
-              col(MatStencil_j,nocols) = j
-              col(MatStencil_k,nocols) = k
-              col(MatStencil_c,nocols) = nmus
-
-              call MatSetValuesStencil(matprecond,1,row,nocols,col,v,INSERT_VALUES,ierr)
+           call MatSetValuesStencil(matprecond,1,row,nocols,col,v,INSERT_VALUES,ierr)
 
         end do
      end do

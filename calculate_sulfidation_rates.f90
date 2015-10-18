@@ -8,7 +8,7 @@ subroutine calculate_sulfidation_rates
 
   !!#### Gaseous
 
-  !!$$k_{metal}^{gas} = 10^{(0.00473 T) - 5.645 + \frac{0.4 \times (\mu_{env}+63562)}{R T}} \ nm/s $$
+!!$$k_{metal}^{gas} = 10^{(0.00473 T) - 5.645 + \frac{0.4 \times (\mu_{env}+63562)}{R T}} \ nm/s $$
   !!Reference: Assessing Corrosion in Oil Refining and Petrochemical Processing, Materials Research, Vol 7, No 1, pp. 163-173, 2004
   !!---
   sulf_rate_gas(nmet) = 10**((0.00473*T)-5.645+(0.4*(avg_mu_env+63562)/(R*T)))
@@ -37,25 +37,25 @@ subroutine calculate_sulfidation_rates
 
   !!#### Aqueous
 
-  !!$$k_{metal}^{liq} = 0.0666 \times \left( 1 + \frac{\mu_{env} + 63562}{R T} \right) $$
+!!$$k_{metal}^{liq} = 0.0666 \times \left( 1 + \frac{\mu_{env} + 63562}{R T} \right) $$
   !!Reference: Kinetics of iron sulfide and mixed iron sulfide/carbonate scale precipitation in CO2/H2S corrosion, Corrosion 2006, Paper 06644
   !!---
   sulf_rate_liq(nmet) = 0.0666*(1 + ((avg_mu_env+63562)/(R*T)))
   sulf_rate_liq(nmet) = max(sulf_rate_liq(nmet)*1E-9,0.0d0)
 
-  !!$$k_{mackinawite}^{liq} = 0.1332 \times \left(1 + \frac{2 \times (\mu_{env} + 63562)}{R T} \right) $$
+!!$$k_{mackinawite}^{liq} = 0.1332 \times \left(1 + \frac{2 \times (\mu_{env} + 63562)}{R T} \right) $$
   !!Reference: Mechanistic model of H2S corrosion of mild steel
   !!---
   sulf_rate_liq(nmkw) = 0.1332*(1 + (2*(avg_mu_env+63562)/(R*T)))
   sulf_rate_liq(nmkw) = max(sulf_rate_liq(nmkw)*1E-9,0.0d0)
 
-  !!$$k_{pyrrhotite}^{liq} = 2.41628 \ nm/s $$
+!!$$k_{pyrrhotite}^{liq} = 2.41628 \ nm/s $$
   !!Reference: Corrosion, January 1990, Vol. 46, No. 1, pp. 66-74
   !!---
   sulf_rate_liq(npht) = 2.41628
   sulf_rate_liq(npht) = max(sulf_rate_liq(npht)*1E-9,0.0d0)
 
-  !!$$k_{pyrite}^{liq} = 0.003543 \ nm/s $$
+!!$$k_{pyrite}^{liq} = 0.003543 \ nm/s $$
   !!Reference: Crystal growth of pyrite in Aqueous solutions. Inhibition by organophosphorous compounds, Harmandas NG. et. al., Langmuir 14, 1250-1255, 1998
   !!---
   sulf_rate_liq(npyr) = 0.003543

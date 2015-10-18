@@ -6,7 +6,7 @@ subroutine allocate_matrices()
 #include <finclude/petscsys.h>
   !!####Allocate all matrices responsible for storing the field variables
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Allocate global matrices
   allocate(met_g(psx_g,psy_g,psz_g))
@@ -17,7 +17,7 @@ subroutine allocate_matrices()
   allocate(mu_g(psx_g,psy_g,psz_g))
   allocate(elpot_g(psx_g,psy_g,psz_g))
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   ! Allocate field mobilities
   allocate(Mob_pf(0:(nphases-1),0:(nphases-1)))

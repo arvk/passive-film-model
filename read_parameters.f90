@@ -9,7 +9,7 @@ subroutine read_parameters()
   character*1 :: isdissolve !! Flag to indicate if film dissolution should be modeled
   character*1 :: useelectro !! Flag to indicate if electrical potential distribution should be modeled
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !!---
   !! Input Tag = RESTART ; Is the simulation being started from scratch?
@@ -25,7 +25,7 @@ subroutine read_parameters()
      write(6,*) 'INFO: Simulation started from scratch.'
   end if
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !! Input Tag = PFSIZE ; What is the size of the phase-field simulation box?
   ! Output variable = psx_g, psy_g, psz_g
@@ -37,7 +37,7 @@ subroutine read_parameters()
      stop "ERROR: Phase field grid sizes are non-positive. Exiting."
   end if
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !! Input Tag = TEMP ; What is the temperature of the simulation box?
   ! Output variable = T
@@ -55,7 +55,7 @@ subroutine read_parameters()
      write(6,*) "WARNING: Error in reading temperature. Simulation will continue at 573K."
   end if
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !! Input Tag = PH ; What is the pH of the simulation box?
   ! Output variable = pH_in
@@ -68,7 +68,7 @@ subroutine read_parameters()
      write(6,*) "WARNING: No pH input. Simulation will continue at a pH of 3."
   end if
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !! Input Tag = SIMLEN ; What is the length of the simulation?
   ! Output variable = nomc
@@ -86,7 +86,7 @@ subroutine read_parameters()
      write(6,*) "WARNING: Error in reading SIMLEN. Simulation will run for 10^6 steps."
   end if
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !! Input Tag = DISSOLVE ; Should dissolution be included in the simulation?
   ! Output variable = include_dissolve
@@ -111,7 +111,7 @@ subroutine read_parameters()
 
   end if
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !! Input Tag= ELECTRO ; Should the electrochemistry module be included?
   ! Output variable = include_electro
@@ -148,7 +148,7 @@ subroutine read_parameters()
 
   end if
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
+  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
   !! Input Tag = SNAPSHOTS ; How many output snapshots?
   ! Output variable = num_images
