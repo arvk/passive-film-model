@@ -199,8 +199,6 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,static_local,ierr)
   call DMGlobalToLocalEnd(simstate%lattval,simstate%slice,INSERT_VALUES,static_local,ierr)
 
-  allocate(staticpointer(0:(nfields-1),simstate%startx-1:simstate%startx+simstate%widthx,simstate%starty-1:simstate%starty+simstate%widthy,simstate%startz-1:simstate%startz+simstate%widthz))
-
   call DMDAVecGetArrayF90(simstate%lattval,state_local,statepointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,function_value,functionpointer,ierr)
   call DMDAVecGetArrayF90(simstate%lattval,static_local,staticpointer,ierr)
@@ -358,8 +356,6 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   type(context) simstate
 
   c0 = 10**(0.0d0-pH_in)*1E3
-
-  allocate(staticpointer(0:(nfields-1),simstate%startx-1:simstate%startx+simstate%widthx,simstate%starty-1:simstate%starty+simstate%widthy,simstate%startz-1:simstate%startz+simstate%widthz))
 
   call DMGetLocalVector(simstate%lattval,static_local,ierr)
   call DMGlobalToLocalBegin(simstate%lattval,simstate%slice,INSERT_VALUES,static_local,ierr)
