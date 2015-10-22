@@ -151,7 +151,7 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
               end if
 
               do fesphase = nmet,npyr
-                 statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) = statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) + (sulfid_bias_Efield*(8.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw))-rhoS(max(min(fesphase-1,npyr),nmet)))*sulf_rate(fesphase)/(dpf))*statepointer(fesphase,i,j,k))
+                 statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) = statepointer(npH,i,j,min(k+3,simstate%startz+simstate%widthz-1)) + (sulfid_bias_Efield*(8.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw)))*sulf_rate(fesphase)/(dpf))*statepointer(fesphase,i,j,k))
               end do
            end if
 
@@ -315,7 +315,7 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
 
            if ((k .ne. (psz_g-1)) .and. (statepointer(nenv,i,j,k) .gt. 0.1d0)) then
 
-              D = D_H_env
+              D = D_H_env*6E-2
 
               if (k.gt.0) then
                  nocols = nocols + 1
