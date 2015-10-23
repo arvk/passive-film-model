@@ -246,7 +246,7 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
         end do
         average_from_fine = average_from_fine/(kg_scale*kg_scale)
         distance_interface_moved(x+1,y+1) = interface_loc(x+1,y+1) - (average_from_fine/kg_scale)
-        interface_loc(x+1,y+1) = floor(average_from_fine/kg_scale)
+        interface_loc(x+1,y+1) = ceiling(average_from_fine/kg_scale)
      end do
   end do
 
@@ -271,6 +271,17 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
            statepointer(nmus,x,y,z) = avg_mu_env
            statepointer(nvoi,x,y,z) = 1.0d0
         end do
+
+       if ((interface_loc(x+1,y+1).ge.simstate%startz).and.(interface_loc(x+1,y+1)+1.le.simstate%startz+simstate%widthz-1)) then
+          z = interface_loc(x+1,y+1)-1
+          statepointer(nmet,x,y,z) = statepointer(nmet,x,y,z)*(1.0d0 - mod(distance_interface_moved(x+1,y+1),1.0d0))
+          statepointer(nmkw,x,y,z) = statepointer(nmkw,x,y,z)*(1.0d0 - mod(distance_interface_moved(x+1,y+1),1.0d0))
+          statepointer(npht,x,y,z) = statepointer(npht,x,y,z)*(1.0d0 - mod(distance_interface_moved(x+1,y+1),1.0d0))
+          statepointer(npyr,x,y,z) = statepointer(npyr,x,y,z)*(1.0d0 - mod(distance_interface_moved(x+1,y+1),1.0d0))
+          statepointer(nenv,x,y,z) = 1.0d0 - (statepointer(nmet,x,y,z)+statepointer(nmkw,x,y,z)+statepointer(npht,x,y,z)+statepointer(npyr,x,y,z))
+          statepointer(nvoi,x,y,z) = 1.0d0
+       end if
+
      end do
   end do
 
