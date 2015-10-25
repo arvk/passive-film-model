@@ -172,7 +172,7 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
         do y = 0,psy_g-1
            do xfine = 0,kg_scale-1
               do yfine = 0,kg_scale-1
-                 write(666,'(I8,I3,I7,F19.12)') 1+((x*kg_scale)+xfine)+(((y*kg_scale)+yfine)*(kg_scale*psx_g)), 1, interface_loc(x+1,y+1)*kg_scale, vac_form_bias(x+1,y+1)
+                 write(666,'(I8,I3,I7,F19.12)') 1+((x*kg_scale)+xfine)+(((y*kg_scale)+yfine)*(kg_scale*psx_g)), 1, interface_loc(x+1,y+1)*100, vac_form_bias(x+1,y+1)
               end do
            end do
         end do
@@ -245,8 +245,8 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
            end do
         end do
         average_from_fine = average_from_fine/(kg_scale*kg_scale)
-        distance_interface_moved(x+1,y+1) = interface_loc(x+1,y+1) - (average_from_fine/kg_scale)
-        interface_loc(x+1,y+1) = ceiling(average_from_fine/kg_scale)
+        distance_interface_moved(x+1,y+1) = interface_loc(x+1,y+1) - (average_from_fine/100.0d0)
+        interface_loc(x+1,y+1) = ceiling(average_from_fine/100.0d0)
      end do
   end do
 
