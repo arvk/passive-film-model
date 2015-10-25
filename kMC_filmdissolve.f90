@@ -134,7 +134,7 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
               ! Convert dissolution rates to probabilities for kMC
               do fesphase = 0,(nphases-1)
                  call PetscRandomGetValueReal(random_context,random_number,ierr)
-                 vac_form_prob(fesphase) = max(((2.0d0*random_number*raw_dissolution_rate(fesphase)*kg_scale/100.0d0)-0.0055d0)/0.00077d0,0.0d0)
+                 vac_form_prob(fesphase) = max(((2.0d0*random_number*raw_dissolution_rate(fesphase))+0.1406d0)/0.02244d0,0.0d0)
               end do
 
               ! Final probabilities are weighted by phase fractions at the interface
