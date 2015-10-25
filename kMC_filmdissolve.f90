@@ -272,7 +272,7 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
            statepointer(nvoi,x,y,z) = 1.0d0
         end do
 
-       if ((interface_loc(x+1,y+1).ge.simstate%startz).and.(interface_loc(x+1,y+1)+1.le.simstate%startz+simstate%widthz-1)) then
+       if ((interface_loc(x+1,y+1)-1.ge.simstate%startz).and.(interface_loc(x+1,y+1)-1.le.simstate%startz+simstate%widthz-1)) then
           z = interface_loc(x+1,y+1)-1
           statepointer(nmet,x,y,z) = statepointer(nmet,x,y,z)*(1.0d0 - mod(distance_interface_moved(x+1,y+1),1.0d0))
           statepointer(nmkw,x,y,z) = statepointer(nmkw,x,y,z)*(1.0d0 - mod(distance_interface_moved(x+1,y+1),1.0d0))
