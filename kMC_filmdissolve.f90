@@ -203,8 +203,8 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
      write(667,*) 'solve_style tree'
      write(667,*) 'sector yes'
      write(667,*) 'diag_style energy stats yes'
-     write(667,*) 'stats 5'
-     write(667,*) 'dump couplingfe text 15 couplingfe x y i2'
+     write(667,*) 'stats 0.0'
+     write(667,*) 'dump couplingfe text ', dt*kmc_freq ,' couplingfe x y i2'
      write(667,'(A,F16.8)') 'run ', dt*kmc_freq
      write(667,*) 'undump couplingfe'
      close(667)
