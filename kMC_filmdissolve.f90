@@ -40,6 +40,7 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
   PetscScalar, intent(inout) :: metal_content_in_simcell    !! Amount of metal phase in the simulation cell
   PetscRandom, intent(inout) :: random_context !! Context to seed and generate random numbers
   PetscReal :: random_number  !! Pseudo random number generated from a PETSc context
+  PetscScalar, parameter :: vacancy_formation_energy = 0.40d0 !! Formation energy of an isolated vacancy on a terrace (in eV)
 
   interface
 
@@ -191,7 +192,7 @@ subroutine kMC_filmdissolve(iter,simstate,metal_content_in_simcell,random_contex
 
      open(unit = 667, file = 'filmenv.spparksscript', status = 'new')
      write(667,*) 'seed ', floor(100000.0d0*random_number)+1
-     write(667,*) 'app_style filmenv 0.25'
+     write(667,*) 'app_style filmenv ', vacancy_formation_energy/4.0d0
      write(667,*) 'dimension 2'
      write(667,*) 'boundary p p p'
      write(667,*) 'lattice sq/4n 1.0'
