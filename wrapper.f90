@@ -18,6 +18,7 @@ program passive_film_model
 #include <finclude/petscdm.h>
 #include <finclude/petscdmda.h>
 #include <finclude/petscdmda.h90>
+#include <finclude/petscviewer.h>
 
   !!##This program simulates the growth and breakdown of iron sulfide films formed in sour corrosive conditions using a combined phase-field and kinetic Monte Carlo algorithm.
   !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -113,7 +114,7 @@ program passive_film_model
 
      if (mod(iter,(nomc/num_images)).eq.0) then
         write(image_ID,'(I5.5)') iter/max(floor(real(nomc/num_images)),1)
-        call PetscViewerASCIIOpen(MPI_COMM_WORLD,"SIMCELL_"//image_ID//".out",snapshot_writer,ierr)
+        call PetscViewerVTKOpen(MPI_COMM_WORLD,"SIMCELL_"//image_ID//".vts",FILE_MODE_WRITE,snapshot_writer,ierr)
         call VecView(simstate%slice,snapshot_writer,ierr)
         call PetscViewerDestroy(snapshot_writer,ierr)
      end if
