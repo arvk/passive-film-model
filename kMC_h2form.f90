@@ -126,7 +126,7 @@ subroutine kMC_h2form(iter,simstate,random_context)
      write(666,'(A,F16.8,A)') 'dump raw_metfilm_output text ', dt*kmc_freq, ' raw_metfilm_output id x y i1 i2 i3'
      write(666,'(A,F16.8)') 'dump_modify raw_metfilm_output delay ', dt*kmc_freq
      if (already_run_once) write(666,*) 'read_sites input.metfilm'
-     write(666,'(A,F16.8)') 'run ', dt*kmc_freq
+     write(666,'(A,F16.8,A)') 'run ', dt*kmc_freq, ' pre yes post no'
      close(666)
   end if
 

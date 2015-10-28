@@ -127,7 +127,7 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_contex
      end do
 
      write(666,'(A,F16.8)') 'dump_modify mydump delay ', dt*kmc_freq
-     write(666,'(A,F16.8)') 'run ', dt*kmc_freq
+     write(666,'(A,F16.8,A)') 'run ', dt*kmc_freq, ' pre yes post no'
      close(666)
 
   end if
