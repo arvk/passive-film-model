@@ -28,8 +28,8 @@ kMC_vacdebonding.o: kMC_vacdebonding.f90
 	$(FC) $(CFLAG) -c $(OFLAG) $(INC) shared_modules.f90 kMC_vacdebonding.f90
 
 clean:
-	rm -f *.exe *.out *.mod *.o *__genmod.f90
+	rm -f *.exe *.out *.mod *.o *__genmod.f90 *.vts
 
 purge:
-	rm -f *.exe *.out *.mod *.o *__genmod.f90 input.metfilm *.spparksscript
+	rm -f *.exe *.out *.mod *.o *__genmod.f90 input.metfilm *.spparksscript *.vts
 
