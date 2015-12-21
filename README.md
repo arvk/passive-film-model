@@ -26,7 +26,7 @@ More extensive documentation is on the way.
 
 Contributing
 ============
-Please report any errors and issues [here](issues)
+Please report any errors and issues using the issues tab. 
 
 To do
 =====
