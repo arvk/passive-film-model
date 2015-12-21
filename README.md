@@ -18,10 +18,15 @@ After choosing an appropriate Fortran compiler in the Makefile and verifying the
 
 Documentation
 =============
-The code is partly documented using [FORD](https://github.com/cmacmackin/ford).
-To compile the documentation, run `ford sample_parameters/ford_project_file` from the main directory.
+The code is partly documented using [FORD](https://github.com/cmacmackin/ford). To compile the documentation, from the main directory, run
+
+`ford sample_parameters/ford_project_file`
 
 More extensive documentation is on the way.
+
+Contributing
+============
+Please report any errors and issues [here](/issues)
 
 To do
 =====
@@ -30,4 +35,4 @@ To do
 
 License
 =======
-The passive film model source code and documentation are distributed 'as is' under the [GNU General Public License v2](passive-film-model/blob/master/doc/LICENSE).
+The passive film model source code and documentation are distributed 'as is' under the [GNU General Public License v2](doc/LICENSE).
