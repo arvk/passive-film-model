@@ -367,9 +367,9 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   PetscScalar :: v((9*2*(nfields-1))+1)
   MatStencil :: row(4,1), col(4,(9*2*(nfields-1))+1)
   PetscInt :: nocols
-  Mat pf_jacob, pf_precond
+  Mat, intent(inout) :: pf_jacob, pf_precond
   PetscScalar :: grady, gradz
-  type(context) simstate
+  type(context), intent(in) :: simstate
   PetscScalar :: zeromatentry(7)
   PetscInt :: matfield1, matfield2
 

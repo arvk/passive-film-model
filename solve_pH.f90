@@ -22,7 +22,7 @@ subroutine solve_pH(iter,ksp_pH,simstate)
   Vec :: state, solved_pH_vector, state_solved !! Vectors to store function values and solutions
   PetscInt, intent(in) :: iter  !! Current iteration number
   PetscInt :: x, y, z           !! Coordinates inside the simulation system
-  type(context) simstate       !! Field variables stored in PETSc vectors and DMDA objects
+  type(context), intent(inout) :: simstate       !! Field variables stored in PETSc vectors and DMDA objects
   external computeRHS_pH, computeMatrix_pH, computeInitialGuess_pH
 
   call KSPSetDM(ksp_pH,simstate%lattval,ierr)
@@ -79,8 +79,8 @@ subroutine computeInitialGuess_pH(ksp_pH,b,simstate,ierr)
 
   KSP :: ksp_pH
   PetscErrorCode :: ierr
-  Vec :: b
-  type(context) simstate
+  Vec, intent(inout) :: b
+  type(context), intent(in) :: simstate
 
   call VecCopy(simstate%slice,b,ierr)
 
@@ -123,9 +123,9 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
 
   KSP :: ksp_pH
   PetscErrorCode :: ierr
-  Vec :: b
+  Vec, intent(inout) :: b
   PetscInt :: i, j, k, field, fesphase
-  type(context) simstate
+  type(context), intent(in) :: simstate
   PetscScalar, pointer :: statepointer(:,:,:,:), bpointer(:,:,:,:)
   PetscScalar :: local_Efield, sulfid_bias_Efield
 
@@ -191,7 +191,7 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   KSP :: ksp_pH
   PetscErrorCode :: ierr
   Vec :: state, statelocal
-  Mat :: matoper, matprecond
+  Mat, intent(inout) :: matoper, matprecond
   PetscInt :: i, j, k, x, y, z
   PetscScalar :: v(7)
   MatStencil :: row(4,1), col(4,7)
@@ -199,7 +199,7 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   PetscScalar :: D
   PetscInt :: nocols
   PetscScalar :: add_to_v_ij
-  type(context) simstate
+  type(context), intent(in) :: simstate
   PetscScalar :: zeromatentry(7)
   PetscInt :: matfield
 
@@ -292,8 +292,6 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
      end do
   end do
 
-  call MatAssemblyBegin(matprecond,MAT_FLUSH_ASSEMBLY,ierr)
-  call MatAssemblyEnd(matprecond,MAT_FLUSH_ASSEMBLY,ierr)
 
 
 
@@ -393,7 +391,6 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
            col(MatStencil_c,nocols) = npH
 
            call MatSetValuesStencil(matprecond,1,row,nocols,col,v,INSERT_VALUES,ierr)
-
 
         end do
      end do
