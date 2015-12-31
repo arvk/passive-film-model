@@ -1,4 +1,4 @@
-include ${PETSC_DIR}/conf/variables
+include ${PETSC_DIR}/lib/petsc/conf/variables
 
 # Define fortran compiler and linker
 FC=mpif90

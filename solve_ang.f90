@@ -5,14 +5,14 @@ subroutine solve_ang(iter,ksp_ang,simstate)
   use diffusion_constants
   implicit none
   !! **Set up and solve the linear equations for evolution of pyrite crystal shape**
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
@@ -62,15 +62,15 @@ subroutine computeInitialGuess_ang(ksp_ang,b,simstate,ierr)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   KSP :: ksp_ang
   PetscErrorCode :: ierr
@@ -99,15 +99,15 @@ subroutine computeRHS_ang(ksp_ang,b,simstate,ierr)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   KSP :: ksp_ang
   PetscErrorCode :: ierr
@@ -159,15 +159,15 @@ subroutine ComputeMatrix_ang(ksp_ang,matoper,matprecond,simstate,ierr)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   KSP :: ksp_ang
   PetscErrorCode :: ierr

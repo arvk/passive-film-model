@@ -3,7 +3,7 @@
 module fields
   implicit none
   save
-#include <finclude/petscsysdef.h>
+#include <petsc/finclude/petscsysdef.h>
 
   PetscInt :: psx_g,psy_g,psz_g !! Number of gridpoints in the simulation cell along 3 directions
 
@@ -13,7 +13,7 @@ module fields
   PetscScalar, dimension(:,:,:), allocatable :: elpot_g                           !! Global electrical potential
 
   type context
-#include <finclude/petscdmdef.h>
+#include <petsc/finclude/petscdmdef.h>
      DM lattval
      Vec slice, exslice   !! All field variables that define the system state
      PetscInt :: startx,starty,startz !! Coordinates that define the bottom-left corner of the local part of the simulation cell
@@ -26,7 +26,7 @@ end module fields
 
 module commondata
   implicit none
-#include <finclude/petscsysdef.h>
+#include <petsc/finclude/petscsysdef.h>
   save
 
   ! MPI parameters
@@ -73,7 +73,7 @@ end module commondata
 
 module thermo_constants
   implicit none
-#include <finclude/petscsysdef.h>
+#include <petsc/finclude/petscsysdef.h>
   save
 
   PetscScalar :: mus_met_mkw_eqb, mus_mkw_pht_eqb, mus_pht_pyr_eqb !! mu_S boundary between phases
@@ -112,7 +112,7 @@ end module thermo_constants
 
 module diffusion_constants
   implicit none
-#include <finclude/petscsysdef.h>
+#include <petsc/finclude/petscsysdef.h>
   save
 
   PetscScalar :: D_S_met, D_S_mkw, D_S_pht, D_S_pyr, D_S_env  !! Diffusivity of sulfur in different FeS phases

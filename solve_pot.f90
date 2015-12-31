@@ -5,15 +5,15 @@ subroutine solve_pot(iter,snes_pot,simstate)
   use diffusion_constants
   implicit none
   !! **Set up and solve the Poisson-Boltzmann equations in the environment region on the simulation cell**
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
@@ -83,15 +83,15 @@ subroutine FormRHS_pot(rhs_vec,simstate)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   PetscErrorCode :: ierr
   Vec :: rhs_vec
@@ -165,15 +165,15 @@ subroutine FormFunction_pot(snes_pot,input_state,function_value,simstate,ierr)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   SNES :: snes_pot
   PetscErrorCode :: ierr
@@ -326,15 +326,15 @@ subroutine FormJacobian_pot(snes_pot,input_state,pf_jacob,pf_precond,simstate,ie
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   SNES :: snes_pot
   PetscErrorCode :: ierr

@@ -9,16 +9,16 @@ program passive_film_model
   use commondata
   use fields
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
-#include <finclude/petscviewer.h>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
+#include <petsc/finclude/petscviewer.h>
 
   !!##This program simulates the growth and breakdown of iron sulfide films formed in sour corrosive conditions using a combined phase-field and kinetic Monte Carlo algorithm.
   !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

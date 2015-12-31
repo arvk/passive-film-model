@@ -3,7 +3,7 @@ subroutine thermo
   use commondata
   use fields
   implicit none
-#include <finclude/petscsys.h>
+#include <petsc/finclude/petscsys.h>
   !! **Calculate thermodynamic properties of different \(FeS\) phases -- Phase boundaries, densities, surface energies and field mobilities.**
 
   PetscInt :: mu_x_10k                              !! Integer equal to 10000*mu. Useful for looping

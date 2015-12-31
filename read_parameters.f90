@@ -2,7 +2,7 @@ subroutine read_parameters()
   use commondata
   use fields
   implicit none
-#include <finclude/petscsys.h>
+#include <petsc/finclude/petscsys.h>
   !!####Read simulation parameters from user-provided input script
   !!---
   PetscInt :: error_temp, error_nomc, error_ph, error_dissolve, error_electro, error_metpotl, error_snapshots !! Variables to store exceptions raised during file-read

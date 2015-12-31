@@ -5,14 +5,14 @@ subroutine solve_pH(iter,ksp_pH,simstate)
   use diffusion_constants
   implicit none
   !! **Set up and solve the linear equations for time-evolution of [H+] in the environment**
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
@@ -67,15 +67,15 @@ subroutine computeInitialGuess_pH(ksp_pH,b,simstate,ierr)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   KSP :: ksp_pH
   PetscErrorCode :: ierr
@@ -110,16 +110,16 @@ subroutine computeRHS_pH(ksp_pH,b,simstate,ierr)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscvec.h90>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscvec.h90>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   KSP :: ksp_pH
   PetscErrorCode :: ierr
@@ -178,15 +178,15 @@ subroutine ComputeMatrix_pH(ksp_pH,matoper,matprecond,simstate,ierr)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   KSP :: ksp_pH
   PetscErrorCode :: ierr

@@ -5,15 +5,15 @@ subroutine solve_pf(iter,snes_pf,simstate)
   use diffusion_constants
   implicit none
   !! **Set up and solve the phase-field equations for time-evolution of phase-fractions of different \(FeS\) phases**
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!
 
@@ -85,15 +85,15 @@ subroutine FormRHS_pf(rhs_vec,simstate)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   PetscErrorCode :: ierr
   Vec :: rhs_vec, single_phase_vector
@@ -151,15 +151,15 @@ subroutine FormFunction_pf(snes_pf,input_state,function_value,simstate,ierr)
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   SNES :: snes_pf
   PetscErrorCode :: ierr
@@ -346,15 +346,15 @@ subroutine FormJacobian_pf(snes_pf,input_state,pf_jacob,pf_precond,simstate,ierr
   use thermo_constants
   use diffusion_constants
   implicit none
-#include <finclude/petscsys.h>
-#include <finclude/petscvec.h>
-#include <finclude/petscmat.h>
-#include <finclude/petscpc.h>
-#include <finclude/petscksp.h>
-#include <finclude/petscsnes.h>
-#include <finclude/petscdm.h>
-#include <finclude/petscdmda.h>
-#include <finclude/petscdmda.h90>
+#include <petsc/finclude/petscsys.h>
+#include <petsc/finclude/petscvec.h>
+#include <petsc/finclude/petscmat.h>
+#include <petsc/finclude/petscpc.h>
+#include <petsc/finclude/petscksp.h>
+#include <petsc/finclude/petscsnes.h>
+#include <petsc/finclude/petscdm.h>
+#include <petsc/finclude/petscdmda.h>
+#include <petsc/finclude/petscdmda.h90>
 
   SNES :: snes_pf
   PetscErrorCode :: ierr

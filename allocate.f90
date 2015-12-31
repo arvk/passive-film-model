@@ -3,7 +3,7 @@ subroutine allocate_matrices()
   use fields
   use thermo_constants
   implicit none
-#include <finclude/petscsys.h>
+#include <petsc/finclude/petscsys.h>
   !!####Allocate all matrices responsible for storing the field variables
 
   !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!

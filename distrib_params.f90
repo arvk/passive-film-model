@@ -2,7 +2,7 @@ subroutine distrib_params()
   use commondata
   use fields
   implicit none
-#include <finclude/petscsys.h>
+#include <petsc/finclude/petscsys.h>
   !!####Distribute simulation parameters to all child processors
 
   PetscErrorCode :: ierr !! MPI error flag
