@@ -8,5 +8,20 @@ AC_PROG_FC([ftn mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r], [Fortran 90])
 
 AC_ARG_WITH(spparks, [AS_HELP_STRING([--with-spparks=DIR], [Directory where SPPARKS was installed.])],[SPPARKS_LIB_DIR="$withval"],[])
 AC_SUBST(SPPARKS_LIB_DIR)
+AC_CHECK_FILE(["$withval/libspparks.so"],[AC_MSG_NOTICE([Found SPPARKS library])],[AC_MSG_ERROR([Didn't find SPPARKS at $SPPARKS_LIB_DIR])])
+AC_CHECK_FILES([$withval/app_metfilm.cpp $withval/app_filmenv.cpp],[AC_MSG_NOTICE([Found custom SPPARKS apps])],[AC_MSG_ERROR([Didn't find custom SPPARKS apps at $SPPARKS_LIB_DIR])])
+
+
+if test x"$PETSC_DIR" != x""; then
+  AC_MSG_NOTICE([PETSC directory is pre-defined. Using $PETSC_DIR])
+else
+  AC_ARG_WITH(petscdir, [AS_HELP_STRING([--with-petscdir=DIR], [PETSC base directory.])],[PETSC_DIR="$withval"],[AC_MSG_ERROR([PETSC directory is undefined])])
+fi
+
+if test x"$PETSC_ARCH" != x""; then
+  AC_MSG_NOTICE([PETSC architecture is pre-defined. Using $PETSC_ARCH])
+else
+  AC_ARG_WITH(petscarch, [AS_HELP_STRING([--with-petscarch=DIR], [PETSC architecture])],[PETSC_ARCH="$withval"],[AC_MSG_ERROR([PETSC architecture is undefined])])
+fi
 
 AC_OUTPUT(Makefile)
