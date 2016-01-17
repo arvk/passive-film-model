@@ -1,7 +1,7 @@
 include $(PETSC_DIR)/conf/variables
 
 CPPFLAGS = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include
-AM_FCFLAGS = -O2 -xHost -ipo -cpp -traceback -zero -unroll0 $(CPPFLAGS)
+AM_FCFLAGS = -O2 -xHost -ipo -cpp -traceback -zero -unroll0 -dynamic $(CPPFLAGS)
 #AM_LDFLAGS = $(PETSC_LIB) -L$(SPPARKS_LIB_DIR) -lspparks
 
 bin_PROGRAMS = pfm
