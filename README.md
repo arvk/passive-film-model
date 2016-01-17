@@ -17,8 +17,8 @@ Compiling and Running
 =====================
 1. Run autoreconf using `autoreconf -i`
 2. Run the configure script and provide the path the the `SPPARKS` library using the `--with-spparks` flag
-   * `./configure --with-spparks=<PATH_TO_SPPARKS>`
-   * If the PETSc installation is successful, the environmental variables `PETSC_DIR` and `PETSC_ARCH` are available and the previous configure command should work. If they are not currently defined, you can define them using the `--with-petscdir=<PATH_TO_PETSC>` and `--with-petscarch=<PETSC_ARCH>` flags
+   * If the PETSc installation is successful, the environmental variables `PETSC_DIR` and `PETSC_ARCH` are available. In this case, run `./configure --with-spparks=<PATH_TO_SPPARKS>`
+   * If these environment variables are not currently defined, you can define them in the configure command using the `./configure --with-spparks=<PATH_TO_SPPARKS> --with-petscdir=<PATH_TO_PETSC> --with-petscarch=<PETSC_ARCH>`
 3. Run `make`
 
 The executable, `pfm` is in `src/`
