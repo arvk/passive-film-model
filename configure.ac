@@ -42,4 +42,4 @@ AC_CHECK_FILE(["$PETSC_DIR/$PETSC_ARCH/include/petscsys.mod"],[AC_MSG_NOTICE([Fo
 fi
 
 dnl WRITE OUTPUT
-AC_OUTPUT(Makefile)
+AC_OUTPUT([Makefile src/Makefile])
