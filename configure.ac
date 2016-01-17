@@ -32,11 +32,14 @@ fi
 if test x"$PETSC_ARCH" != x""; then
   AC_MSG_NOTICE([PETSC architecture is pre-defined. Using $PETSC_ARCH])
 else
-  AC_ARG_WITH(petscarch, [AS_HELP_STRING([--with-petscarch=DIR], [PETSC architecture])],[PETSC_ARCH="$withval"],[AC_MSG_ERROR([PETSC architecture is undefined])])
+  AC_MSG_NOTICE([PETSC architecture is undefined.])
 fi
 
-AC_CHECK_FILE(["$PETSC_DIR/$PETSC_ARCH/lib/libpetsc.so"],[AC_MSG_NOTICE([Found PETSC library])],[AC_MSG_ERROR([Didn't find PETSC at $PETSC_DIR])])
-
+if test x"$PETSC_ARCH" == x""; then
+AC_CHECK_FILE(["$PETSC_DIR/include/petscsys.mod"],[AC_MSG_NOTICE([Found PETSC library])],[AC_MSG_ERROR([Didn't find PETSC at $PETSC_DIR])])
+else
+AC_CHECK_FILE(["$PETSC_DIR/$PETSC_ARCH/include/petscsys.mod"],[AC_MSG_NOTICE([Found PETSC library])],[AC_MSG_ERROR([Didn't find PETSC at $PETSC_DIR])])
+fi
 
 dnl WRITE OUTPUT
 AC_OUTPUT(Makefile)
