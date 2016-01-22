@@ -43,6 +43,9 @@ subroutine kMC_h2form(iter,simstate,random_context)
   PetscScalar :: blist_size !! Lateral size of the H2 blister
   PetscScalar :: blist_rad_curv !! Radius of curvature of the blister
   PetscScalar :: mkw_thickness !! Thickness of the mackinawite film that undergoes blistering
+  PetscScalar :: pht_thickness !! Thickness of the pyrrhotite film that undergoes blistering
+  PetscScalar :: pyr_thickness !! Thickness of the pyrite film that undergoes blistering
+  PetscScalar :: film_thickness !! Total thickness of the composite FeS_x film that undergoes blistering
   PetscScalar :: threshold_P !! Critical pressure for stable blister formation
   PetscScalar :: delamination_height !! Distance between two (001) planes of mackinawite before delamination occurs
   PetscScalar :: vol_spher_cap !! Volume of the blister. Bilster is assumed to be a spherical cap
@@ -206,11 +209,14 @@ subroutine kMC_h2form(iter,simstate,random_context)
   mkw_surf_energy = 0.1 ! in J/m^2
   blist_size = dpf/2    ! in m
   call VecStrideNorm(simstate%slice,nmkw,NORM_1,mkw_thickness,ierr) ; mkw_thickness = (mkw_thickness/(psx_g*psy_g))*dpf ! in m
-  blist_rad_curv = 2.27E-6 ! in m
+  call VecStrideNorm(simstate%slice,npht,NORM_1,pht_thickness,ierr) ; pht_thickness = (pht_thickness/(psx_g*psy_g))*dpf ! in m
+  call VecStrideNorm(simstate%slice,npyr,NORM_1,pyr_thickness,ierr) ; pyr_thickness = (pyr_thickness/(psx_g*psy_g))*dpf ! in m
+  film_thickness = mkw_thickness + pht_thickness + pyr_thickness
   delamination_height = 5.5E-10 ! in m
+  blist_rad_curv = ((blist_size*blist_size)-(delamination_height*delamination_height))/(2*delamination_height) ! in m
   vol_spher_cap = Pi * delamination_height*((3*blist_size*blist_size)+(delamination_height*delamination_height))/6 ! in m
 
-  threshold_P = ((4*mkw_modulus*mkw_thickness*mkw_thickness)/(3*blist_rad_curv*blist_rad_curv)) + ((2*mkw_surf_energy)/blist_rad_curv)
+  threshold_P = ((4*mkw_modulus*film_thickness*film_thickness)/(3*blist_rad_curv*blist_rad_curv)) + ((2*mkw_surf_energy)/blist_rad_curv)
   threshold_H2_molecules = 6.022E23 * threshold_P * vol_spher_cap / (R*T)
 
   call DMDAVecGetArrayF90(simstate%lattval,simstate%slice,statepointer,ierr)
