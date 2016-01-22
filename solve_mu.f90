@@ -164,7 +164,7 @@ subroutine computeRHS_mu(ksp_mu,b,simstate,ierr)
               end if
 
               do fesphase = nmet,npyr
-                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + (sulfid_bias_Efield*(4.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw)))*sulf_rate(fesphase)/(dpf*drho_dmu(fesphase)))*statepointer(fesphase,i,j,k))
+                 bpointer(nmus,i,j,k) = bpointer(nmus,i,j,k) + (sulfid_bias_Efield*(4.0d0/9.0d0)*((rhoS(max(min(fesphase,npyr),nmkw)))*sulf_rate(fesphase)/(dpf*drho_dmu(fesphase)))*statepointer(fesphase,i,j,k)*statepointer(nvoi,i,j,k))
               end do
               bpointer(nmus,i,j,k) = min(bpointer(nmus,i,j,k),avg_mu_env/dt)
            end if
