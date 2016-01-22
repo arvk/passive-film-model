@@ -207,7 +207,10 @@ subroutine kMC_h2form(iter,simstate,random_context)
   ! Calculate parameters
   mkw_modulus = 15E9    ! in Pa
   mkw_surf_energy = 0.1 ! in J/m^2
-  blist_size = dpf/2    ! in m
+
+  blist_size = 25E-9    ! in m
+  ! Size of incipient corrosion blister. REFERENCE: In situ study of the initiation of hydrogen bubbles at the aluminium metal/oxide interface, Nature Materials 14, 899-903 (2015) DOI: 10.1038/nmat4336
+
   call VecStrideNorm(simstate%slice,nmkw,NORM_1,mkw_thickness,ierr) ; mkw_thickness = (mkw_thickness/(psx_g*psy_g))*dpf ! in m
   call VecStrideNorm(simstate%slice,npht,NORM_1,pht_thickness,ierr) ; pht_thickness = (pht_thickness/(psx_g*psy_g))*dpf ! in m
   call VecStrideNorm(simstate%slice,npyr,NORM_1,pyr_thickness,ierr) ; pyr_thickness = (pyr_thickness/(psx_g*psy_g))*dpf ! in m
