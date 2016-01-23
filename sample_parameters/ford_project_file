@@ -3,9 +3,9 @@ project_dir: /home/aravind/Desktop/DOC/code
 output_dir: /home/aravind/Desktop/DOC/doc
 project_github: https://github.mit.edu/aravindk/passive-film-model
 project_website: https://github.mit.edu/aravindk/passive-film-model
-summary: Some Fortran program which I wrote.
+summary: Coupled phase-field and kinetic Monte Carlo model for simulating the behavior of iron sulfide passive films in corrosion
 author: Aravind Krishnamoorthy
-author_description: I am a graduate student in the Materials Science Department at MIT
+author_description: Ph.D candidate at the Department of Materials Science at MIT
 github: https://github.com/arvk
 email: aravindk@mit.edu
 graph: true
