@@ -100,5 +100,15 @@ subroutine initialize_geometry(simstate)
 
   call PetscRandomDestroy(random_orientation_context,ierr)
 
+  call DMDASetFieldName(simstate%lattval,nmet,"Metal",ierr)
+  call DMDASetFieldName(simstate%lattval,nmkw,"Mackinawite",ierr)
+  call DMDASetFieldName(simstate%lattval,npht,"Pyrrhotite",ierr)
+  call DMDASetFieldName(simstate%lattval,npyr,"Pyrite",ierr)
+  call DMDASetFieldName(simstate%lattval,nenv,"Environment",ierr)
+  call DMDASetFieldName(simstate%lattval,nmus,"Sulfur chemical potential",ierr)
+  call DMDASetFieldName(simstate%lattval,npH,"[H+]",ierr)
+  call DMDASetFieldName(simstate%lattval,nang,"Grain orientation",ierr)
+  call DMDASetFieldName(simstate%lattval,nvoi,"Voids",ierr)
+
 end subroutine initialize_geometry
 
