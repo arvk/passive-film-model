@@ -29,7 +29,7 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_contex
   PetscScalar :: average_from_fine
   type(context) simstate
   PetscInt, intent(in) :: iter  ! Iteration count
-  PetscInt, dimension(psx_g,psy_g) :: coarse_vac_config
+  PetscScalar, dimension(psx_g,psy_g) :: coarse_vac_config
   PetscInt :: coarsex,coarsey
   PetscScalar, pointer :: statepointer(:,:,:,:)
   PetscInt :: floor
@@ -87,7 +87,7 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_contex
   call VecStrideNorm(simstate%slice,nmet,NORM_1,metal_content_in_simcell,ierr)
 
   ! Calculate \DeltaC => Vacancy concentration at the metal-mkw interface
-  DeltaC = ((metal_content_in_simcell_last_timestep - metal_content_in_simcell)*(10*dpf*dpf))/(D_Fe_met*psx_g*psy_g*dt*kmc_freq)
+  DeltaC = ((metal_content_in_simcell_last_timestep - metal_content_in_simcell)*(4*dpf*dpf))/(D_Fe_met*psx_g*psy_g*dt*kmc_freq)
 
   call PetscRandomGetValueReal(random_context,random_number,ierr)
 
@@ -159,7 +159,7 @@ subroutine kMC_vacdebonding(iter,simstate,metal_content_in_simcell,random_contex
      read(667,'(I5, I5, I4)') partial_x, partial_y, i1
      coarsex = floor(1.0d0*partial_x/kg_scale)
      coarsey = floor(1.0d0*partial_y/kg_scale)
-     coarse_vac_config(coarsex+1,coarsey+1) = coarse_vac_config(coarsex+1,coarsey+1) + (i1/(kg_scale*kg_scale))
+     coarse_vac_config(coarsex+1,coarsey+1) = coarse_vac_config(coarsex+1,coarsey+1) + ((2.0d0-i1)/(kg_scale*kg_scale))
   end do
 
   close(667)
