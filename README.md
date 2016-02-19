@@ -1,6 +1,9 @@
 passive-film-model
 ==================
-Note: This is a work in progress
+
+![Schematic of the passive film model](doc/pfm-splash.png)
+==================
+**Note**: This is a work in progress
 
 The passive film model is a coupled kinetic Monte Carlo (kMC) and phase field (PF) method to simulate the multiscale behavior of multi-phase passive films in electrochemical environments.
 
@@ -8,8 +11,8 @@ The passive film model is a coupled kinetic Monte Carlo (kMC) and phase field (P
 Dependencies
 ============
 * [PETSc](http://www.mcs.anl.gov/petsc/) 3.2 for solving phase-field equations
-* [SPPARKS](http://spparks.sandia.gov/), compiled as a library, for performing 2D kMC modeling at interfaces between phases
-* [VisIt](https://wci.llnl.gov/simulation/computer-codes/visit/) for visualizing output .vts files.
+* Customized copy of [SPPARKS](http://spparks.sandia.gov/), compiled as a library, for performing 2D kMC modeling at interfaces between phases. Download the custom SPPARKS from the repo [here](https://github.com/arvk/spparks-pfm).
+* [VisIt](https://wci.llnl.gov/simulation/computer-codes/visit/) for visualizing .vts output files.
 
 
 Compiling and Running
@@ -26,7 +29,7 @@ More extensive documentation is on the way.
 
 Contributing
 ============
-Please report any errors and issues using the issues tab. 
+Please report any errors and issues using the issues tab.
 
 To do
 =====
