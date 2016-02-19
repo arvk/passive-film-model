@@ -1,0 +1,15 @@
+project: Passive Film Model
+project_dir: ./src
+output_dir: ./doc/html
+project_github: https://github.com/arvk/passive-film-model
+project_website: https://github.com/arvk/passive-film-model
+summary: Coupled kinetic Monte Carlo and phase field model of electrochemical passive films
+author: Aravind Krishnamoorthy
+author_description: Ph.D candidate at the Department of Materials Science at MIT
+github: https://github.com/arvk
+email: aravindk@mit.edu
+graph: true
+extra_vartypes: Vec
+extra_vartypes: Mat
+extra_vartypes: SNES
+extra_vartypes: KSP

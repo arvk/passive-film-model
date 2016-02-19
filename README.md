@@ -30,7 +30,7 @@ Documentation
 =============
 The code is partly documented using [FORD](https://github.com/cmacmackin/ford). To compile the documentation, from the main directory, run
 
-`ford sample_parameters/ford_project_file`
+`ford doc/ford_project_file`
 
 More extensive documentation is on the way.
 
