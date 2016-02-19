@@ -45,4 +45,4 @@ To do
 
 License
 =======
-The passive film model source code and documentation are distributed 'as is' under the [GNU General Public License v2](doc/LICENSE).
+The passive film model source code and documentation are distributed 'as is' under the [GNU General Public License v2](LICENSE).
