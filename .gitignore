@@ -3,6 +3,7 @@
 
 # Output files and executables
 *.out
+pfm
 *.exe
 
 # Fortran module files
@@ -18,3 +19,25 @@
 *.so
 *.dylib
 *.dll
+
+# Automake files
+
+Makefile.in
+Makefile
+
+# Autoconf files
+
+autom4te.cache
+autoscan.log
+autoscan-*.log
+aclocal.m4
+compile
+config.h.in
+configure
+configure.scan
+depcomp
+install-sh
+missing
+stamp-h1
+config.log
+config.status

@@ -10,14 +10,21 @@ The passive film model is a coupled kinetic Monte Carlo (kMC) and phase field (P
 
 Dependencies
 ============
-* [PETSc](http://www.mcs.anl.gov/petsc/) 3.2 for solving phase-field equations
-* Customized copy of [SPPARKS](http://spparks.sandia.gov/), compiled as a library, for performing 2D kMC modeling at interfaces between phases. Download the custom SPPARKS from the repo [here](https://github.com/arvk/spparks-pfm).
-* [VisIt](https://wci.llnl.gov/simulation/computer-codes/visit/) for visualizing .vts output files.
+* [autotools](http://www.gnu.org/software/autoconf/autoconf.html) for building the program
+* [PETSc](http://www.mcs.anl.gov/petsc/) (v3.2-3.5) for solving phase-field equations
+* [Custom fork](https://github.com/arvk/spparks-pfm) of the Stochastic Parallel PARticle Kinetic Simulator ([SPPARKS](http://spparks.sandia.gov/)), compiled as a library, for performing 2D kMC modeling at interfaces between phases
+* [VisIt](https://wci.llnl.gov/simulation/computer-codes/visit/) for visualizing output .vts files.
 
 
 Compiling and Running
 =====================
-After choosing an appropriate Fortran compiler in the Makefile and verifying the values of environment variables `PETSC_DIR` and `SPPARKS_LIB_DIR`, compile with GNU Make using `make -f Makefile` and run using `./model.exe`
+1. Run autoreconf using `autoreconf -i`
+2. Run the configure script and provide the path the the `SPPARKS` library using the `--with-spparks` flag
+   * If the PETSc installation is successful, the environmental variables `PETSC_DIR` and `PETSC_ARCH` are available. In this case, run `./configure --with-spparks=<PATH_TO_SPPARKS>`
+   * If these environment variables are not currently defined, you can define them in the configure command using the `./configure --with-spparks=<PATH_TO_SPPARKS> --with-petscdir=<PATH_TO_PETSC> --with-petscarch=<PETSC_ARCH>`
+3. Run `make`
+
+The executable, `pfm` is in `src/`
 
 Documentation
 =============
